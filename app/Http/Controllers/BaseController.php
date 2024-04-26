@@ -10,10 +10,19 @@ use App\Http\Controllers\Controller;
  */
 class BaseController extends Controller
 {
+    public static $api_client_manager;
+
+    public function __construct()
+    {
+        $this::$api_client_manager = new ApiClientManager();
+    }
 
     public function index()
     {
-        return view("pages.film");
+
+        $medias = $this::$api_client_manager::call('GET', getApiURL() . '/media');
+        // dd($medias);
+        return view("pages.film", compact('medias'));
     }
     public function serie()
     {

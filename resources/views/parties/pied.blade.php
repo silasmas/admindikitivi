@@ -14,7 +14,16 @@
 <script src="{{ asset('assets/javascript/theme.min.js') }}"></script> <!-- END THEME JS -->
 <!-- BEGIN PAGE LEVEL JS -->
 <script src="{{ asset('assets/javascript/pages/dashboard-demo.js') }}"></script> <!-- END PAGE LEVEL JS -->
-
+<script>
+    var skin = localStorage.getItem('skin') || 'default';
+    var isCompact = JSON.parse(localStorage.getItem('hasCompactMenu'));
+    var disabledSkinStylesheet = document.querySelector('link[data-skin]:not([data-skin="' + skin + '"])');
+    // Disable unused skin immediately
+    disabledSkinStylesheet.setAttribute('rel', '');
+    disabledSkinStylesheet.setAttribute('disabled', true);
+    // add flag class to html immediately
+    if (isCompact == true) document.querySelector('html').classList.add('preparing-compact-menu');
+  </script>
 @yield("script")
 </body>
 </html>

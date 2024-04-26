@@ -18,27 +18,27 @@
             </div>
             <h1 class="h3"> Sign In </h1>
         </div>
-        <p class="text-left mb-4"> Don't have a account? <a href="{{ route('register') }}">Crée un compte</a>
+        <p class="mb-4 text-left"> Don't have a account? <a href="{{ route('register') }}">Crée un compte</a>
         </p><!-- .form-group -->
-        <div class="form-group mb-4">
-            <label class="d-block text-left" for="inputUser">Email</label>
+        <div class="mb-4 form-group">
+            <label class="text-left d-block" for="inputUser">Email</label>
             <input type="text" id="inputUser" name="email" class="form-control form-control-lg"
                 value="{{ old('email') }}" required="" autofocus="">
 
         </div><!-- /.form-group -->
         <!-- .form-group -->
-        <div class="form-group mb-4">
-            <label class="d-block text-left" for="inputPassword">Mot de passe</label>
+        <div class="mb-4 form-group">
+            <label class="text-left d-block" for="inputPassword">Mot de passe</label>
             <input type="password" id="inputPassword" name="password" class="form-control form-control-lg" required="">
         </div><!-- /.form-group -->
         <!-- .form-group -->
-        <div class="form-group mb-4">
+        <div class="mb-4 form-group">
             <button class="btn btn-lg btn-primary btn-block" type="submit">Connexion</button>
         </div><!-- /.form-group -->
         <!-- .form-group -->
-        <div class="form-group text-center">
+        <div class="text-center form-group">
             <div class="custom-control custom-control-inline custom-checkbox">
-                <input type="checkbox" class="custom-control-input" id="remember-me">
+                <input type="checkbox" class="custom-control-input" name="remember" id="remember-me">
                 <label class="custom-control-label" for="remember-me">Keep me sign in</label>
             </div>
         </div><!-- /.form-group -->
@@ -48,7 +48,7 @@
                 href="auth-recovery-password.html" class="link">Forgot Password?</a>
         </p><!-- /recovery links -->
         <!-- copyright -->
-        <p class="mb-0 px-3 text-muted text-center"> © 2018 All Rights Reserved. Dikitivi<a href="#">Privacy</a> and <a
+        <p class="px-3 mb-0 text-center text-muted"> © 2018 All Rights Reserved. Dikitivi<a href="#">Privacy</a> and <a
                 href="#">Terms</a>
         </p>
     </form><!-- /.auth-form -->

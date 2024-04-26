@@ -1,55 +1,36 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
+use App\Http\Controllers\BaseController;
+use App\Http\Resources\Media as ResourcesMedia;
 use App\Models\Media;
 use App\Models\Session;
 use App\Models\User;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Resources\Media as ResourcesMedia;
+use Illuminate\Support\Str;
 
 class MediaController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     * 
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function index(Request $request)
+    public static $api_client_manager;
+
+    public function __construct()
     {
-        $medias = Media::orderByDesc('created_at')->get();
-
-        if ($request->user_id != null) {
-            $session = Session::where(['user_id', $request->user_id])->first();
-
-            if ($session->medias() == null) {
-                $session->medias()->attach($medias->pluck('id'));
-            }
-
-            if ($session->medias() != null) {
-                $session->medias()->sync($medias->pluck('id'));
-            }
-        }
-
-        if ($request->ip_address != null) {
-            $session = Session::where(['ip_address', $request->ip_address])->first();
-
-            if ($session->medias() == null) {
-                $session->medias()->attach($medias->pluck('id'));
-            }
-
-            if ($session->medias() != null) {
-                $session->medias()->sync($medias->pluck('id'));
-            }
-        }
-
-        return $this->handleResponse(ResourcesMedia::collection($medias), __('notifications.find_all_medias_success'));
+        $this::$api_client_manager = new ApiClientManager();
     }
+    public function create()
+    {
+        $series = $this::$api_client_manager::call('GET', getApiURL() . '/media/find_all_by_type/fr/Série TV');
+        $albums = $this::$api_client_manager::call('GET', getApiURL() . '/media/find_all_by_type/fr/Album musique');
+        $type = $this::$api_client_manager::call('GET', getApiURL() . '/type/find_by_group/fr/Type de média');
+        $categories = $this::$api_client_manager::call('GET', getApiURL() . '/category');
+        $medias = (collect($series->data))->merge(collect($albums->data));
 
+        // dd($medias);
+        return view("pages.addMedia", compact("medias", "type", "categories"));
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -58,46 +39,38 @@ class MediaController extends BaseController
      */
     public function store(Request $request)
     {
+        // dd($request);
         // Get inputs
         $inputs = [
             'media_title' => $request->media_title,
+            'media_description' => $request->media_description,
+            'belonging_count' => $request->belonging_count,
+            'source' => $request->source,
+            'time_length' => $request->time_length,
             'media_url' => $request->media_url,
-            'author' => $request->author,
+            'teaser_url' => $request->file('teaser_url'),
+            'author_names' => $request->author_names,
+            'artist_names' => $request->artist_names,
             'writer' => $request->writer,
             'director' => $request->director,
+            'published_date' => $request->published_date,
+            'cover_url' => $request->file('cover_url'),
             'price' => $request->price,
             'for_youth' => $request->for_youth,
+            'is_live' => $request->is_live,
             'belongs_to' => $request->belongs_to,
             'type_id' => $request->type_id,
-            'user_id' => $request->user_id
+            'user_id' => $request->user_id,
         ];
-        // Select all medias to check unique constraint
-        $medias = Media::all();
+        //  dd($inputs);
+        $series = $this::$api_client_manager::call('POST', getApiURL() . '/media',session()->get("tokenUserActive"), $inputs);
 
-        // Validate required fields
-        if (trim($inputs['media_title']) == null) {
-            return $this->handleError($inputs['media_title'], __('validation.required'), 400);
-        }
-
-        if (trim($inputs['media_url']) == null) {
-            return $this->handleError($inputs['media_url'], __('validation.required'), 400);
-        }
-
-        // Check if media title already exists
-        foreach ($medias as $another_media):
-            if ($another_media->media_title == $inputs['media_title']) {
-                return $this->handleError($inputs['media_title'], __('validation.custom.title.exists'), 400);
-            }
-        endforeach;
-
-        $media = Media::create($inputs);
-
-        return $this->handleResponse(new ResourcesMedia($media), __('notifications.create_media_success'));
+        return redirect()->back()->with("msg","Enregistrement réussi");
     }
 
     /**
      * Display the specified resource.
-     * 
+     *
      * @param  \Illuminate\Http\Request  $request
      * @param  int $id
      * @return \Illuminate\Http\Response
@@ -158,7 +131,7 @@ class MediaController extends BaseController
             'for_youth' => $request->for_youth,
             'belongs_to' => $request->belongs_to,
             'type_id' => $request->type_id,
-            'user_id' => $request->user_id
+            'user_id' => $request->user_id,
         ];
         // Select all medias to check unique constraint
         $medias = Media::all();
@@ -311,15 +284,15 @@ class MediaController extends BaseController
     {
         if ($request->user_id != null) {
             $medias = Media::whereHas('sessions', function ($query) use ($request) {
-                                $query->where('sessions.user_id', $request->user_id);
-                            })->where([['medias.for_youth', $for_youth], ['medias.type_id', $type_id]])->orderByDesc('medias.created_at')->get();
+                $query->where('sessions.user_id', $request->user_id);
+            })->where([['medias.for_youth', $for_youth], ['medias.type_id', $type_id]])->orderByDesc('medias.created_at')->get();
 
             return $this->handleResponse(ResourcesMedia::collection($medias), __('notifications.find_all_medias_success'));
 
         } else if ($request->ip_address != null) {
             $medias = Media::whereHas('sessions', function ($query) use ($request) {
-                                $query->where('sessions.ip_address', $request->ip_address);
-                            })->where([['medias.for_youth', $for_youth], ['medias.type_id', $type_id]])->orderByDesc('medias.created_at')->get();
+                $query->where('sessions.ip_address', $request->ip_address);
+            })->where([['medias.for_youth', $for_youth], ['medias.type_id', $type_id]])->orderByDesc('medias.created_at')->get();
 
             return $this->handleResponse(ResourcesMedia::collection($medias), __('notifications.find_all_medias_success'));
 
@@ -349,13 +322,13 @@ class MediaController extends BaseController
         foreach ($user->medias as $med) {
             if ($med->pivot->media_id == null) {
                 $user->medias()->attach([$media_id => [
-                    'status_id' => $status_id
+                    'status_id' => $status_id,
                 ]]);
             }
 
             if ($med->pivot->media_id != null) {
                 $user->medias()->sync([$media_id => [
-                    'status_id' => $status_id
+                    'status_id' => $status_id,
                 ]]);
             }
         }
@@ -372,7 +345,7 @@ class MediaController extends BaseController
     {
         $inputs = [
             'media_id' => $request->entity_id,
-            'image_64' => $request->base64image
+            'image_64' => $request->base64image,
         ];
 
         // $extension = explode('/', explode(':', substr($inputs['image_64'], 0, strpos($inputs['image_64'], ';')))[1])[1];
@@ -390,13 +363,13 @@ class MediaController extends BaseController
         // Upload image
         Storage::url(Storage::disk('public')->put($image_url, base64_decode($image)));
 
-		$media = Media::find($id);
+        $media = Media::find($id);
 
         $media->update([
             'cover_url' => $image_url,
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         return $this->handleResponse(new ResourcesMedia($media), __('notifications.update_media_success'));
-	}
+    }
 }

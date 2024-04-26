@@ -41,7 +41,7 @@
     <link rel="stylesheet" href="{{ asset('assets/stylesheets/theme-dark.min.css') }}" data-skin="dark">
     <link rel="stylesheet" href="{{ asset('assets/stylesheets/custom.css') }}">
 
-    
+
     <script>
       var skin = localStorage.getItem('skin') || 'default';
       var isCompact = JSON.parse(localStorage.getItem('hasCompactMenu'));
@@ -55,7 +55,21 @@
   </head>
   <body>
 
+    @if (\Session::has('error_message_login'))
+    <!-- Alert Start -->
+    <div class="position-relative">
+        <div class="row position-fixed w-100" style="opacity: 0.9; z-index: 999;">
+            <div class="mx-auto col-lg-5 col-sm-6">
+                <div class="alert alert-danger alert-dismissible fade show rounded-0 cnpr-line-height-1_1" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2 fs-4" style="vertical-align: -3px;"></i> {!! preg_match('/~/', \Session::get('error_message_login')) ? explode(', ', explode('~', \Session::get('error_message_login'))[0])[1] : \Session::get('error_message_login') !!}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Alert End -->
 
+@endif
     @yield("content")
 
       <!-- BEGIN BASE JS -->
@@ -70,13 +84,13 @@
          * you might need to observe the `theme:load` event to make sure your scripts are executed after the theme is ready.
          */
         $(document).on('theme:init', () =>{
-        //   particlesJS.load(@dom-id, @path-json, @callback (optional)); 
+        //   particlesJS.load(@dom-id, @path-json, @callback (optional));
           particlesJS.load('announcement', 'assets/javascript/pages/particles.json');
         })
       </script> <!-- END PLUGINS JS -->
       <!-- BEGIN THEME JS -->
       <script src="{{ asset('assets/javascript/theme.min.js') }}"></script>
 
-     
+
     </body>
   </html>

@@ -25,7 +25,7 @@
             </div><!-- /.dropdown-aside -->
         </header><!-- /.aside-header --> --}}
         <!-- .aside-menu -->
-        <div class="aside-menu overflow-hidden">
+        <div class="overflow-hidden aside-menu">
             <!-- .stacked-menu -->
             <nav id="stacked-menu" class="stacked-menu">
                 <!-- .menu -->
@@ -39,10 +39,10 @@
                     </li><!-- /.menu-item -->
 
                     <!-- .menu-item -->
-                    <li class="menu-item {{ Route::current()->getName() == 'film' ? 'has-active' : ''}}">
-                        <a href="{{ route('film') }}" class="menu-link">
+                    <li class="menu-item {{ Route::current()->getName() == 'media' ? 'has-active' : ''}}">
+                        <a href="{{ route('media') }}" class="menu-link">
                             <span class="menu-icon fas fa-film"></span>
-                            <span class="menu-text">Films</span>
+                            <span class="menu-text">Medias</span>
                         </a>
                     </li>
                     <li class="menu-item {{ Route::current()->getName() == 'serie' ? 'has-active' : ''}}">
@@ -68,9 +68,9 @@
             </nav><!-- /.stacked-menu -->
         </div><!-- /.aside-menu -->
         <!-- Skin changer -->
-        <footer class="aside-footer border-top p-2">
+        <footer class="p-2 aside-footer border-top">
             <button class="btn btn-light btn-block text-primary" data-toggle="skin"><span
-                    class="d-compact-menu-none">Night mode</span> <i class="fas fa-moon ml-1"></i></button>
+                    class="d-compact-menu-none">Night mode</span> <i class="ml-1 fas fa-moon"></i></button>
         </footer><!-- /Skin changer -->
     </div><!-- /.aside-content -->
 </aside><!-- /.app-aside -->

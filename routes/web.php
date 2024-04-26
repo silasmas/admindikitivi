@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BaseController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,9 +31,13 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('media', [BaseController::class, 'index'])->name('media');
     Route::get('film', [BaseController::class, 'index'])->name('film');
     Route::get('client', [BaseController::class, 'client'])->name('client');
     Route::get('serie', [BaseController::class, 'serie'])->name('serie');
+
+    Route::get('createMedia', [MediaController::class, 'create'])->name('createMedia');
+    Route::post('registerMedia', [MediaController::class, 'store'])->name('registerMedia');
 
 });
 

@@ -15,7 +15,7 @@
         @csrf
         <div class="form-group">
             <div class="form-label-group">
-                <input name="firstname" type="text" id="inputUser" class="form-control" placeholder="Nom" required="">
+                <input name="name" type="text" id="inputUser" class="form-control" placeholder="Nom" required="">
                 <label for="inputUser">Nom</label>
             </div>
         </div>

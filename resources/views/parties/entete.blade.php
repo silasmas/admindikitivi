@@ -43,18 +43,11 @@
     <link rel="stylesheet" href="{{ asset('assets/stylesheets/theme.min.css') }}" data-skin="default">
     <link rel="stylesheet" href="{{ asset('assets/stylesheets/theme-dark.min.css') }}" data-skin="dark">
     <link rel="stylesheet" href="{{ asset('assets/stylesheets/custom.css') }}">
+
     @yield("style")
 
-    <script>
-      var skin = localStorage.getItem('skin') || 'default';
-      var isCompact = JSON.parse(localStorage.getItem('hasCompactMenu'));
-      var disabledSkinStylesheet = document.querySelector('link[data-skin]:not([data-skin="' + skin + '"])');
-      // Disable unused skin immediately
-      disabledSkinStylesheet.setAttribute('rel', '');
-      disabledSkinStylesheet.setAttribute('disabled', true);
-      // add flag class to html immediately
-      if (isCompact == true) document.querySelector('html').classList.add('preparing-compact-menu');
-    </script><!-- END THEME STYLES -->
+
+    <!-- END THEME STYLES -->
   </head>
   <body>
      <!-- .app -->
