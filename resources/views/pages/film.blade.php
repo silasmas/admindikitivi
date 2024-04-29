@@ -15,6 +15,7 @@
             <div class="section-block d-sm-flex justify-content-between">
 
                 <h2 class="section-title">Page des medias</h2>
+                <P>{{count( $medias->data) }} Media(s) trouvés</P>
                 <p class="text-muted">
                     <a href="{{ route('createMedia') }}" class="btn btn-success">
                         Ajouter
@@ -25,14 +26,10 @@
 
             <!-- grid row -->
             <div class="row">
-
-                <!-- grid column -->
-                {{-- <div class="col-xl-4 col-sm-6"> --}}
-                    <!-- .card -->
-                    {{-- {{ dd($medias->data) }} --}}
                     @forelse ($medias->data as $m)
                     <div class="col-sm-6">
                         @if (!empty($m->media_url))
+
                         <div class="card card-body">
                             <div class="embed-responsive embed-responsive-16by9 w-100">
                                 <iframe id="youtube-9854" frameborder="0" allowfullscreen="1"
@@ -47,13 +44,19 @@
                                     <ul class="list-inline text-muted mb-0">
                                         <li class="list-inline-item">
                                             <a href="{{ route('editeMedia',['id'=>$m->id]) }}">
+                                                <span class="oi oi-eye"></span>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="{{ route('editeMedia',['id'=>$m->id]) }}">
                                                 <span class="oi oi-pencil"></span>
                                             </a>
                                         </li>
                                         <li class="list-inline-item float-right">
-                                            <a href="{{ route('deleteMedia',['id'=>$m->id]) }}">
-                                            <span class="oi oi-calendar"></span>
-                                        </a>
+                                            <a href="{{ route('deleteMedia',['id'=>$m->id]) }}"
+                                                onclick="event.preventDefault();deletemedia({{$m->id}})">
+                                                <span class="oi oi-trash"></span>
+                                            </a>
                                         </li>
                                     </ul>
                                 </figcaption>
@@ -75,52 +78,73 @@
                                             <a href="#" class="btn btn-block btn-sm btn-primary">Voir en detail</a>
                                         </div>
                                     </div><!-- /.figure-img -->
-                                    <!-- .figure-caption -->
-                                    <figcaption class="figure-caption">
-                                        <ul class="list-inline text-muted mb-0">
-                                            <li class="list-inline-item">
-                                                <span class="oi oi-paperclip"></span> 0.62MB
-                                            </li>
-                                            <li class="list-inline-item float-right">
-                                                <span class="oi oi-calendar"></span>
-                                            </li>
-                                        </ul>
-                                    </figcaption><!-- /.figure-caption -->
+                                    <div class="row mb-1 mt-3 ml-5">
+                                        <figcaption class="figure-caption">
+                                            <ul class="list-inline text-muted mb-0">
+                                                <li class="list-inline-item">
+                                                    <a href="{{ route('editeMedia',['id'=>$m->id]) }}">
+                                                        <span class="oi oi-eye"></span>
+                                                    </a>
+                                                </li>
+                                                <li class="list-inline-item">
+                                                    <a href="{{ route('editeMedia',['id'=>$m->id]) }}">
+                                                        <span class="oi oi-pencil"></span>
+                                                    </a>
+                                                </li>
+                                                <li class="list-inline-item float-right">
+                                                    <a href="{{ route('deleteMedia',['id'=>$m->id]) }}"
+                                                        onclick="event.preventDefault();deletemedia({{$m->id}})">
+                                                        <span class="oi oi-trash"></span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </figcaption>
+                                    </div>
                                 </figure><!-- /.card-figure -->
+
                             </div><!-- /.card -->
-
                         </div>
-
                         @endif
-                    </div><!-- /.card -->
+                    </div>
+                    <!-- /.card -->
                     @empty
 
                     @endforelse
-                    <div class="card-body">
-                        <hr>
-                        <div class="el-example">
-                            <ul class="pagination">
-                                <li class="page-item disabled">
-                                    <a class="page-link" href="#">«</a>
-                                </li>
-                                {{-- {{ dd($medias->lastPage) }} --}}
-                                {{-- @for ($i=1; $i <= $medias->lastPage; $i++)
-                                    <li class="page-item{{ $i == $medias->currentPage() ? ' active' : '' }}">
-                                        <a class="page-link" href="{{ '/media?page=' . $i }}">{{ $i }}</a>
-                                    </li>
-                                    @endfor --}}
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">»</a>
-                                    </li>
-                            </ul>
-                        </div>
-
-                    </div>
-
-                </div><!-- /grid row -->
-
-
             </div><!-- /.page-inner -->
+            <div class="row">
+                <div class="card-body">
+                    <hr>
+                    <div class="el-example">
+                        <ul class="pagination">
+                            @if(!request()->has('page')|| request()->get('page')==1)
+                            <li class="page-item disabled" hidden>
+                                <a class="page-link" href="">«</a>
+                            </li>
+                            @else
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">«</a>
+                            </li>
+                            @endif
+                            {{-- {{ dd($medias->lastPage) }} --}}
+                            @for ($i=1; $i <= $medias->lastPage; $i++)
+                                <li class="page-item {{!request()->has('page') || request()->get('page')==$i ? ' active' : '' }}">
+                                    <a class="page-link" href="{{ '/media?page=' . $i }}">{{ $i }}</a>
+                                </li>
+
+                                @endfor
+                                @if(request()->get('page')==$medias->lastPage)
+                                <li class="page-item" hidden>
+                                    <a class="page-link" href="?{{ $medias->lastPage }}">»</a>
+                                </li>
+                                @else
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ $medias->lastPage }}">»</a>
+                                </li>
+                                @endif
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div><!-- /.page -->
     </div>
     </main>
@@ -133,4 +157,72 @@
     <script src="{{ asset('assets/vendor/plyr/plyr.min.js') }}"></script>
     <script src="{{ asset('assets/javascript/pages/photoswipe-demo.js') }} "></script>
 
+    <script>
+        console.log($('[name="apiUrl"]').attr('content'));
+        console.log($('[name="csrf"]').attr('content'));
+        function deletemedia(id) {
+            Swal.fire({
+                title: "Suppression d'un media",
+                text: "êtes-vous sûre de vouloir supprimer ce media ?",
+                icon: 'warning',
+                inputAttributes: {
+                autocapitalize: "off"
+                },
+                showCancelButton: true,
+                confirmButtonText: "OUI",
+                cancelButtonText: "NON",
+                showLoaderOnConfirm: true,
+                preConfirm: async (login) => {
+                    // alert('alert')
+                            try {
+
+                            } catch (error) {
+
+                            }
+                },allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                        if (result.isConfirmed) {
+                            addCard(id,"","deleteMedia");
+                        }
+                });
+            }
+
+
+
+            function addCard(form, idLoad, url) {
+        // event.preventDefault()
+        var header = {'X-CSRF-TOKEN': $('[name="csrf"]').attr('content'),'Authorization': 'Bearer ' + $('[name="jpt-devref"]').attr('content'), 'Accept': 'application/json', 'X-localization': navigator.language};
+
+        var autre = idLoad == '' ? '' : '../';
+        Swal.fire({
+            title: 'Merci de patienter...',
+            icon: 'info'
+        })
+        $.ajax({
+            url: url + '/' + form,
+            method: "GET",
+            // data: {
+            //     'id': form
+            // },
+            success: function(data) {
+                if (!data.reponse) {
+                    Swal.fire({
+                        title: data.msg,
+                        icon: 'error'
+                    })
+                } else {
+                    Swal.fire({
+                        title: data.msg,
+                        icon: 'success'
+                    })
+                    actualiser();
+                }
+            },
+        });
+
+    }
+    function actualiser() {
+        location.reload();
+    }
+    </script>
     @endsection

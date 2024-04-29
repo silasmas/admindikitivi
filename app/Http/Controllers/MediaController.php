@@ -63,9 +63,8 @@ class MediaController extends BaseController
             'user_id' => $request->user_id,
         ];
         //  dd($inputs);
-        $series = $this::$api_client_manager::call('POST', getApiURL() . '/media',session()->get("tokenUserActive"), $inputs);
-
-        return redirect()->back()->with("msg","Enregistrement réussi");
+        $series = $this::$api_client_manager::call('POST', getApiURL() . '/media', session()->get("tokenUserActive"), $inputs);
+        return redirect()->back()->with("msg", "Enregistrement réussi");
     }
 
     /**
@@ -75,39 +74,18 @@ class MediaController extends BaseController
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, $id)
+    public function show($id)
     {
-        $media = Media::find($id);
+        $m = $this::$api_client_manager::call('GET', getApiURL() . '/media/' . $id);
+        $media=$m->data;
+        $type = $this::$api_client_manager::call('GET', getApiURL() . '/type/find_by_group/fr/Type de média');
+        $categories = $this::$api_client_manager::call('GET', getApiURL() . '/category');
 
-        if (is_null($media)) {
-            return $this->handleError(__('notifications.find_media_404'));
-        }
-
-        if ($request->user_id != null) {
-            $session = Session::where(['user_id', $request->user_id])->first();
-
-            if ($session->medias() == null) {
-                $session->medias()->attach([$media->id]);
-            }
-
-            if ($session->medias() != null) {
-                $session->medias()->syncWithoutDetaching([$media->id]);
-            }
-        }
-
-        if ($request->ip_address != null) {
-            $session = Session::where(['ip_address', $request->ip_address])->first();
-
-            if ($session->medias() == null) {
-                $session->medias()->attach([$media->id]);
-            }
-
-            if ($session->medias() != null) {
-                $session->medias()->syncWithoutDetaching([$media->id]);
-            }
-        }
-
-        return $this->handleResponse(new ResourcesMedia($media), __('notifications.find_media_success'));
+        $series = $this::$api_client_manager::call('GET', getApiURL() . '/media/find_all_by_type/fr/Série TV');
+        $albums = $this::$api_client_manager::call('GET', getApiURL() . '/media/find_all_by_type/fr/Album musique');
+        $medias = (collect($series->data))->merge(collect($albums->data));
+        // dd($media);
+        return view("pages.addMedia", compact("medias",'media','type','categories'));
     }
 
     /**
@@ -123,99 +101,28 @@ class MediaController extends BaseController
         $inputs = [
             'id' => $request->id,
             'media_title' => $request->media_title,
+            'media_description' => $request->media_description,
+            'belonging_count' => $request->belonging_count,
+            'source' => $request->source,
+            'time_length' => $request->time_length,
             'media_url' => $request->media_url,
-            'author' => $request->author,
+            'teaser_url' => $request->file('teaser_url'),
+            'author_names' => $request->author_names,
+            'artist_names' => $request->artist_names,
             'writer' => $request->writer,
             'director' => $request->director,
+            'published_date' => $request->published_date,
+            'cover_url' => $request->file('cover_url'),
             'price' => $request->price,
             'for_youth' => $request->for_youth,
+            'is_live' => $request->is_live,
             'belongs_to' => $request->belongs_to,
             'type_id' => $request->type_id,
             'user_id' => $request->user_id,
         ];
-        // Select all medias to check unique constraint
-        $medias = Media::all();
-        $current_media = Media::find($inputs['id']);
-
-        if ($inputs['media_title'] != null) {
-            foreach ($medias as $another_media):
-                if ($current_media->media_title != $inputs['media_title']) {
-                    if ($another_media->media_title == $inputs['media_title']) {
-                        return $this->handleError($inputs['media_title'], __('validation.custom.title.exists'), 400);
-                    }
-                }
-            endforeach;
-
-            $media->update([
-                'media_title' => $request->media_title,
-                'updated_at' => now(),
-            ]);
-        }
-
-        if ($inputs['media_url'] != null) {
-            $media->update([
-                'media_url' => $request->media_url,
-                'updated_at' => now(),
-            ]);
-        }
-
-        if ($inputs['author'] != null) {
-            $media->update([
-                'author' => $request->author,
-                'updated_at' => now(),
-            ]);
-        }
-
-        if ($inputs['writer'] != null) {
-            $media->update([
-                'writer' => $request->writer,
-                'updated_at' => now(),
-            ]);
-        }
-
-        if ($inputs['director'] != null) {
-            $media->update([
-                'director' => $request->director,
-                'updated_at' => now(),
-            ]);
-        }
-
-        if ($inputs['price'] != null) {
-            $media->update([
-                'price' => $request->price,
-                'updated_at' => now(),
-            ]);
-        }
-
-        if ($inputs['for_youth'] != null) {
-            $media->update([
-                'for_youth' => $request->for_youth,
-                'updated_at' => now(),
-            ]);
-        }
-
-        if ($inputs['belongs_to'] != null) {
-            $media->update([
-                'belongs_to' => $request->belongs_to,
-                'updated_at' => now(),
-            ]);
-        }
-
-        if ($inputs['type_id'] != null) {
-            $media->update([
-                'type_id' => $request->type_id,
-                'updated_at' => now(),
-            ]);
-        }
-
-        if ($inputs['user_id'] != null) {
-            $media->update([
-                'user_id' => $request->user_id,
-                'updated_at' => now(),
-            ]);
-        }
-
-        return $this->handleResponse(new ResourcesMedia($media), __('notifications.update_media_success'));
+        //  dd($inputs);
+        $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/'.$request->id, session()->get("tokenUserActive"), $inputs);
+        return redirect()->back()->with("msg", "Modification réussie");
     }
 
     /**
@@ -224,13 +131,18 @@ class MediaController extends BaseController
      * @param  \App\Models\Media  $media
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Media $media)
+    public function destroy($id)
     {
-        $media->delete();
 
-        $medias = Media::all();
+        $rep = $this::$api_client_manager::call('DELETE', getApiURL() . '/media/' . $id,session()->get("tokenUserActive"));
+        // dd($rep->success);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => $rep->message]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
 
-        return $this->handleResponse(ResourcesMedia::collection($medias), __('notifications.delete_media_success'));
+        }
+
     }
 
     // ==================================== CUSTOM METHODS ====================================

@@ -42,6 +42,7 @@
     <link rel="stylesheet" href="{{ asset('assets/stylesheets/custom.css') }}">
 
 
+
     <script>
       var skin = localStorage.getItem('skin') || 'default';
       var isCompact = JSON.parse(localStorage.getItem('hasCompactMenu'));
@@ -78,6 +79,7 @@
       <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.min.js') }}"></script> <!-- END BASE JS -->
       <!-- BEGIN PLUGINS JS -->
       <script src="{{ asset('assets/vendor/particles.js/particles.js') }}"></script>
+
       <script>
         /**
          * Keep in mind that your scripts may not always be executed after the theme is completely ready,

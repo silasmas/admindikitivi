@@ -15,11 +15,11 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item active">
-                            <a href="#"><i class="breadcrumb-icon fa fa-angle-left mr-2"></i>Liste des medias</a>
+                            <a href="{{ route('media') }}"><i class="breadcrumb-icon fa fa-angle-left mr-2"></i>Liste des medias</a>
                         </li>
                     </ol>
                 </nav>
-                <h1 class="page-title"> Formumaire d'enregistrement </h1>
+                <h1 class="page-title"> {{ isset($media)?"Formumaire de modification":"Formumaire d'enregistrement" }}  </h1>
                 @if(session()->has("msg"))
                 <div class="alert alert-primary" role="alert">
                     {{ session()->get("msg") }}
@@ -38,103 +38,177 @@
                     <!-- .card-body -->
                     <div class="card-body">
 
-                        <form method="POST" action="{{ route('registerMedia') }}" accept="multipart/form-data">
+                        <form method="POST" action="{{isset($media)?route('updateMedia') :route('registerMedia') }}" accept="multipart/form-data">
                             @csrf
                             <!-- .fieldset -->
                             <fieldset>
                                 <legend>Base style</legend> <!-- .form-group -->
                                 <div class="form-group">
-                                    <label>Titre du Media</label>
-                                    <input name="media_title" type="text" class="form-control" placeholder="">
+                                    <input name="id" type="text" class="form-control"
+                                     placeholder="" value="{{isset($media)?$media->id:"" }}" hidden>
+                                    <label>Titre du Media
+                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="Le titre principale du media"></i>
+                                    </label>
+                                    <input name="media_title" type="text" class="form-control"
+                                     placeholder="" value="{{isset($media)?$media->media_title:"" }}">
                                 </div>
                                 <div class="form-group">
-                                    <label for="tf6">Description du media</label>
+                                    <label for="tf6">Description du media
+                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="La description pour faire comprendre le media"></i>
+                                    </label>
                                     <textarea name="media_description" class="form-control" id="tf6"
-                                        rows="3"></textarea>
+                                        rows="3">
+                                        {{ isset($media)?$media->media_description:"" }}
+                                    </textarea>
                                 </div>
                                 <div class="form-group">
-                                    <label>Nombre des contenants</label>
-                                    <input name="belonging_count" type="number" class="form-control" placeholder="">
+                                    <label>Nombre des contenants
+                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="Combien d'episode/chanson contient la serie/album??"></i>
+                                    </label>
+                                    <input name="belonging_count" type="number" class="form-control" placeholder=""
+                                    value="{{ isset($media)?$media->belonging_count:"" }}">
                                 </div>
                                 <div class="form-group">
-                                    <label>Source du Media</label>
-                                    <input name="source" type="text" class="form-control" placeholder="">
+                                    <label>Source du Media
+                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="La source de provenance de la video. ex : YouTube, AWS..."></i>
+                                    </label>
+                                    <input name="source" type="text" class="form-control" placeholder=""
+                                    value="{{ isset($media)?$media->source:"" }}">
                                 </div>
                                 <div class="form-group">
-                                    <label>Temps du Media</label>
-                                    <input name="time_length" type="time" class="form-control" placeholder="">
+                                    <label>Temps du Media
+                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="Le temps que met la vidéo (hh:mm)"></i>
+                                    </label>
+                                    <input name="time_length" type="time" class="form-control" placeholder=""
+                                    value="{{ isset($media)?$media->time_length:"" }}">
                                 </div>
                                 <div class="form-group">
-                                    <label for="pi3">URL du media</label> <!-- .input-group -->
+                                    <label for="pi3">URL du media
+                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="Le lien du media, en forma"></i></label> <!-- .input-group -->
                                     <div class="input-group input-group-alt">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">http://</span>
                                         </div><input name="media_url" type="text" class="form-control" id="pi3"
-                                            placeholder="uselooper.com">
+                                            placeholder="" value="{{ isset($media)?$media->media_url:"" }}">
                                     </div><!-- /.input-group -->
                                 </div>
                                 <div class="form-group">
-                                    <label for="pi3">URL du teaser</label> <!-- .input-group -->
+                                    <label for="pi3">URL du teaser
+                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="Une courte vidéo présentant le média"></i></label> <!-- .input-group -->
                                     <div class="input-group input-group-alt">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">http://</span>
                                         </div><input name="teaser_url" type="text" class="form-control" id="pi3"
-                                            placeholder="uselooper.com">
+                                            placeholder="" value="{{ isset($media)?$media->teaser_url:"" }}">
                                     </div><!-- /.input-group -->
                                 </div>
                                 <div class="form-group">
-                                    <label>Auteur</label>
-                                    <input name="author_names" type="text" class="form-control" placeholder="">
+                                    <label>Auteur
+                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="La personne qui a publié la vidéo sur YouTube ou autre site médiatique"></i>
+                                    </label>
+                                    <input name="author_names" type="text" class="form-control" placeholder=""
+                                    value="{{ isset($media)?$media->author_names:"" }}">
                                 </div>
                                 <div class="form-group">
-                                    <label>Nom de l'artiste</label>
-                                    <input name="artist_names" type="text" class="form-control" placeholder="">
+                                    <label>Nom de l'artiste
+                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="L'artiste auteur et/ou compositeur, si c'est une chanson'"></i>
+                                    </label>
+                                    <input name="artist_names" type="text" class="form-control" placeholder=""
+                                    value="{{ isset($media)?$media->artist_names:"" }}">
                                 </div>
                                 <div class="form-group">
-                                    <label>Ecrit par :</label>
-                                    <input name="writer" type="text" class="form-control" placeholder="">
+                                    <label>Ecrit par :
+                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="La personne qui a écrit l'histoire', si c'est du cinéma"></i>
+                                    </label>
+                                    <input name="writer" type="text" class="form-control" placeholder=""
+                                    value="{{ isset($media)?$media->writer:"" }}">
                                 </div>
                                 <div class="form-group">
-                                    <label>Realisateur</label>
-                                    <input name="director" type="text" class="form-control" placeholder="">
+                                    <label>Realisateur
+                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="Le réalisateur du film ou de la chanson"></i>
+                                    </label>
+                                    <input name="director" type="text" class="form-control" placeholder=""
+                                    value="{{ isset($media)?$media->director:"" }}">
                                 </div>
                                 <div class="form-group">
-                                    <label>Date de publication</label>
-                                    <input name="published_date" type="date" class="form-control" placeholder="">
+                                    <label>Date de publication
+                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="La date à laquelle le film ou la chanson a été publié pour la première fois"></i>
+                                    </label>
+                                    <input name="published_date" type="date" class="form-control" placeholder=""
+                                    value="{{ isset($media)?$media->published_date:"" }}">
                                 </div>
                                 <div class="form-group">
-                                    <label for="tf3">Uploader Couverture</label>
+                                    <label for="tf3">Uploader Couverture
+                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="Une image qui sera affichée lorsque la vidéo n'est pas encore lue"></i>
+                                    </label>
                                     <div class="custom-file">
                                         <input name="cover_url" type="file" class="custom-file-input" id="tf3" multiple>
-                                        <label class="custom-file-label" for="tf3">Choisir fichier</label>
+                                        <label class="custom-file-label" for="">Choisir fichier</label>
                                     </div>
+                                    @isset($media)
+                                    @if ($media->cover_url!=null)
+                                        <figure class="figure">
+                                        <!-- .figure-img -->
+                                        <div class="figure-img">
+                                            <img class="img-fluid" src="{{asset($media->cover_url)}}" alt="Card image cap">
+                                            <a href="{{ asset($media->cover_url) }}" class="img-link" data-size="600x450">
+                                                <span class="tile tile-circle bg-danger"><span class="oi oi-eye"></span>
+                                                </span> <span class="img-caption d-none">Image caption goes here</span></a>
+                                            <div class="figure-action">
+                                                <a href="#" class="btn btn-block btn-sm btn-primary">Voir en detail</a>
+                                            </div>
+                                        </div>
+                                    </figure>
+                                    @endif
+                                    @endisset
                                 </div>
                                 <div class="form-group">
+                                    <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                data-container="body" title="La tranche d'âge permise pour visionner la vidéo"></i>
                                     <div class="form-label-group">
-                                        <label for="for_youth">Pour enfant ?</label>
+                                        <label for="for_youth">Pour enfant ?
+                                        </label>
                                         <select name="for_youth" class="custom-select" id="for_youth" required="">
-                                            <option value="0">NON</option>
-                                            <option value="1">OUI</option>
+                                            <option value="0" {{ isset($media)&&$media->for_youth==0?"selected":"" }}>NON</option>
+                                            <option value="1" {{ isset($media)&&$media->for_youth==1?"selected":"" }}>OUI</option>
                                         </select>
                                         <label for="for_youth">Pour enfant ? </label>
                                     </div>
                                 </div>
                                 <div class="form-group">
+                                    <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                data-container="body" title="Le média est il en direct ?"></i>
                                     <div class="form-label-group">
-                                        <label for="is_live">Est un live?</label>
+                                        <label for="is_live">Est un live?
+                                        </label>
                                         <select name="is_live" class="custom-select" id="is_live" required="">
-                                            <option value="0">NON</option>
-                                            <option value="1">OUI</option>
+                                            <option value="0" {{ isset($media)&&$media->is_live==0?"selected":"" }}>NON</option>
+                                            <option value="1" {{ isset($media)&&$media->is_live==1?"selected":"" }}>OUI</option>
                                         </select>
                                         <label for="is_live">Est un live? </label>
                                     </div>
                                 </div>
                                 <div class="form-group">
+                                    <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                    data-container="body" title="Est-ce un épisode appartenant à une série TV ou une chanson appartenant à un album ?"></i>
                                     <div class="form-label-group">
                                         <select name="belongs_to" class="custom-select" id="fls1">
-                                            <option value=""> Appartien à : </option>
+                                            <option value=""> Appartien à :</option>
                                             @forelse ($medias as $m)
-                                            <option value="{{ $m->id }}">{{ $m->media_title }}</option>
+                                            <option value="{{ $m->id }}" {{ isset($media)&&$media->belongs_to==$m->id?"selected":"" }}>{{ $m->media_title }}</option>
                                             @empty
 
                                             @endforelse
@@ -142,11 +216,13 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
+                                    <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                data-container="body" title="Sélectionner le type du media"></i>
                                     <div class="form-label-group">
-                                        <select name="type_id" class="custom-select" id="fls1" required="">
+                                        <select name="type_id" class="custom-select" id="type_id" required="">
                                             <option value=""> Type du media : </option>
                                             @forelse ($type->data as $m)
-                                            <option value="{{ $m->id }}">{{ $m->type_name }}</option>
+                                            <option value="{{ $m->id }}" {{isset($media)&&$media->type->id==$m->id?"selected":"" }}>{{ $m->type_name }}</option>
                                             @empty
 
                                             @endforelse
@@ -154,11 +230,13 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="d-block">Choisir les catégories du media :</label>
+                                    <label class="d-block">Choisir les catégories du media : <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="Le titre principale du media"></i>
+                                    </label>
                                     @forelse ($categories->data as $m)
                                     <div class="custom-control custom-control-inline custom-checkbox">
                                         <input type="checkbox" name="categories_ids[]" class="custom-control-input"
-                                            id="{{ $m->id }}">
+                                            id="{{ $m->id }}" {{ inArrayR($m->category_name, $media->categories, "category_name")?"checked":"" }}>
                                         <label class="custom-control-label" for="{{ $m->id }}">{{ $m->category_name
                                             }}</label>
                                         <div class="text-muted"> </div>

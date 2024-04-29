@@ -33,6 +33,8 @@
     <link rel="apple-touch-icon" sizes="144x144" href="assets/apple-touch-icon.png">
     <link rel="shortcut icon" href="assets/favicon.ico">
     <meta name="theme-color" content="#3063A0"><!-- End FAVICONS -->
+    <meta name="apiUrl" content="{{ getApiURL() }}">
+    <meta name="csrf" content="{{ csrf_token() }}">
     <!-- GOOGLE FONT -->
     <link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,500,600" rel="stylesheet"><!-- End GOOGLE FONT -->
     <!-- BEGIN PLUGINS STYLES -->
@@ -43,7 +45,7 @@
     <link rel="stylesheet" href="{{ asset('assets/stylesheets/theme.min.css') }}" data-skin="default">
     <link rel="stylesheet" href="{{ asset('assets/stylesheets/theme-dark.min.css') }}" data-skin="dark">
     <link rel="stylesheet" href="{{ asset('assets/stylesheets/custom.css') }}">
-
+    <link rel="stylesheet" href="{{ asset('assets/custom/sweetalert2/dist/sweetalert2.min.css') }}">
     @yield("style")
 
 
