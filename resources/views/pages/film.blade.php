@@ -42,11 +42,11 @@
                             <div class="row mb-1 mt-3 ml-5">
                                 <figcaption class="figure-caption">
                                     <ul class="list-inline text-muted mb-0">
-                                        <li class="list-inline-item">
+                                        {{-- <li class="list-inline-item">
                                             <a href="{{ route('editeMedia',['id'=>$m->id]) }}">
                                                 <span class="oi oi-eye"></span>
                                             </a>
-                                        </li>
+                                        </li> --}}
                                         <li class="list-inline-item">
                                             <a href="{{ route('editeMedia',['id'=>$m->id]) }}">
                                                 <span class="oi oi-pencil"></span>
