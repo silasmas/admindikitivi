@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Illuminate\View\View;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\URL;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\RedirectResponse;
-use App\Providers\RouteServiceProvider;
-use Illuminate\Support\Facades\Session;
-use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Controllers\ApiClientManager;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Providers\RouteServiceProvider;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\URL;
+use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -38,15 +38,15 @@ class AuthenticatedSessionController extends Controller
     {
         $inputs = [
             'username' => $request->email,
-            'password' => $request->password
+            'password' => $request->password,
         ];
         // Login API
         $user = $this::$api_client_manager::call('POST', getApiURL() . '/user/login', null, $inputs);
         //dd($user->data->api_token);
-        $request->session()->put('tokenUserActive', $user->data->api_token);
 
         $request->authenticate();
         $request->session()->regenerate();
+        $request->session()->put('tokenUserActive', $user->data->api_token);
 
         return redirect()->intended(RouteServiceProvider::HOME);
     }

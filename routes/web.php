@@ -37,6 +37,8 @@ Route::middleware('auth')->group(function () {
     Route::get('serie', [BaseController::class, 'serie'])->name('serie');
 
     Route::get('createMedia', [MediaController::class, 'create'])->name('createMedia');
+    Route::get('editeMedia/{id}', [MediaController::class, 'create'])->name('editeMedia');
+    Route::get('deleteMedia/{id}', [MediaController::class, 'create'])->name('deleteMedia');
     Route::post('registerMedia', [MediaController::class, 'store'])->name('registerMedia');
 
 });

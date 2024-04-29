@@ -110,25 +110,28 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="tf5">Pour enfant ?</label>
-                                    <div class="custom-control custom-switch">
-                                        <input name="for_youth" value="0" type="checkbox" class="custom-control-input"
-                                            id="enfant"> <label class="custom-control-label" for="enfant">Toggle this
-                                            switch
-                                            element</label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="tf5">Est un live?</label>
-                                    <div class="custom-control custom-switch">
-                                        <input name="is_live" value="0" type="checkbox" class="custom-control-input"
-                                            id="live"> <label class="custom-control-label" for="live">Toggle this switch
-                                            element</label>
+                                    <div class="form-label-group">
+                                        <label for="for_youth">Pour enfant ?</label>
+                                        <select name="for_youth" class="custom-select" id="for_youth" required="">
+                                            <option value="0">NON</option>
+                                            <option value="1">OUI</option>
+                                        </select>
+                                        <label for="for_youth">Pour enfant ? </label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <div class="form-label-group">
-                                        <select name="belongs_to" class="custom-select" id="fls1" required="">
+                                        <label for="is_live">Est un live?</label>
+                                        <select name="is_live" class="custom-select" id="is_live" required="">
+                                            <option value="0">NON</option>
+                                            <option value="1">OUI</option>
+                                        </select>
+                                        <label for="is_live">Est un live? </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-label-group">
+                                        <select name="belongs_to" class="custom-select" id="fls1">
                                             <option value=""> Appartien à : </option>
                                             @forelse ($medias as $m)
                                             <option value="{{ $m->id }}">{{ $m->media_title }}</option>
