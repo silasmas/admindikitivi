@@ -356,6 +356,7 @@
                     })
 
                     $(f)[0].reset();
+                    actualiser();
                 }
 
             },
