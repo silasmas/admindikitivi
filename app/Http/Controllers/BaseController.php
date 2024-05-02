@@ -20,13 +20,16 @@ class BaseController extends Controller
     public function index()
     {
 
-        $medias = $this::$api_client_manager::call('GET', getApiURL() . '/media?page='.request()->get('page'));
+        $medias = $this::$api_client_manager::call('GET', getApiURL() . '/media?page=' . request()->get('page'));
         // dd($medias);
         return view("pages.film", compact('medias'));
     }
-    public function serie()
+    public function categories()
     {
-        return view("pages.serie");
+        $categories = $this::$api_client_manager::call('GET', getApiURL() . '/category');
+        // dd($categories);
+
+        return view("pages.serie", compact('categories'));
     }
     public function client()
     {

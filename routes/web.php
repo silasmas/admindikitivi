@@ -34,13 +34,22 @@ Route::middleware('auth')->group(function () {
     Route::get('media', [BaseController::class, 'index'])->name('media');
     Route::get('film', [BaseController::class, 'index'])->name('film');
     Route::get('client', [BaseController::class, 'client'])->name('client');
-    Route::get('serie', [BaseController::class, 'serie'])->name('serie');
+    Route::get('categories', [BaseController::class, 'categories'])->name('categories');
 
     Route::get('createMedia', [MediaController::class, 'create'])->name('createMedia');
+
     Route::get('editeMedia/{id}', [MediaController::class, 'show'])->name('editeMedia');
+    Route::get('editCat/{id}', [MediaController::class, 'show_cat'])->name('editCat');
+
     Route::get('deleteMedia/{id}', [MediaController::class, 'destroy'])->name('deleteMedia');
+    Route::get('deleteCategorie/{id}', [MediaController::class, 'destroyCat'])->name('deleteCategorie');
+
+
     Route::post('registerMedia', [MediaController::class, 'store'])->name('registerMedia');
+    Route::post('addCat', [MediaController::class, 'store_cat'])->name('addCat');
+
     Route::post('updateMedia', [MediaController::class, 'update'])->name('updateMedia');
+    Route::post('updateCat', [MediaController::class, 'update_categorie'])->name('updateCat');
 
 });
 

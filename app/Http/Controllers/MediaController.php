@@ -39,7 +39,7 @@ class MediaController extends BaseController
      */
     public function store(Request $request)
     {
-        // dd($request);
+        //  dd($request->media_url);
         // Get inputs
         $inputs = [
             'media_title' => $request->media_title,
@@ -48,7 +48,8 @@ class MediaController extends BaseController
             'source' => $request->source,
             'time_length' => $request->time_length,
             'media_url' => $request->media_url,
-            'teaser_url' => $request->file('teaser_url'),
+            'teaser_url' => $request->teaser_url,
+            // 'teaser_url' => $request->file('teaser_url'),
             'author_names' => $request->author_names,
             'artist_names' => $request->artist_names,
             'writer' => $request->writer,
@@ -62,9 +63,28 @@ class MediaController extends BaseController
             'type_id' => $request->type_id,
             'user_id' => $request->user_id,
         ];
-        //  dd($inputs);
+        // dd($inputs);
         $series = $this::$api_client_manager::call('POST', getApiURL() . '/media', session()->get("tokenUserActive"), $inputs);
         return redirect()->back()->with("msg", "Enregistrement réussi");
+    }
+    public function store_cat(Request $request)
+    {
+        // dd($request->category_name_fr);
+        // Get inputs
+        $inputs = [
+            'category_name_fr' => $request->category_name_fr,
+            'category_name_en' => $request->category_name_en,
+            'category_name_ln' => $request->category_name_ln,
+            'category_description' => $request->category_description,
+        ];
+        // dd($inputs);
+        $rep = $this::$api_client_manager::call('POST', getApiURL() . '/category', session()->get("tokenUserActive"), $inputs);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => $rep->message]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
+
+        }
     }
 
     /**
@@ -77,15 +97,26 @@ class MediaController extends BaseController
     public function show($id)
     {
         $m = $this::$api_client_manager::call('GET', getApiURL() . '/media/' . $id);
-        $media=$m->data;
+        $media = $m->data;
         $type = $this::$api_client_manager::call('GET', getApiURL() . '/type/find_by_group/fr/Type de média');
         $categories = $this::$api_client_manager::call('GET', getApiURL() . '/category');
 
         $series = $this::$api_client_manager::call('GET', getApiURL() . '/media/find_all_by_type/fr/Série TV');
         $albums = $this::$api_client_manager::call('GET', getApiURL() . '/media/find_all_by_type/fr/Album musique');
         $medias = (collect($series->data))->merge(collect($albums->data));
-        // dd($media);
-        return view("pages.addMedia", compact("medias",'media','type','categories'));
+        //  dd($media);
+        return view("pages.addMedia", compact("medias", 'media', 'type', 'categories'));
+    }
+    public function show_cat($id)
+    {
+        $rep = $this::$api_client_manager::call('GET', getApiURL() . '/category/' . $id);
+        //   dd($rep->data);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' =>"Catégorie trouvée, vous pouvez modifier", 'data' => $rep->data]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
+
+        }
     }
 
     /**
@@ -121,8 +152,28 @@ class MediaController extends BaseController
             'user_id' => $request->user_id,
         ];
         //  dd($inputs);
-        $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/'.$request->id, session()->get("tokenUserActive"), $inputs);
+        $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/' . $request->id, session()->get("tokenUserActive"), $inputs);
         return redirect()->back()->with("msg", "Modification réussie");
+    }
+    public function update_categorie(Request $request, Media $media)
+    {
+        //  dd($request->id);
+        // Get inputs
+        $inputs = [
+            'id' => $request->id,
+            'category_name_fr' => $request->category_name_fr,
+            'category_name_en' => $request->category_name_en,
+            'category_name_ln' => $request->category_name_ln,
+            'category_description' => $request->category_description,
+        ];
+        // dd($inputs);
+        $rep = $this::$api_client_manager::call('PUT', getApiURL() . '/category/' . $request->id, session()->get("tokenUserActive"), $inputs);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => "Modification réussi"]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de modification."]);
+
+        }
     }
 
     /**
@@ -134,7 +185,20 @@ class MediaController extends BaseController
     public function destroy($id)
     {
 
-        $rep = $this::$api_client_manager::call('DELETE', getApiURL() . '/media/' . $id,session()->get("tokenUserActive"));
+        $rep = $this::$api_client_manager::call('DELETE', getApiURL() . '/media/' . $id, session()->get("tokenUserActive"));
+        // dd($rep->success);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => $rep->message]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
+
+        }
+
+    }
+    public function destroyCat($id)
+    {
+
+        $rep = $this::$api_client_manager::call('DELETE', getApiURL() . '/category/' . $id, session()->get("tokenUserActive"));
         // dd($rep->success);
         if ($rep->success) {
             return response()->json(['reponse' => true, 'msg' => $rep->message]);

@@ -95,7 +95,7 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">http://</span>
                                         </div><input name="media_url" type="text" class="form-control" id="pi3"
-                                            placeholder="" value="{{ isset($media)?$media->media_url:"" }}">
+                                            placeholder="" value="{{isset($media)?$media->media_url:"" }}">
                                     </div><!-- /.input-group -->
                                 </div>
                                 <div class="form-group">
@@ -252,6 +252,221 @@
                     </div>
                 </div>
             </div>
+            <div class="page-sidebar">
+                <!-- .sidebar-header -->
+                <header class="sidebar-header d-sm-none">
+                  <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                      <li class="breadcrumb-item active">
+                        <a href="#" onclick="Looper.toggleSidebar()"><i class="breadcrumb-icon fa fa-angle-left mr-2"></i>Back</a>
+                      </li>
+                    </ol>
+                  </nav>
+                </header><!-- /.sidebar-header -->
+                <!-- .sidebar-section-fill -->
+                <div class="sidebar-section-fill">
+                  <!-- .card -->
+                  <div class="card card-reflow">
+                    <!-- .card-body -->
+                    <div class="card-body">
+                      <button type="button" class="close mt-n1 d-none d-xl-none d-sm-block" onclick="Looper.toggleSidebar()" aria-label="Close"><span aria-hidden="true">×</span></button>
+                      <h4 class="card-title"> Summary </h4><!-- grid row -->
+                      <div class="row">
+                        <!-- grid column -->
+                        <div class="col-6">
+                          <!-- .metric -->
+                          <div class="metric">
+                            <h6 class="metric-value"> $83,743 </h6>
+                            <p class="metric-label mt-1"> Incomes </p>
+                          </div><!-- /.metric -->
+                        </div><!-- /grid column -->
+                        <!-- grid column -->
+                        <div class="col-6">
+                          <!-- .metric -->
+                          <div class="metric">
+                            <h6 class="metric-value"> $18,821 </h6>
+                            <p class="metric-label mt-1"> Expenses </p>
+                          </div><!-- /.metric -->
+                        </div><!-- /grid column -->
+                        <!-- grid column -->
+                        <div class="col-6">
+                          <!-- .metric -->
+                          <div class="metric">
+                            <h6 class="metric-value"> 2,630 </h6>
+                            <p class="metric-label mt-1"> Leads </p>
+                          </div><!-- /.metric -->
+                        </div><!-- /grid column -->
+                        <!-- grid column -->
+                        <div class="col-6">
+                          <!-- .metric -->
+                          <div class="metric">
+                            <h6 class="metric-value"> 40 </h6>
+                            <p class="metric-label mt-1"> Clients </p>
+                          </div><!-- /.metric -->
+                        </div><!-- /grid column -->
+                      </div><!-- /grid row -->
+                    </div><!-- /.card-body -->
+                    <!-- .card-body -->
+                    <div class="card-body border-top pb-1">
+                      <h4 class="card-title"> Leads source </h4><!-- .progress -->
+                      <div class="progress mb-2">
+                        <div class="progress-bar bg-teal" role="progressbar" aria-valuenow="33.84" aria-valuemin="0" aria-valuemax="100" style="width: 33.84%">
+                          <span class="sr-only">33.84% Complete</span>
+                        </div>
+                        <div class="progress-bar bg-indigo" role="progressbar" aria-valuenow="24.71" aria-valuemin="0" aria-valuemax="100" style="width: 24.71%">
+                          <span class="sr-only">24.71% Complete</span>
+                        </div>
+                        <div class="progress-bar bg-pink" role="progressbar" aria-valuenow="26.29" aria-valuemin="0" aria-valuemax="100" style="width: 26.29%">
+                          <span class="sr-only">26.29% Complete</span>
+                        </div>
+                        <div class="progress-bar bg-purple" role="progressbar" aria-valuenow="15.15" aria-valuemin="0" aria-valuemax="100" style="width: 15.15%">
+                          <span class="sr-only">15.15% Complete</span>
+                        </div>
+                      </div><!-- /.progress -->
+                    </div><!-- /.card -->
+                    <!-- .list-group -->
+                    <div class="list-group list-group-bordered list-group-reflow">
+                      <!-- .list-group-item -->
+                      <div class="list-group-item justify-content-between align-items-center">
+                        <span><i class="fas fa-square text-teal mr-2"></i> Mailchimp</span> <span class="text-muted">890 result</span>
+                      </div><!-- /.list-group-item -->
+                      <!-- .list-group-item -->
+                      <div class="list-group-item justify-content-between align-items-center">
+                        <span><i class="fas fa-square text-indigo mr-2"></i> Facebook</span> <span class="text-muted">650 result</span>
+                      </div><!-- /.list-group-item -->
+                      <!-- .list-group-item -->
+                      <div class="list-group-item justify-content-between align-items-center">
+                        <span><i class="fas fa-square text-pink mr-2"></i> Google</span> <span class="text-muted">692 result</span>
+                      </div><!-- /.list-group-item -->
+                      <!-- .list-group-item -->
+                      <div class="list-group-item justify-content-between align-items-center">
+                        <span><i class="fas fa-square text-purple mr-2"></i> Linkedin</span> <span class="text-muted">398 result</span>
+                      </div><!-- /.list-group-item -->
+                    </div><!-- /.list-group -->
+                    <!-- .card-body -->
+                    <div class="card-body border-top">
+                      <div class="d-flex justify-content-between my-3">
+                        <h4 class="card-title"> Recent activity </h4><a href="#">View all</a>
+                      </div><!-- .timeline -->
+                      <ul class="timeline timeline-fluid">
+                        <!-- .timeline-item -->
+                        <li class="timeline-item">
+                          <!-- .timeline-figure -->
+                          <div class="timeline-figure">
+                            <span class="tile tile-circle tile-sm"><i class="far fa-calendar-alt fa-lg"></i></span>
+                          </div><!-- /.timeline-figure -->
+                          <!-- .timeline-body -->
+                          <div class="timeline-body">
+                            <!-- .media -->
+                            <div class="media">
+                              <!-- .media-body -->
+                              <div class="media-body">
+                                <p class="mb-0">
+                                  <a href="#">Jeffrey Wells</a> created a <a href="#">schedule</a>
+                                </p><span class="timeline-date">About a minute ago</span>
+                              </div><!-- /.media-body -->
+                            </div><!-- /.media -->
+                          </div><!-- /.timeline-body -->
+                        </li><!-- /.timeline-item -->
+                        <!-- .timeline-item -->
+                        <li class="timeline-item">
+                          <!-- .timeline-figure -->
+                          <div class="timeline-figure">
+                            <span class="tile tile-circle tile-sm"><i class="oi oi-chat fa-lg"></i></span>
+                          </div><!-- /.timeline-figure -->
+                          <!-- .timeline-body -->
+                          <div class="timeline-body">
+                            <!-- .media -->
+                            <div class="media">
+                              <!-- .media-body -->
+                              <div class="media-body">
+                                <p class="mb-0">
+                                  <a href="#">Anna Vargas</a> logged a <a href="#">chat</a> with team </p><span class="timeline-date">3 hours ago</span>
+                              </div><!-- /.media-body -->
+                            </div><!-- /.media -->
+                          </div><!-- /.timeline-body -->
+                        </li><!-- /.timeline-item -->
+                        <!-- .timeline-item -->
+                        <li class="timeline-item">
+                          <!-- .timeline-figure -->
+                          <div class="timeline-figure">
+                            <span class="tile tile-circle tile-sm"><i class="fa fa-tasks fa-lg"></i></span>
+                          </div><!-- /.timeline-figure -->
+                          <!-- .timeline-body -->
+                          <div class="timeline-body">
+                            <!-- .media -->
+                            <div class="media">
+                              <!-- .media-body -->
+                              <div class="media-body">
+                                <p class="mb-0">
+                                  <a href="#">Arthur Carroll</a> created a <a href="#">task</a>
+                                </p><span class="timeline-date">8:14pm</span>
+                              </div><!-- /.media-body -->
+                            </div><!-- /.media -->
+                          </div><!-- /.timeline-body -->
+                        </li><!-- /.timeline-item -->
+                        <!-- .timeline-item -->
+                        <li class="timeline-item">
+                          <!-- .timeline-figure -->
+                          <div class="timeline-figure">
+                            <span class="tile tile-circle tile-sm"><i class="fas fa-user-plus fa-lg"></i></span>
+                          </div><!-- /.timeline-figure -->
+                          <!-- .timeline-body -->
+                          <div class="timeline-body">
+                            <!-- .media -->
+                            <div class="media">
+                              <!-- .media-body -->
+                              <div class="media-body">
+                                <p class="mb-0">
+                                  <a href="#">Sara Carr</a> invited to <a href="#">Stilearn Admin</a> project </p><span class="timeline-date">7:21pm</span>
+                              </div><!-- /.media-body -->
+                            </div><!-- /.media -->
+                          </div><!-- /.timeline-body -->
+                        </li><!-- /.timeline-item -->
+                        <!-- .timeline-item -->
+                        <li class="timeline-item">
+                          <!-- .timeline-figure -->
+                          <div class="timeline-figure">
+                            <span class="tile tile-circle tile-sm"><i class="fa fa-folder fa-lg"></i></span>
+                          </div><!-- /.timeline-figure -->
+                          <!-- .timeline-body -->
+                          <div class="timeline-body">
+                            <!-- .media -->
+                            <div class="media">
+                              <!-- .media-body -->
+                              <div class="media-body">
+                                <p class="mb-0">
+                                  <a href="#">Angela Peterson</a> added <a href="#">Looper Admin</a> to collection </p><span class="timeline-date">5:21pm</span>
+                              </div><!-- /.media-body -->
+                            </div><!-- /.media -->
+                          </div><!-- /.timeline-body -->
+                        </li><!-- /.timeline-item -->
+                        <!-- .timeline-item -->
+                        <li class="timeline-item">
+                          <!-- .timeline-figure -->
+                          <div class="timeline-figure">
+                            <span class="tile tile-circle tile-sm"><i class="oi oi-person fa-lg"></i></span>
+                          </div><!-- /.timeline-figure -->
+                          <!-- .timeline-body -->
+                          <div class="timeline-body">
+                            <!-- .media -->
+                            <div class="media">
+                              <!-- .media-body -->
+                              <div class="media-body">
+                                <div class="avatar-group mb-2">
+                                  <a href="#" class="user-avatar user-avatar-sm"><img src="assets/images/avatars/uifaces4.jpg" alt=""></a> <a href="#" class="user-avatar user-avatar-sm"><img src="assets/images/avatars/uifaces5.jpg" alt=""></a> <a href="#" class="user-avatar user-avatar-sm"><img src="assets/images/avatars/uifaces6.jpg" alt=""></a> <a href="#" class="user-avatar user-avatar-sm"><img src="assets/images/avatars/uifaces7.jpg" alt=""></a>
+                                </div>
+                                <p class="mb-0">
+                                  <a href="#">Willie Dixon</a> and 3 others followed you </p><span class="timeline-date">4:32pm</span>
+                              </div><!-- /.media-body -->
+                            </div><!-- /.media -->
+                          </div><!-- /.timeline-body -->
+                        </li><!-- /.timeline-item -->
+                      </ul><!-- /.timeline -->
+                    </div><!-- /.card-body -->
+                  </div><!-- /.card -->
+                </div><!-- /.sidebar-section-fill -->
+              </div>
         </div>
     </div>
 </div>

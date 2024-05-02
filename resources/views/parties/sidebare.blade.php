@@ -46,9 +46,9 @@
                         </a>
                     </li>
                     <li class="menu-item {{ Route::current()->getName() == 'serie' ? 'has-active' : ''}}">
-                        <a href="{{ route('serie') }}" class="menu-link">
+                        <a href="{{ route('categories') }}" class="menu-link">
                             <span class="menu-icon fas fa-rocket"></span>
-                            <span class="menu-text">Séries</span>
+                            <span class="menu-text">Gestion Catégorie</span>
                         </a>
                     </li>
                         <li class="menu-item {{ Route::current()->getName() == 'client' ? 'has-active' : ''}}">

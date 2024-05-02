@@ -3,8 +3,9 @@
 @section("style")
 <link rel="stylesheet" href="{{ asset('assets/vendor/photoswipe/photoswipe.css') }} ">
 <link rel="stylesheet" href="{{ asset('assets/vendor/photoswipe/default-skin/default-skin.css') }} ">
-<link rel="stylesheet" href="{{ asset('assets/vendor/plyr/plyr.css') }}" @endsection @section("content") <main
-    class="app-main">
+<link rel="stylesheet" href="{{ asset('assets/vendor/plyr/plyr.css') }}"
+@endsection @section("content")
+<main class="app-main">
 <div class="wrapper">
     <!-- .page -->
     <div class="page py-0">
@@ -29,7 +30,6 @@
                     @forelse ($medias->data as $m)
                     <div class="col-sm-6">
                         @if (!empty($m->media_url))
-
                         <div class="card card-body">
                             <div class="embed-responsive embed-responsive-16by9 w-100">
                                 <iframe id="youtube-9854" frameborder="0" allowfullscreen="1"
@@ -158,8 +158,6 @@
     <script src="{{ asset('assets/javascript/pages/photoswipe-demo.js') }} "></script>
 
     <script>
-        console.log($('[name="apiUrl"]').attr('content'));
-        console.log($('[name="csrf"]').attr('content'));
         function deletemedia(id) {
             Swal.fire({
                 title: "Suppression d'un media",
