@@ -221,8 +221,8 @@
 
     $("#formCat").on("submit", function (e) {
             e.preventDefault();
-            alert("register")
-            // add("#formCat", 'POST', 'addCat')
+            // alert("register")
+            add("#formCat", 'POST', 'addCat')
         });
         $(document).on("submit","#formCatEdite", function (e) {
             e.preventDefault();
