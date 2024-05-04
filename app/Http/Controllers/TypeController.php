@@ -57,7 +57,26 @@ class TypeController extends BaseController
 
         }
     }
+    public function update_categorie(Request $request, Type $media)
+    {
+        //  dd($request->id);
+        // Get inputs
+        $inputs = [
+            'id' => $request->id,
+            'category_name_fr' => $request->category_name_fr,
+            'category_name_en' => $request->category_name_en,
+            'category_name_ln' => $request->category_name_ln,
+            'category_description' => $request->category_description,
+        ];
+        // dd($inputs);
+        $rep = $this::$api_client_manager::call('PUT', getApiURL() . '/category/' . $request->id, session()->get("tokenUserActive"), $inputs);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => "Modification réussi"]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de modification."]);
 
+        }
+    }
     /**
      * Display the specified resource.
      *
