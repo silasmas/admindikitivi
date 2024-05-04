@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
 use App\Models\Country;
 use Illuminate\Http\Request;
+use App\Http\Controllers\BaseController;
+use App\Http\Controllers\ApiClientManager;
 use App\Http\Resources\Country as ResourcesCountry;
 
 /**
@@ -12,6 +14,12 @@ use App\Http\Resources\Country as ResourcesCountry;
  */
 class CountryController extends BaseController
 {
+    public static $api_client_manager;
+
+    public function __construct()
+    {
+        $this::$api_client_manager = new ApiClientManager();
+    }
     /**
      * Display a listing of the resource.
      *
@@ -19,9 +27,9 @@ class CountryController extends BaseController
      */
     public function index()
     {
-        $countries = Country::orderBy('country_name')->get();
-
-        return $this->handleResponse(ResourcesCountry::collection($countries), __('notifications.find_all_countries_success'));
+        $pays = $this::$api_client_manager::call('GET', getApiURL() . '/country?page=' . request()->get('page'));
+        // dd($medias);
+        return view("pages.pays", compact('pays'));
     }
 
     /**
@@ -38,24 +46,14 @@ class CountryController extends BaseController
             'country_phone_code' => $request->country_phone_code,
             'country_lang_code' => $request->country_lang_code
         ];
-        // Select all countries of a same region to check unique constraint
-        $countries = Country::all();
+        $rep = $this::$api_client_manager::call('POST', getApiURL() . '/country', session()->get("tokenUserActive"), $inputs);
+        // dd($rep);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => "Enregistrement réussi"]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de modification."]);
 
-        // Validate required fields
-        if ($inputs['country_name'] == null OR $inputs['country_name'] == ' ') {
-            return $this->handleError($inputs['country_name'], __('validation.required'), 400);
         }
-
-        // Check if country name already exists
-        foreach ($countries as $another_country):
-            if ($another_country->country_name == $inputs['country_name']) {
-                return $this->handleError($inputs['country_name'], __('validation.custom.country_name.exists'), 400);
-            }
-        endforeach;
-
-        $country = Country::create($inputs);
-
-        return $this->handleResponse(new ResourcesCountry($country), __('notifications.create_country_success'));
     }
 
     /**
@@ -66,13 +64,14 @@ class CountryController extends BaseController
      */
     public function show($id)
     {
-        $country = Country::find($id);
+        $rep = $this::$api_client_manager::call('GET', getApiURL() . '/country/' . $id);
+        //   dd($rep->data);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' =>"Pays trouvé, vous pouvez modifier", 'data' => $rep->data]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
 
-        if (is_null($country)) {
-            return $this->handleError(__('notifications.find_country_404'));
         }
-
-        return $this->handleResponse(new ResourcesCountry($country), __('notifications.find_country_success'));
     }
 
     /**
@@ -92,25 +91,15 @@ class CountryController extends BaseController
             'country_lang_code' => $request->country_lang_code,
             'updated_at' => now()
         ];
-        // Select all countries of a same region and current country to check unique constraint
-        $countries = Country::all();
-        $current_country = Country::find($inputs['id']);
+       
+        // dd($inputs);
+        $rep = $this::$api_client_manager::call('PUT', getApiURL() . '/country/' . $request->id, session()->get("tokenUserActive"), $inputs);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => "Modification réussi"]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de modification."]);
 
-        if ($inputs['country_name'] == null OR $inputs['country_name'] == ' ') {
-            return $this->handleError($inputs['country_name'], __('validation.required'), 400);
         }
-
-        foreach ($countries as $another_country):
-            if ($current_country->country_name != $inputs['country_name']) {
-                if ($another_country->country_name == $inputs['country_name']) {
-                    return $this->handleError($inputs['country_name'], __('validation.custom.country_name.exists'), 400);
-                }
-            }
-        endforeach;
-
-        $country->update($inputs);
-
-        return $this->handleResponse(new ResourcesCountry($country), __('notifications.update_country_success'));
     }
 
     /**
@@ -119,13 +108,16 @@ class CountryController extends BaseController
      * @param  \App\Models\Country  $country
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Country $country)
+    public function destroy($id)
     {
-        $country->delete();
+        $rep = $this::$api_client_manager::call('DELETE', getApiURL() . '/country/' . $id, session()->get("tokenUserActive"));
+        // dd($rep->success);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => $rep->message]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
 
-        $countries = Country::all();
-
-        return $this->handleResponse(ResourcesCountry::collection($countries), __('notifications.delete_country_success'));
+        }
     }
 
     // ==================================== CUSTOM METHODS ====================================

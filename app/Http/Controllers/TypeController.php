@@ -1,18 +1,26 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
 use App\Models\Type;
 use Illuminate\Http\Request;
 use App\Http\Resources\Type as ResourcesType;
 use App\Models\Group;
-
+use App\Http\Controllers\ApiClientManager;
+use App\Http\Controllers\BaseController;
 /**
  * @author Xanders
  * @see https://www.linkedin.com/in/xanders-samoth-b2770737/
  */
 class TypeController extends BaseController
 {
+
+    public static $api_client_manager;
+
+    public function __construct()
+    {
+        $this::$api_client_manager = new ApiClientManager();
+    }
     /**
      * Display a listing of the resource.
      *
@@ -21,7 +29,6 @@ class TypeController extends BaseController
     public function index()
     {
         $types = Type::all();
-
         return $this->handleResponse(ResourcesType::collection($types), __('notifications.find_all_types_success'));
     }
 
@@ -31,42 +38,24 @@ class TypeController extends BaseController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store_type(Request $request)
     {
         // Get inputs
         $inputs = [
-            'type_name' => [
-                'en' => $request->type_name_en,
-                'fr' => $request->type_name_fr,
-                'ln' => $request->type_name_ln
-            ],
+            'type_name_fr' => $request->type_name_fr,
+            'type_name_en' => $request->type_name_en,
+            'type_name_ln' => $request->type_name_ln,
             'type_description' => $request->type_description,
-            'icon' => $request->icon,
-            'color' => $request->color,
-            'group_id' => $request->group_id
+            'group_id' => $request->group_id,
         ];
-        // Select all group types to check unique constraint
-        $types = Type::where('group_id', $inputs['group_id'])->get();
+        // dd($inputs);
+        $rep = $this::$api_client_manager::call('POST', getApiURL() . '/type', session()->get("tokenUserActive"), $inputs);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => $rep->message]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
 
-        // Validate required fields
-        if ($inputs['type_name'] == null) {
-            return $this->handleError($inputs['type_name'], __('validation.required'), 400);
         }
-
-        if ($inputs['group_id'] == null OR $inputs['group_id'] == ' ') {
-            return $this->handleError($inputs['group_id'], __('validation.required'), 400);
-        }
-
-        // Check if type name already exists
-        foreach ($types as $another_type):
-            if ($another_type->type_name == $inputs['type_name']) {
-                return $this->handleError($inputs['type_name'], __('validation.custom.type_name.exists'), 400);
-            }
-        endforeach;
-
-        $type = Type::create($inputs);
-
-        return $this->handleResponse(new ResourcesType($type), __('notifications.create_type_success'));
     }
 
     /**
@@ -75,15 +64,16 @@ class TypeController extends BaseController
      * @param  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show_type($id)
     {
-        $type = Type::find($id);
+        $rep = $this::$api_client_manager::call('GET', getApiURL() . '/type/' . $id);
+        //   dd($rep->data);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' =>"Type trouvé, vous pouvez modifier", 'data' => $rep->data]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
 
-        if (is_null($type)) {
-            return $this->handleError(__('notifications.find_type_404'));
         }
-
-        return $this->handleResponse(new ResourcesType($type), __('notifications.find_type_success'));
     }
 
     /**
@@ -98,70 +88,20 @@ class TypeController extends BaseController
         // Get inputs
         $inputs = [
             'id' => $request->id,
-            'type_name' => [
-                'en' => $request->type_name_en,
-                'fr' => $request->type_name_fr,
-                'ln' => $request->type_name_ln
-            ],
+            'type_name_fr' => $request->type_name_fr,
+            'type_name_en' => $request->type_name_en,
+            'type_name_ln' => $request->type_name_ln,
             'type_description' => $request->type_description,
-            'icon' => $request->icon,
-            'color' => $request->color,
-            'group_id' => $request->group_id
+            'group_id' => $request->group_id,
         ];
-        // Select all group types and specific type to check unique constraint
-        $types = Type::where('group_id', $inputs['group_id'])->get();
-        $current_type = Type::find($inputs['id']);
+        // dd($inputs);
+        $rep = $this::$api_client_manager::call('PUT', getApiURL() . '/type/' . $request->id, session()->get("tokenUserActive"), $inputs);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => "Modification réussi"]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de modification."]);
 
-        if ($inputs['type_name'] != null) {
-            foreach ($types as $another_type):
-                if ($current_type->type_name != $inputs['type_name']) {
-                    if ($another_type->type_name == $inputs['type_name']) {
-                        return $this->handleError($inputs['type_name'], __('validation.custom.type_name.exists'), 400);
-                    }
-                }
-            endforeach;
-
-            $type->update([
-                'type_name' => [
-                    'en' => $request->type_name_en,
-                    'fr' => $request->type_name_fr,
-                    'ln' => $request->type_name_ln
-                ],
-                'updated_at' => now()
-            ]);
         }
-
-        if ($inputs['type_description'] != null) {
-            $type->update([
-                'type_description' => $request->type_description,
-                'updated_at' => now(),
-            ]);
-        }
-
-        if ($inputs['icon'] != null) {
-            $type->update([
-                'icon' => $request->icon,
-                'updated_at' => now(),
-            ]);
-        }
-
-        if ($inputs['color'] != null) {
-            $type->update([
-                'color' => $request->color,
-                'updated_at' => now(),
-            ]);
-        }
-
-        if ($inputs['group_id'] != null) {
-            $type->update([
-                'group_id' => $request->group_id,
-                'updated_at' => now(),
-            ]);
-        }
-
-        $type->update($inputs);
-
-        return $this->handleResponse(new ResourcesType($type), __('notifications.update_type_success'));
     }
 
     /**
@@ -170,13 +110,27 @@ class TypeController extends BaseController
      * @param  \App\Models\Type  $type
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Type $type)
+    public function destroy($id)
     {
-        $type->delete();
+        $rep = $this::$api_client_manager::call('DELETE', getApiURL() . '/type/' . $id, session()->get("tokenUserActive"));
+        // dd($rep->success);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => $rep->message]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
 
-        $types = Type::all();
+        }
+    }
+    public function destroyType($id)
+    {
+         $rep = $this::$api_client_manager::call('DELETE', getApiURL() . '/type/' . $id, session()->get("tokenUserActive"));
+        // dd($rep->success);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => $rep->message]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
 
-        return $this->handleResponse(ResourcesType::collection($types), __('notifications.delete_type_success'));
+        }
     }
 
     // ==================================== CUSTOM METHODS ====================================

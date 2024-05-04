@@ -1,4 +1,4 @@
-@extends("layouts.template",['titre'=>"Catégorie"])
+@extends("layouts.template",['titre'=>"Serie"])
 
 @section("style")
 <link href="{{ asset('assets/stylesheets/dataTables/datatables.min.css') }}" rel="stylesheet">
@@ -13,13 +13,13 @@
                     <!-- .breadcrumb -->
                     <!-- /.breadcrumb -->
                     <!-- floating action -->
-                    <button type="button" id="btnrond"  class="btn btn-success btn-floated" data-toggle="modal"
+                    <button type="button" id="btnrond" class="btn btn-success btn-floated" data-toggle="modal"
                         data-target="#modalBoardConfig">
                         <span id="spanbtnrond" class="fa fa-plus">
                         </span></button> <!-- /floating action -->
                     <!-- title and toolbar -->
                     <div class="d-md-flex align-items-md-start">
-                        <h1 class="page-title mr-sm-auto"> Liste des catégories </h1><!-- .btn-toolbar -->
+                        <h1 class="page-title mr-sm-auto"> Liste des types </h1><!-- .btn-toolbar -->
                         <div id="dt-buttons" class="btn-toolbar"></div><!-- /.btn-toolbar -->
                     </div><!-- /title and toolbar -->
                 </header>
@@ -31,20 +31,22 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Nom de la categorie</th>
+                                            <th>Nom du type</th>
                                             <th>Description</th>
+                                            {{-- <th>Groupe</th> --}}
                                             <th>Options</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse ($categories->data as $i)
+                                        @forelse ($types->data as $i)
                                         <tr class="gradeX">
                                             <td>{{ $loop->index+1}}</td>
-                                            <td>{{ $i->category_name}}</td>
-                                            <td>{{ $i->category_description}}</td>
+                                            <td>{{ $i->type_name}}</td>
+                                            <td>{{ $i->type_description}}</td>
+                                            {{-- <td>{{ $i->group_name}}</td> --}}
                                             <td class="center">
                                                 <p>
-                                                    <a href="{{ $i->id }}" id="deleteCat"
+                                                    <a href="{{ $i->id}}" id="deleteCat"
                                                         onclick="event.preventDefault();deletemedia({{$i->id}})"
                                                         class="btn btn-outline btn-danger dim">
                                                         <i class="fa fa-trash"></i>
@@ -69,6 +71,7 @@
                                             <th>#</th>
                                             <th>Nom de la categorie</th>
                                             <th>Description</th>
+                                            {{-- <th>Groupe</th> --}}
                                             <th>Options</th>
                                         </tr>
                                     </tfoot>
@@ -89,51 +92,61 @@
             <div id="modalContentLayer1" class="modal-content">
                 <!-- .modal-header -->
                 <div class="modal-header">
-                    <h5 id="modalBoardConfigTitle" class="modal-title"> Formulaire pour enregistrer la catégorie</h5>
+                    <h5 id="modalBoardConfigTitle" class="modal-title"> Formulaire pour enregistrer le type</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">×</span></button>
                 </div><!-- /.modal-header -->
                 <!-- .modal-body -->
                 <div class="modal-body">
-                    <form method="POST" id="formCat">
+                    <form method="POST" id="formType">
                         @csrf
                         <!-- .fieldset -->
                         <fieldset>
-                            <input name="id" id="idcat" type="text" class="form-control" placeholder=""
-                                value="" hidden>
+                            <input name="id" id="idType" type="text" class="form-control" placeholder="" value=""
+                                hidden>
                             <div class="form-group">
-                                <label>Nom de la catégorie (FR)
+                                <label>Nom du type (FR)
                                     <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
-                                        data-container="body"
-                                        title="Le nom que doit avoir la catégorie en français"></i>
+                                        data-container="body" title="Le nom que doit avoir le type en français"></i>
                                 </label>
-                                <input name="category_name_fr" id="category_name_fr" type="text" class="form-control" placeholder=""
-                                    value="{{isset($media)?$media->category_name_fr:"" }}">
+                                <input name="type_name_fr" id="type_name_fr" type="text" class="form-control"
+                                    placeholder="" value="">
                             </div>
                             <div class="form-group">
-                                <label>Nom de la catégorie (EN)
+                                <label>Nom du type (EN)
                                     <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
-                                        data-container="body" title="Le nom que doit avoir la catégorie en Anglais"></i>
+                                        data-container="body" title="Le nom que doit avoir le type en Anglais"></i>
                                 </label>
-                                <input name="category_name_en" id="category_name_en" type="text" class="form-control" placeholder=""
-                                    value="{{isset($media)?$media->category_name_en:"" }}">
+                                <input name="type_name_en" id="type_name_en" type="text" class="form-control"
+                                    placeholder="" value="">
                             </div>
                             <div class="form-group">
-                                <label>Nom de la catégorie (LN)
+                                <label>Nom du type (LN)
                                     <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
-                                        data-container="body" title="Le nom que doit avoir la catégorie en Lingala"></i>
+                                        data-container="body" title="Le nom que doit avoir le type en Lingala"></i>
                                 </label>
-                                <input name="category_name_ln" id="category_name_ln" type="text" class="form-control" placeholder=""
-                                    value="{{isset($media)?$media->category_name_ln:"" }}">
+                                <input name="type_name_ln" id="type_name_ln" type="text" class="form-control"
+                                    placeholder="" value="">
+                            </div>
+                            <div class="form-label-group">
+                                <label for="group_id">Groupe
+                                </label>
+                                <select name="group_id" class="custom-select" id="group_id" required="">
+                                    @foreach ($groups->data as $cat)
+                                    <option value="{{$cat->id}}">{{ $cat->group_name }}</option>
+                                    @endforeach
+                                </select>
+                                <label for="group_id">Groupe </label>
                             </div>
                             <div class="form-group">
-                                <label for="tf6">Description de la catégorie
+                                <label for="tf6">Description du type
                                     <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
                                         data-container="body"
                                         title="La description pour expliquer le sens de la catégorie"></i>
                                 </label>
-                                <textarea name="category_description" id="category_description" class="form-control" id="tf6" rows="3">
-                            {{ isset($media)?$media->category_description:"" }}
+                                <textarea name="type_description" id="type_description" class="form-control" id="tf6"
+                                    rows="3">
+
                         </textarea>
                             </div>
                             <!-- /.form-group -->
@@ -212,67 +225,63 @@
 
         });
 
-        $(document).on("click", "#deleteCat", function (e) {
-                e.preventDefault();
-                var id = $(this).attr("href");
-                deleteTeame(id, 'destroy_slide');
-            });
-    });
-
-    $("#formCat").on("submit", function (e) {
+    $("#formType").on("submit", function (e) {
             e.preventDefault();
             // alert("register")
-            add("#formCat", 'POST', 'addCat')
-        });
-        $(document).on("submit","#formCatEdite", function (e) {
+            add("#formType", 'POST', 'addType')
+    });
+    });
+
+        $(document).on("submit","#formTypeEdite", function (e) {
             e.preventDefault();
             // alert("ok")
-             add("#formCatEdite", 'POST', 'updateCat')
+             add("#formTypeEdite", 'POST', 'updateType')
         });
         function edite(id) {
-        Swal.fire({
-            title: 'Merci de patienter...',
-            icon: 'info'
-        })
-        $.ajax({
-            url:'editCat/' + id,
-            method: "GET",
-            success: function(data) {
-                if (!data.reponse) {
-                    Swal.fire({
-                        title: data.msg,
-                        icon: 'error'
-                    })
-                } else {
-                    // Remplir les champs du formulaire avec les données reçues
-                $('#category_name_fr').val(data.data.category_name_fr);
-                $('#category_name_en').val(data.data.category_name_en);
-                $('#category_name_ln').val(data.data.category_name_ln);
-                $('#idcat').val(data.data.id);
-                $('#category_description').val(data.data.category_description);
+            Swal.fire({
+                title: 'Merci de patienter...',
+                icon: 'info'
+            })
+            $.ajax({
+                url:'editType/' + id,
+                method: "GET",
+                success: function(data) {
+                    if (!data.reponse) {
+                        Swal.fire({
+                            title: data.msg,
+                            icon: 'error'
+                        })
+                    } else {
+                        // Remplir les champs du formulaire avec les données reçues
+                    $('#type_name_fr').val(data.data.type_name_fr);
+                    $('#type_name_en').val(data.data.type_name_en);
+                    $('#type_name_ln').val(data.data.type_name_ln);
+                    $('#group_id').val(data.data.group_id);
+                    $('#idType').val(data.data.id);
+                    $('#type_description').val(data.data.type_description);
 
-                // Changer le texte du bouton
-                $('#btnCat').text('Modifier');
-                $("#formCat").off("submit");
-                $('#formCat').attr('id', 'formCatEdite');
-                 // Sélectionner le bouton qui déclenche l'ouverture du modal
-                var button = $('#btnrond');
-                    // Simuler un clic sur le bouton pour ouvrir le modal
-                button.click();
-                $('#modalBoardConfigTitle').text('Formulaire pour modifier la catégorie');
-                    Swal.fire({
-                        title: data.msg,
-                        icon: 'success'
-                    })
-                    // actualiser();
-                }
-            },
-        });
+                    // Changer le texte du bouton
+                    $('#btnCat').text('Modifier');
+                    $("#formType").off("submit");
+                    $('#formType').attr('id', 'formTypeEdite');
+                    // Sélectionner le bouton qui déclenche l'ouverture du modal
+                    var button = $('#btnrond');
+                        // Simuler un clic sur le bouton pour ouvrir le modal
+                    button.click();
+                    $('#modalBoardConfigTitle').text('Formulaire pour modifier le type');
+                        Swal.fire({
+                            title: data.msg,
+                            icon: 'success'
+                        })
+                        // actualiser();
+                    }
+                },
+            });
         }
     function deletemedia(id) {
             Swal.fire({
-                title: "Suppression d'une catégorie",
-                text: "êtes-vous sûre de vouloir supprimer cette catégorie ?",
+                title: "Suppression d'une type",
+                text: "êtes-vous sûre de vouloir supprimer ce type ?",
                 icon: 'warning',
                 inputAttributes: {
                 autocapitalize: "off"
@@ -291,7 +300,7 @@
                 },allowOutsideClick: () => !Swal.isLoading()
                 }).then((result) => {
                         if (result.isConfirmed) {
-                            addCard(id,"","deleteCategorie");
+                            addCard(id,"","deleteType");
                         }
                 });
             }

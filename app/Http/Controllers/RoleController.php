@@ -1,17 +1,24 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
 use App\Models\Role;
 use Illuminate\Http\Request;
 use App\Http\Resources\Role as ResourcesRole;
-
+use App\Http\Controllers\BaseController;
+use App\Http\Controllers\ApiClientManager;
 /**
  * @author Xanders
  * @see https://www.linkedin.com/in/xanders-samoth-b2770737/
  */
 class RoleController extends BaseController
 {
+    public static $api_client_manager;
+
+    public function __construct()
+    {
+        $this::$api_client_manager = new ApiClientManager();
+    }
     /**
      * Display a listing of the resource.
      *
@@ -19,9 +26,9 @@ class RoleController extends BaseController
      */
     public function index()
     {
-        $roles = Role::all();
-
-        return $this->handleResponse(ResourcesRole::collection($roles), __('notifications.find_all_roles_success'));
+        $roles = $this::$api_client_manager::call('GET', getApiURL() . '/role?page=' . request()->get('page'));
+        // dd($medias);
+        return view("pages.role", compact('roles'));
     }
 
     /**
@@ -37,24 +44,14 @@ class RoleController extends BaseController
             'role_name' => $request->role_name,
             'role_description' => $request->role_description
         ];
-        // Select all roles to check unique constraint
-        $roles = Role::all();
+        // dd($inputs);
+        $rep = $this::$api_client_manager::call('POST', getApiURL() . '/role', session()->get("tokenUserActive"), $inputs);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => "Enregistrement réussi"]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de modification."]);
 
-        // Validate required fields
-        if ($inputs['role_name'] == null OR $inputs['role_name'] == ' ') {
-            return $this->handleError($inputs['role_name'], __('validation.required'), 400);
         }
-
-        // Check if role name already exists
-        foreach ($roles as $another_role):
-            if ($another_role->role_name == $inputs['role_name']) {
-                return $this->handleError($inputs['role_name'], __('validation.custom.role_name.exists'), 400);
-            }
-        endforeach;
-
-        $role = Role::create($inputs);
-
-        return $this->handleResponse(new ResourcesRole($role), __('notifications.create_role_success'));
     }
 
     /**
@@ -65,13 +62,14 @@ class RoleController extends BaseController
      */
     public function show($id)
     {
-        $role = Role::find($id);
+        $rep = $this::$api_client_manager::call('GET', getApiURL() . '/role/' . $id);
+        //   dd($rep->data);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' =>"Pays trouvé, vous pouvez modifier", 'data' => $rep->data]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
 
-        if (is_null($role)) {
-            return $this->handleError(__('notifications.find_role_404'));
         }
-
-        return $this->handleResponse(new ResourcesRole($role), __('notifications.find_role_success'));
     }
 
     /**
@@ -90,35 +88,17 @@ class RoleController extends BaseController
             'role_description' => $request->role_description,
             'updated_at' => now()
         ];
-        // Select all roles and specific role to check unique constraint
-        $roles = Role::all();
-        $current_role = Role::find($inputs['id']);
+               
+        // dd($inputs);
+        $rep = $this::$api_client_manager::call('PUT', getApiURL() . '/role/' . $request->id, session()->get("tokenUserActive"), $inputs);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => "Modification réussi"]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de modification."]);
 
-        if ($inputs['role_name'] != null) {
-            foreach ($roles as $another_role):
-                if ($current_role->role_name != $inputs['role_name']) {
-                    if ($another_role->role_name == $inputs['role_name']) {
-                        return $this->handleError($inputs['role_name'], __('validation.custom.role_name.exists'), 400);
-                    }
-                }
-            endforeach;
-
-            $role->update([
-                'role_name' => $request->role_name,
-                'updated_at' => now(),
-            ]);
         }
 
-        if ($inputs['role_description'] != null) {
-            $role->update([
-                'role_description' => $request->role_description,
-                'updated_at' => now(),
-            ]);
-        }
-
-        $role->update($inputs);
-
-        return $this->handleResponse(new ResourcesRole($role), __('notifications.update_role_success'));
+        
     }
 
     /**
@@ -127,12 +107,15 @@ class RoleController extends BaseController
      * @param  \App\Models\Role  $role
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Role $role)
+    public function destroy($id)
     {
-        $role->delete();
+        $rep = $this::$api_client_manager::call('DELETE', getApiURL() . '/role/' . $id, session()->get("tokenUserActive"));
+        // dd($rep->success);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => $rep->message]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
 
-        $roles = Role::all();
-
-        return $this->handleResponse(ResourcesRole::collection($roles), __('notifications.delete_role_success'));
+        }
     }
 }

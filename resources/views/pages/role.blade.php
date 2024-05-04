@@ -13,13 +13,13 @@
                     <!-- .breadcrumb -->
                     <!-- /.breadcrumb -->
                     <!-- floating action -->
-                    <button type="button" id="btnrond"  class="btn btn-success btn-floated" data-toggle="modal"
+                    <button type="button" id="btnrond" class="btn btn-success btn-floated" data-toggle="modal"
                         data-target="#modalBoardConfig">
                         <span id="spanbtnrond" class="fa fa-plus">
                         </span></button> <!-- /floating action -->
                     <!-- title and toolbar -->
                     <div class="d-md-flex align-items-md-start">
-                        <h1 class="page-title mr-sm-auto"> Liste des catégories </h1><!-- .btn-toolbar -->
+                        <h1 class="page-title mr-sm-auto"> Liste des rôles </h1><!-- .btn-toolbar -->
                         <div id="dt-buttons" class="btn-toolbar"></div><!-- /.btn-toolbar -->
                     </div><!-- /title and toolbar -->
                 </header>
@@ -31,17 +31,17 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Nom de la categorie</th>
+                                            <th>Nom du role</th>
                                             <th>Description</th>
                                             <th>Options</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse ($categories->data as $i)
+                                        @forelse ($roles->data as $i)
                                         <tr class="gradeX">
                                             <td>{{ $loop->index+1}}</td>
-                                            <td>{{ $i->category_name}}</td>
-                                            <td>{{ $i->category_description}}</td>
+                                            <td>{{ $i->role_name}}</td>
+                                            <td>{{ $i->role_description}}</td>
                                             <td class="center">
                                                 <p>
                                                     <a href="{{ $i->id }}" id="deleteCat"
@@ -58,7 +58,7 @@
                                         </tr>
                                         @empty
                                         <h2>
-                                            {{ $categories->message }}
+                                            {{ $role->message }}
                                         </h2>
                                         @endforelse
 
@@ -67,7 +67,7 @@
                                     <tfoot>
                                         <tr>
                                             <th>#</th>
-                                            <th>Nom de la categorie</th>
+                                            <th>Nom du role</th>
                                             <th>Description</th>
                                             <th>Options</th>
                                         </tr>
@@ -89,53 +89,36 @@
             <div id="modalContentLayer1" class="modal-content">
                 <!-- .modal-header -->
                 <div class="modal-header">
-                    <h5 id="modalBoardConfigTitle" class="modal-title"> Formulaire pour enregistrer la catégorie</h5>
+                    <h5 id="modalBoardConfigTitle" class="modal-title"> Formulaire pour enregistrer le rôle</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">×</span></button>
                 </div><!-- /.modal-header -->
                 <!-- .modal-body -->
                 <div class="modal-body">
-                    <form method="POST" id="formCat">
+                    <form method="POST" id="formRole">
                         @csrf
                         <!-- .fieldset -->
                         <fieldset>
-                            <input name="id" id="idcat" type="text" class="form-control" placeholder=""
-                                value="" hidden>
+                            <input name="id" id="idroles" type="text" class="form-control" placeholder="" value="" hidden>
                             <div class="form-group">
-                                <label>Nom de la catégorie (FR)
+                                <label>Nom du role
                                     <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
                                         data-container="body"
-                                        title="Le nom que doit avoir la catégorie en français"></i>
+                                        title="Le nom que porte le role"></i>
                                 </label>
-                                <input name="category_name_fr" id="category_name_fr" type="text" class="form-control" placeholder=""
-                                    value="{{isset($media)?$media->category_name_fr:"" }}">
+                                <input name="role_name" id="role_name" type="text" class="form-control"
+                                    placeholder="" value="">
                             </div>
                             <div class="form-group">
-                                <label>Nom de la catégorie (EN)
-                                    <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
-                                        data-container="body" title="Le nom que doit avoir la catégorie en Anglais"></i>
-                                </label>
-                                <input name="category_name_en" id="category_name_en" type="text" class="form-control" placeholder=""
-                                    value="{{isset($media)?$media->category_name_en:"" }}">
-                            </div>
-                            <div class="form-group">
-                                <label>Nom de la catégorie (LN)
-                                    <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
-                                        data-container="body" title="Le nom que doit avoir la catégorie en Lingala"></i>
-                                </label>
-                                <input name="category_name_ln" id="category_name_ln" type="text" class="form-control" placeholder=""
-                                    value="{{isset($media)?$media->category_name_ln:"" }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="tf6">Description de la catégorie
+                                <label for="tf6">Description du rôle
                                     <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
                                         data-container="body"
-                                        title="La description pour expliquer le sens de la catégorie"></i>
+                                        title="La description pour expliquer le sens du rôle"></i>
                                 </label>
-                                <textarea name="category_description" id="category_description" class="form-control" id="tf6" rows="3">
-                            {{ isset($media)?$media->category_description:"" }}
-                        </textarea>
-                            </div>
+                                <textarea name="role_description" id="role_description" class="form-control" id="tf6" rows="3">
+                           
+                                </textarea>
+                            </div>                       
                             <!-- /.form-group -->
                             <button type="submit" id="btnCat" class="btn btn-primary">Enregistrer</button>
                         </fieldset><!-- /.fieldset -->
@@ -212,22 +195,22 @@
 
         });
 
-        $(document).on("click", "#deleteCat", function (e) {
-                e.preventDefault();
-                var id = $(this).attr("href");
-                deleteTeame(id, 'destroy_slide');
-            });
+        // $(document).on("click", "#deleteCat", function (e) {
+        //         e.preventDefault();
+        //         var id = $(this).attr("href");
+        //         deleteTeame(id, 'destroy_slide');
+        //     });
     });
 
-    $("#formCat").on("submit", function (e) {
+    $("#formRole").on("submit", function (e) {
             e.preventDefault();
             // alert("register")
-            add("#formCat", 'POST', 'addCat')
+            add("#formRole", 'POST', 'addRole')
         });
-        $(document).on("submit","#formCatEdite", function (e) {
+        $(document).on("submit","#formRoleEdite", function (e) {
             e.preventDefault();
             // alert("ok")
-             add("#formCatEdite", 'POST', 'updateCat')
+             add("#formRoleEdite", 'POST', 'updateRole')
         });
         function edite(id) {
         Swal.fire({
@@ -235,7 +218,7 @@
             icon: 'info'
         })
         $.ajax({
-            url:'editCat/' + id,
+            url:'editRole/' + id,
             method: "GET",
             success: function(data) {
                 if (!data.reponse) {
@@ -245,16 +228,14 @@
                     })
                 } else {
                     // Remplir les champs du formulaire avec les données reçues
-                $('#category_name_fr').val(data.data.category_name_fr);
-                $('#category_name_en').val(data.data.category_name_en);
-                $('#category_name_ln').val(data.data.category_name_ln);
-                $('#idcat').val(data.data.id);
-                $('#category_description').val(data.data.category_description);
+                $('#role_name').val(data.data.role_name);
+                $('#role_description').val(data.data.role_description);
+                $('#idroles').val(data.data.id);
 
                 // Changer le texte du bouton
                 $('#btnCat').text('Modifier');
-                $("#formCat").off("submit");
-                $('#formCat').attr('id', 'formCatEdite');
+                $("#formRole").off("submit");
+                $('#formRole').attr('id', 'formRoleEdite');
                  // Sélectionner le bouton qui déclenche l'ouverture du modal
                 var button = $('#btnrond');
                     // Simuler un clic sur le bouton pour ouvrir le modal
@@ -271,8 +252,8 @@
         }
     function deletemedia(id) {
             Swal.fire({
-                title: "Suppression d'une catégorie",
-                text: "êtes-vous sûre de vouloir supprimer cette catégorie ?",
+                title: "Suppression d'un role",
+                text: "êtes-vous sûre de vouloir supprimer ce rôle ?",
                 icon: 'warning',
                 inputAttributes: {
                 autocapitalize: "off"
@@ -291,7 +272,7 @@
                 },allowOutsideClick: () => !Swal.isLoading()
                 }).then((result) => {
                         if (result.isConfirmed) {
-                            addCard(id,"","deleteCategorie");
+                            addCard(id,"","deleteRole");
                         }
                 });
             }

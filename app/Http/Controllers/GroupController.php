@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
 use App\Models\Group;
 use Illuminate\Http\Request;
 use App\Http\Resources\Group as ResourcesGroup;
+use App\Http\Controllers\BaseController;
+use App\Http\Controllers\ApiClientManager;
 
 /**
  * @author Xanders
@@ -12,6 +14,12 @@ use App\Http\Resources\Group as ResourcesGroup;
  */
 class GroupController extends BaseController
 {
+    public static $api_client_manager;
+
+    public function __construct()
+    {
+        $this::$api_client_manager = new ApiClientManager();
+    }
     /**
      * Display a listing of the resource.
      *
@@ -19,9 +27,10 @@ class GroupController extends BaseController
      */
     public function index()
     {
-        $groups = Group::all();
+        $groupes = $this::$api_client_manager::call('GET', getApiURL() . '/group?page=' . request()->get('page'),session()->get("tokenUserActive"));
+        //  dd($groupes);
+        return view("pages.groupes", compact('groupes'));
 
-        return $this->handleResponse(ResourcesGroup::collection($groups), __('notifications.find_all_groups_success'));
     }
 
     /**
@@ -34,31 +43,19 @@ class GroupController extends BaseController
     {
         // Get inputs
         $inputs = [
-            'group_name' => [
-                'en' => $request->group_name_en,
-                'fr' => $request->group_name_fr,
-                'ln' => $request->group_name_ln
-            ],
+            'group_name_fr' => $request->group_name_fr,
+            'group_name_en' => $request->group_name_en,
+            'group_name_ln' => $request->group_name_ln,
             'group_description' => $request->group_description
         ];
-        // Select all groups to check unique constraint
-        $groups = Group::all();
+       
+        $rep = $this::$api_client_manager::call('POST', getApiURL() . '/group', session()->get("tokenUserActive"), $inputs);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => $rep->message]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
 
-        // Validate required fields
-        if ($inputs['group_name'] == null) {
-            return $this->handleError($inputs['group_name'], __('validation.required'), 400);
         }
-
-        // Check if group name already exists
-        foreach ($groups as $another_group):
-            if ($another_group->group_name == $inputs['group_name']) {
-                return $this->handleError($inputs['group_name'], __('validation.custom.group_name.exists'), 400);
-            }
-        endforeach;
-
-        $group = Group::create($inputs);
-
-        return $this->handleResponse(new ResourcesGroup($group), __('notifications.create_group_success'));
     }
 
     /**
@@ -67,15 +64,16 @@ class GroupController extends BaseController
      * @param  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show_Groupe($id)
     {
-        $group = Group::find($id);
+        $rep = $this::$api_client_manager::call('GET', getApiURL() . '/group/' . $id, session()->get("tokenUserActive"));
+        //    dd($rep);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' =>"Groupe trouvé, vous pouvez modifier", 'data' => $rep->data]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
 
-        if (is_null($group)) {
-            return $this->handleError(__('notifications.find_group_404'));
         }
-
-        return $this->handleResponse(new ResourcesGroup($group), __('notifications.find_group_success'));
     }
 
     /**
@@ -90,46 +88,19 @@ class GroupController extends BaseController
         // Get inputs
         $inputs = [
             'id' => $request->id,
-            'group_name' => [
-                'en' => $request->group_name_en,
-                'fr' => $request->group_name_fr,
-                'ln' => $request->group_name_ln
-            ],
-            'group_description' => $request->group_description
+            'group_name_fr' => $request->group_name_fr,
+            'group_name_en' => $request->group_name_en,
+            'group_name_ln' => $request->group_name_ln,
+            'group_description' => $request->group_description,
         ];
-        // Select all groups and specific group to check unique constraint
-        $groups = Group::all();
-        $current_group = Group::find($inputs['id']);
+        // dd($inputs);
+        $rep = $this::$api_client_manager::call('PUT', getApiURL() . '/group/' . $request->id, session()->get("tokenUserActive"), $inputs);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => "Modification réussi"]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de modification."]);
 
-        if ($inputs['group_name'] != null) {
-            foreach ($groups as $another_group):
-                if ($current_group->group_name != $inputs['group_name']) {
-                    if ($another_group->group_name == $inputs['group_name']) {
-                        return $this->handleError($inputs['group_name'], __('validation.custom.group_name.exists'), 400);
-                    }
-                }
-            endforeach;
-
-            $group->update([
-                'group_name' => [
-                    'en' => $request->group_name_en,
-                    'fr' => $request->group_name_fr,
-                    'ln' => $request->group_name_ln
-                ],
-                'updated_at' => now()
-            ]);
         }
-
-        if ($inputs['group_description'] != null) {
-            $group->update([
-                'group_description' => $request->group_description,
-                'updated_at' => now(),
-            ]);
-        }
-
-        $group->update($inputs);
-
-        return $this->handleResponse(new ResourcesGroup($group), __('notifications.update_group_success'));
     }
 
     /**
@@ -138,12 +109,15 @@ class GroupController extends BaseController
      * @param  \App\Models\Group  $group
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Group $group)
+    public function destroy($id)
     {
-        $group->delete();
+        $rep = $this::$api_client_manager::call('DELETE', getApiURL() . '/group/' . $id, session()->get("tokenUserActive"));
+        // dd($rep->success);
+        if ($rep->success) {
+            return response()->json(['reponse' => true, 'msg' => $rep->message]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
 
-        $groups = Group::all();
-
-        return $this->handleResponse(ResourcesGroup::collection($groups), __('notifications.delete_group_success'));
+        }
     }
 }

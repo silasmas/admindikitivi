@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\BaseController;
-use App\Http\Resources\Media as ResourcesMedia;
+use App\Models\User;
 use App\Models\Media;
 use App\Models\Session;
-use App\Models\User;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\BaseController;
+use App\Http\Controllers\ApiClientManager;
+use App\Http\Resources\Media as ResourcesMedia;
 
 class MediaController extends BaseController
 {

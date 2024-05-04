@@ -51,6 +51,30 @@
                             <span class="menu-text">Gestion Catégorie</span>
                         </a>
                     </li>
+                    <li class="menu-item {{ Route::current()->getName() == 'types' ? 'has-active' : ''}}">
+                        <a href="{{ route('types') }}" class="menu-link">
+                            <span class="menu-icon fas fa-rocket"></span>
+                            <span class="menu-text">Gestion des types</span>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ Route::current()->getName() == 'groupes' ? 'has-active' : ''}}">
+                        <a href="{{ route('groupes') }}" class="menu-link">
+                            <span class="menu-icon fas fa-rocket"></span>
+                            <span class="menu-text">Gestion des groupes</span>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ Route::current()->getName() == 'pays' ? 'has-active' : ''}}">
+                        <a href="{{ route('pays') }}" class="menu-link">
+                            <span class="menu-icon fas fa-rocket"></span>
+                            <span class="menu-text">Gestion des pays</span>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ Route::current()->getName() == 'roles' ? 'has-active' : ''}}">
+                        <a href="{{ route('roles') }}" class="menu-link">
+                            <span class="menu-icon fas fa-rocket"></span>
+                            <span class="menu-text">Gestion des roles</span>
+                        </a>
+                    </li>
                         <li class="menu-item {{ Route::current()->getName() == 'client' ? 'has-active' : ''}}">
                         <a href="{{ route('client') }}" class="menu-link">
                             <span class="menu-icon fas fa-users"></span>
