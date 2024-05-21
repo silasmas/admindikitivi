@@ -68,7 +68,7 @@ class MediaController extends BaseController
             $media_parent = Media::find($inputs['belongs_to']);
 
             if (is_null($media_parent)) {
-                return response()->back()->with('msg', 'Les parents n\'existe pas');
+                return redirect()->back()->with('msg', 'Les parents n\'existe pas');
             }
 
             if ($media_parent->belonging_count != null) {
@@ -117,7 +117,7 @@ class MediaController extends BaseController
             $media->categories()->attach($request->categories_ids);
         }
 
-        return response()->back()->with('msg', 'Média ajouté !');
+        return redirect()->back()->with('msg', 'Média ajouté !');
     }
 
     // public function store(Request $request)
