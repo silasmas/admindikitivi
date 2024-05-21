@@ -38,7 +38,7 @@
                     <!-- .card-body -->
                     <div class="card-body">
 
-                        <form method="POST" action="{{isset($media)?route('updateMedia') :route('registerMedia') }}" accept="multipart/form-data">
+                        <form method="POST" action="{{isset($media)?route('updateMedia') :route('registerMedia') }}" enctype="multipart/form-data">
                             @csrf
                             <!-- .fieldset -->
                             <fieldset>
@@ -155,7 +155,7 @@
                                         data-container="body" title="Une image qui sera affichée lorsque la vidéo n'est pas encore lue"></i>
                                     </label>
                                     <div class="custom-file">
-                                        <input name="cover_url" type="file" class="custom-file-input" id="tf3" multiple>
+                                        <input name="cover_url" type="file" class="custom-file-input" id="cover_url" multiple>
                                         <label class="custom-file-label" for="">Choisir fichier</label>
                                     </div>
                                     @isset($media)
@@ -236,9 +236,8 @@
                                     @forelse ($categories->data as $m)
                                     <div class="custom-control custom-control-inline custom-checkbox">
                                         <input type="checkbox" name="categories_ids[]" class="custom-control-input"
-                                            id="{{ $m->id }}" {{isset($media)?inArrayR($m->category_name, $media->categories, "category_name")?"checked":"":""}}>
-                                        <label class="custom-control-label" for="{{ $m->id }}">{{ $m->category_name
-                                            }}</label>
+                                           value="{{ $m->id }}" id="{{ $m->id }}" {{isset($media)?inArrayR($m->category_name, $media->categories, "category_name")?"checked":"":""}}>
+                                        <label class="custom-control-label" for="{{ $m->id }}">{{ $m->category_name}}</label>
                                         <div class="text-muted"> </div>
                                     </div>
                                     @empty
@@ -474,3 +473,4 @@
 </main>
 
 @endsection
+

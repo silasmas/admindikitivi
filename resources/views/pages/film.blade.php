@@ -4,29 +4,30 @@
 <link rel="stylesheet" href="{{ asset('assets/vendor/photoswipe/photoswipe.css') }} ">
 <link rel="stylesheet" href="{{ asset('assets/vendor/photoswipe/default-skin/default-skin.css') }} ">
 <link rel="stylesheet" href="{{ asset('assets/vendor/plyr/plyr.css') }}"
-@endsection @section("content")
+@endsection
+@section("content")
 <main class="app-main">
-<div class="wrapper">
-    <!-- .page -->
-    <div class="page py-0">
-        <!-- .page-inner -->
-        <div class="page-inner">
+    <div class="wrapper">
+        <!-- .page -->
+        <div class="page py-0">
+            <!-- .page-inner -->
+            <div class="page-inner">
 
-            <!-- .section-block -->
-            <div class="section-block d-sm-flex justify-content-between">
+                <!-- .section-block -->
+                <div class="section-block d-sm-flex justify-content-between">
 
-                <h2 class="section-title">Page des medias</h2>
-                <P>{{count( $medias->data) }} Media(s) trouvés</P>
-                <p class="text-muted">
-                    <a href="{{ route('createMedia') }}" class="btn btn-success">
-                        Ajouter
-                    </a>
-                </p>
+                    <h2 class="section-title">Page des medias</h2>
+                    <P>{{$medias->count }} Media(s) trouvés</P>
+                    <p class="text-muted">
+                        <a href="{{ route('createMedia') }}" class="btn btn-success">
+                            Ajouter
+                        </a>
+                    </p>
 
-            </div><!-- /.section-block -->
+                </div><!-- /.section-block -->
 
-            <!-- grid row -->
-            <div class="row">
+                <!-- grid row -->
+                <div class="row">
                     @forelse ($medias->data as $m)
                     <div class="col-sm-6">
                         @if (!empty($m->media_url))
@@ -110,55 +111,57 @@
                     @empty
 
                     @endforelse
-            </div><!-- /.page-inner -->
-            <div class="row">
-                <div class="card-body">
-                    <hr>
-                    <div class="el-example">
-                        <ul class="pagination">
-                            @if(!request()->has('page')|| request()->get('page')==1)
-                            <li class="page-item disabled" hidden>
-                                <a class="page-link" href="">«</a>
-                            </li>
-                            @else
-                            <li class="page-item">
-                                <a class="page-link" href="?page=1">«</a>
-                            </li>
-                            @endif
-                            {{-- {{ dd($medias->lastPage) }} --}}
-                            @for ($i=1; $i <= $medias->lastPage; $i++)
-                                <li class="page-item {{!request()->has('page') || request()->get('page')==$i ? ' active' : '' }}">
-                                    <a class="page-link" href="{{ '/media?page=' . $i }}">{{ $i }}</a>
-                                </li>
-
-                                @endfor
-                                @if(request()->get('page')==$medias->lastPage)
-                                <li class="page-item" hidden>
-                                    <a class="page-link" href="?{{ $medias->lastPage }}">»</a>
+                </div><!-- /.page-inner -->
+                <div class="row">
+                    <div class="card-body">
+                        <hr>
+                        <div class="el-example">
+                            <ul class="pagination">
+                                @if(!request()->has('page')|| request()->get('page')==1)
+                                <li class="page-item disabled" hidden>
+                                    <a class="page-link" href="">«</a>
                                 </li>
                                 @else
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ $medias->lastPage }}">»</a>
+                                    <a class="page-link" href="?page=1">«</a>
                                 </li>
                                 @endif
-                        </ul>
+                                {{-- {{ dd($medias->lastPage) }} --}}
+                                @for ($i=1; $i <= $medias->lastPage; $i++)
+                                    <li
+                                        class="page-item {{!request()->has('page') || request()->get('page')==$i ? ' active' : '' }}">
+                                        <a class="page-link" href="{{ '/media?page=' . $i }}">{{ $i }}</a>
+                                    </li>
+
+                                    @endfor
+                                    @if(request()->get('page')==$medias->lastPage)
+                                    <li class="page-item" hidden>
+                                        <a class="page-link" href="?{{ $medias->lastPage }}">»</a>
+                                    </li>
+                                    @else
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ $medias->lastPage }}">»</a>
+                                    </li>
+                                    @endif
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div><!-- /.page -->
+            </div><!-- /.page -->
+        </div>
     </div>
-    </main>
-    @endsection
+</main>
+@endsection
 
-    @section("script")
-    <!-- BEGIN PLUGINS JS -->
-    <script src="{{ asset('assets/vendor/photoswipe/photoswipe.min.js') }}"></script>
-    <script src="{{ asset('assets/vendor/photoswipe/photoswipe-ui-default.min.js') }}"></script>
-    <script src="{{ asset('assets/vendor/plyr/plyr.min.js') }}"></script>
-    <script src="{{ asset('assets/javascript/pages/photoswipe-demo.js') }} "></script>
+@section("script")
+<!-- BEGIN PLUGINS JS -->
+<script src="{{ asset('assets/vendor/photoswipe/photoswipe.min.js') }}"></script>
+<script src="{{ asset('assets/vendor/photoswipe/photoswipe-ui-default.min.js') }}"></script>
+<script src="{{ asset('assets/vendor/plyr/plyr.min.js') }}"></script>
+<script src="{{ asset('assets/javascript/pages/photoswipe-demo.js') }} "></script>
 
-    <script>
-        function deletemedia(id) {
+<script>
+    function deletemedia(id) {
             Swal.fire({
                 title: "Suppression d'un media",
                 text: "êtes-vous sûre de vouloir supprimer ce media ?",
@@ -222,5 +225,5 @@
     function actualiser() {
         location.reload();
     }
-    </script>
-    @endsection
+</script>
+@endsection

@@ -20,17 +20,17 @@ class BaseController extends Controller
     public function index()
     {
         $medias = $this::$api_client_manager::call('GET', getApiURL() . '/media?page=' . request()->get('page'));
-        // dd($medias);
+        // dd($medias->count);
         return view("pages.film", compact('medias'));
     }
-    
+
     public function types()
     {
         $types = $this::$api_client_manager::call('GET', getApiURL() . '/type');
         $groups = $this::$api_client_manager::call('GET', getApiURL() . '/group', session()->get("tokenUserActive"));
         // dd($groups);
 
-        return view("pages.type", compact('types','groups'));
+        return view("pages.type", compact('types', 'groups'));
     }
     public function categories()
     {

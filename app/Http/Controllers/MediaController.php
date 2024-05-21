@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Http\Controllers\ApiClientManager;
+use App\Http\Controllers\BaseController;
+use App\Http\Resources\Media as ResourcesMedia;
 use App\Models\Media;
 use App\Models\Session;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Controllers\BaseController;
-use App\Http\Controllers\ApiClientManager;
-use App\Http\Resources\Media as ResourcesMedia;
+use Illuminate\Support\Str;
 
 class MediaController extends BaseController
 {
@@ -29,7 +29,6 @@ class MediaController extends BaseController
         $categories = $this::$api_client_manager::call('GET', getApiURL() . '/category');
         $medias = (collect($series->data))->merge(collect($albums->data));
 
-        // dd($medias);
         return view("pages.addMedia", compact("medias", "type", "categories"));
     }
     /**
@@ -40,7 +39,7 @@ class MediaController extends BaseController
      */
     public function store(Request $request)
     {
-        //  dd($request->media_url);
+        // dd($request->categories_ids);
         // Get inputs
         $inputs = [
             'media_title' => $request->media_title,
@@ -63,6 +62,7 @@ class MediaController extends BaseController
             'belongs_to' => $request->belongs_to,
             'type_id' => $request->type_id,
             'user_id' => $request->user_id,
+            'categories_ids' => $request->categories_ids,
         ];
         // dd($inputs);
         $series = $this::$api_client_manager::call('POST', getApiURL() . '/media', session()->get("tokenUserActive"), $inputs);
@@ -113,7 +113,7 @@ class MediaController extends BaseController
         $rep = $this::$api_client_manager::call('GET', getApiURL() . '/category/' . $id);
         //   dd($rep->data);
         if ($rep->success) {
-            return response()->json(['reponse' => true, 'msg' =>"Catégorie trouvée, vous pouvez modifier", 'data' => $rep->data]);
+            return response()->json(['reponse' => true, 'msg' => "Catégorie trouvée, vous pouvez modifier", 'data' => $rep->data]);
         } else {
             return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
 
@@ -144,17 +144,27 @@ class MediaController extends BaseController
             'writer' => $request->writer,
             'director' => $request->director,
             'published_date' => $request->published_date,
-            'cover_url' => $request->file('cover_url'),
+            // 'cover_url' => $request->file('cover_url'),
             'price' => $request->price,
             'for_youth' => $request->for_youth,
             'is_live' => $request->is_live,
             'belongs_to' => $request->belongs_to,
             'type_id' => $request->type_id,
             'user_id' => $request->user_id,
+            'categories_ids' => $request->categories_ids,
         ];
-        //  dd($inputs);
+        // dd($request->cover_url);
+        if ($request->file('cover_url') != null) {
+            $this::$api_client_manager::call('POST', getApiURL() . '/media/upload_files/' . $request->id, session()->get("tokenUserActive"), ['cover_url' => $request->file('cover_url')]);
+        }
         $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/' . $request->id, session()->get("tokenUserActive"), $inputs);
-        return redirect()->back()->with("msg", "Modification réussie");
+        if ($series) {
+            return redirect()->back()->with("msg", "Modification réussie");
+
+        } else {
+            return redirect()->back()->with("msg", "Erreur de modification");
+
+        }
     }
     public function update_categorie(Request $request, Media $media)
     {

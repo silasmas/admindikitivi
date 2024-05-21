@@ -61,7 +61,7 @@
                                             {{ $groupes->message }}
                                         </h2>
                                         @endforelse
-                                    </tbody> 
+                                    </tbody>
                                     <tfoot>
                                         <tr>
                                             <th>#</th>
@@ -141,7 +141,8 @@
                 </div><!-- /.modal-body -->
             </div><!-- .modal-content -->
         </div><!-- /.modal-dialog -->
-    </div><!-- /.modalBoardConfig -->
+    </div>
+    <!-- /.modalBoardConfig -->
 </main>
 @endsection
 @section("script")
