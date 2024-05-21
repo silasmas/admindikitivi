@@ -163,7 +163,7 @@
                                         <figure class="figure">
                                         <!-- .figure-img -->
                                         <div class="figure-img">
-                                            <img class="img-fluid" src="{{asset($media->cover_url)}}" alt="Card image cap">
+                                            <img class="img-fluid" src="{{$media->cover_url}}" alt="Card image cap">
                                             <a href="{{ asset($media->cover_url) }}" class="img-link" data-size="600x450">
                                                 <span class="tile tile-circle bg-danger"><span class="oi oi-eye"></span>
                                                 </span> <span class="img-caption d-none">Image caption goes here</span></a>

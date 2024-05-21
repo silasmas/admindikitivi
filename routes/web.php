@@ -54,7 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::get('editGroupe/{id}', [GroupController::class, 'show_Groupe'])->name('editGroupe');
     Route::get('editPays/{id}', [CountryController::class, 'show'])->name('editPays');
     Route::get('editRole/{id}', [RoleController::class, 'show'])->name('editRole');
-    Route::get('editCat/{id}', [MediaController::class, 'show_cat'])->name('editRole');
+    Route::get('editCat/{id}', [MediaController::class, 'show_cat'])->name('editCat');
 
     Route::get('deleteMedia/{id}', [MediaController::class, 'destroy'])->name('deleteMedia');
     Route::get('deleteCategorie/{id}', [MediaController::class, 'destroyCat'])->name('deleteCategorie');
@@ -70,7 +70,7 @@ Route::middleware('auth')->group(function () {
     Route::post('addGroupe', [GroupController::class, 'store'])->name('addGroupe');
     Route::post('addPays', [CountryController::class, 'store'])->name('addPays');
     Route::post('addRole', [RoleController::class, 'store'])->name('addRole');
-    
+
     Route::post('updateMedia', [MediaController::class, 'update'])->name('updateMedia');
     Route::post('updateCat', [TypeController::class, 'update_categorie'])->name('updateCat');
     Route::post('updateType', [TypeController::class, 'update'])->name('updateType');
