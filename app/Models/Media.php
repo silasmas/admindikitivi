@@ -28,16 +28,25 @@ class Media extends Model
      */
     public function sessions()
     {
-        return $this->belongsToMany(Session::class);
+        return $this->belongsToMany(Session::class)->withTimestamps()->withPivot('is_viewed');
     }
 
     /**
      * MANY-TO-MANY
-     * Several user_approbations for several medias
+     * Several users for several medias
      */
-    public function user_approbations()
+    public function users()
     {
-        return $this->belongsToMany(User::class)->withPivot('created_at', 'updated_at', 'status_id');
+        return $this->belongsToMany(User::class)->withTimestamps()->withPivot(['is_liked', 'status_id']);
+    }
+
+    /**
+     * MANY-TO-MANY
+     * Several categories for several medias
+     */
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class);
     }
 
     /**
@@ -53,7 +62,7 @@ class Media extends Model
      * ONE-TO-MANY
      * One user for several medias
      */
-    public function user()
+    public function user_owner()
     {
         return $this->belongsTo(User::class);
     }
