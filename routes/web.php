@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+Route::get('/symlink', function () {return view('symlink');})->name('generate_symlink');
 
 Route::middleware('auth')->group(function () {
     Route::get('media', [BaseController::class, 'index'])->name('media');
