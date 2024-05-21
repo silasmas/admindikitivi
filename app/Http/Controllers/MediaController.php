@@ -247,10 +247,10 @@ class MediaController extends BaseController
 
             if ($request->file('cover_url') != null) {
                 // Upload cover
-                $request->cover_url->storeAs('images/medias/' . $media->id, 'cover.' . $request->file('cover_url')->extension());
-
                 $cover_url = 'images/medias/' . $media->id . '/cover.' . $request->file('cover_url')->extension();
 
+                // Upload URL
+                Storage::url(Storage::disk('public')->put($cover_url, $inputs['cover_url']));
                 $media->update([
                     'cover_url' => '/' . $cover_url,
                     'updated_at' => now(),
