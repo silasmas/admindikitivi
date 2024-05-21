@@ -212,45 +212,100 @@ class MediaController extends BaseController
      */
     public function update(Request $request, Media $media)
     {
-        // Get inputs
-        $inputs = [
-            'id' => $request->id,
-            'media_title' => $request->media_title,
-            'media_description' => $request->media_description,
-            'belonging_count' => $request->belonging_count,
-            'source' => $request->source,
-            'time_length' => $request->time_length,
-            'media_url' => $request->media_url,
-            'teaser_url' => $request->file('teaser_url'),
-            'author_names' => $request->author_names,
-            'artist_names' => $request->artist_names,
-            'writer' => $request->writer,
-            'director' => $request->director,
-            'published_date' => $request->published_date,
-            // 'cover_url' => $request->file('cover_url'),
-            'price' => $request->price,
-            'for_youth' => $request->for_youth,
-            'is_live' => $request->is_live,
-            'belongs_to' => $request->belongs_to,
-            'type_id' => $request->type_id,
-            'user_id' => $request->user_id,
-            'categories_ids' => $request->categories_ids,
-        ];
-        if ($request->file('cover_url') != null) {
-            //    dd($request->file('cover_url'));
-            // $ret = $this::$api_client_manager::call('POST', getApiURL() . '/media/upload_files_again/' . $request->id, session()->get("tokenUserActive"), ['cover_url' => $request->file('cover_url')]);
-            $ret = Http::withToken(session()->get("tokenUserActive"))->attach('file', $request->file('cover_url'))->post(getApiURL() . '/media/upload_files_again/' . $request->id);
-              dd($ret);
-        }
-        // $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/' . $request->id, session()->get("tokenUserActive"), $inputs);
-        // if ($series) {
-        //     return redirect()->back()->with("msg", "Modification réussie");
+            // Get inputs
+            $inputs = [
+                'id' => $request->id,
+                'media_title' => $request->media_title,
+                'media_description' => $request->media_description,
+                'source' => $request->source,
+                'belonging_count' => $request->belonging_count,
+                'time_length' => $request->time_length,
+                'media_url' => $request->media_url,
+                'author_names' => $request->author_names,
+                'artist_names' => $request->artist_names,
+                'writer' => $request->writer,
+                'director' => $request->director,
+                'published_date' => $request->published_date,
+                'price' => $request->price,
+                'for_youth' => $request->for_youth,
+                'is_live' => $request->is_live,
+                'belongs_to' => $request->belongs_to,
+                'type_id' => $request->type_id,
+                'user_id' => $request->user_id,
+            ];
 
-        // } else {
-        //     return redirect()->back()->with("msg", "Erreur de modification");
+            $media = Media::find($request->id);
 
-        // }
+            $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/' . $request->id, session()->get("tokenUserActive"), $inputs);
+                if ($series) {
+                    return redirect()->back()->with("msg", "Modification réussie");
+
+                } else {
+                    return redirect()->back()->with("msg", "Erreur de modification");
+
+                }
+
+            if ($request->file('cover_url') != null) {
+                // Upload cover
+                $request->cover_url->storeAs('images/medias/' . $media->id, 'cover.' . $request->file('cover_url')->extension());
+
+                $cover_url = 'images/medias/' . $media->id . '/cover.' . $request->file('cover_url')->extension();
+
+                $media->update([
+                    'cover_url' => '/' . $cover_url,
+                    'updated_at' => now(),
+                ]);
+            }
+
+            if ($request->categories_ids != null and count($request->categories_ids) > 0) {
+                $media->categories()->attach($request->categories_ids);
+            }
+
+            return redirect()->back()->with('msg', 'Média ajouté !');
+
     }
+    // public function update(Request $request, Media $media)
+    // {
+    //     // Get inputs
+    //     $inputs = [
+    //         'id' => $request->id,
+    //         'media_title' => $request->media_title,
+    //         'media_description' => $request->media_description,
+    //         'belonging_count' => $request->belonging_count,
+    //         'source' => $request->source,
+    //         'time_length' => $request->time_length,
+    //         'media_url' => $request->media_url,
+    //         'teaser_url' => $request->file('teaser_url'),
+    //         'author_names' => $request->author_names,
+    //         'artist_names' => $request->artist_names,
+    //         'writer' => $request->writer,
+    //         'director' => $request->director,
+    //         'published_date' => $request->published_date,
+    //         // 'cover_url' => $request->file('cover_url'),
+    //         'price' => $request->price,
+    //         'for_youth' => $request->for_youth,
+    //         'is_live' => $request->is_live,
+    //         'belongs_to' => $request->belongs_to,
+    //         'type_id' => $request->type_id,
+    //         'user_id' => $request->user_id,
+    //         'categories_ids' => $request->categories_ids,
+    //     ];
+    //     if ($request->file('cover_url') != null) {
+    //         //    dd($request->file('cover_url'));
+    //         // $ret = $this::$api_client_manager::call('POST', getApiURL() . '/media/upload_files_again/' . $request->id, session()->get("tokenUserActive"), ['cover_url' => $request->file('cover_url')]);
+    //         $ret = Http::withToken(session()->get("tokenUserActive"))->attach('file', $request->file('cover_url'))->post(getApiURL() . '/media/upload_files_again/' . $request->id);
+    //           dd($ret);
+    //     }
+    //     // $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/' . $request->id, session()->get("tokenUserActive"), $inputs);
+    //     // if ($series) {
+    //     //     return redirect()->back()->with("msg", "Modification réussie");
+
+    //     // } else {
+    //     //     return redirect()->back()->with("msg", "Erreur de modification");
+
+    //     // }
+    // }
+
     public function update_categorie(Request $request, Media $media)
     {
         //  dd($request->id);
