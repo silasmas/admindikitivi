@@ -237,13 +237,13 @@ class MediaController extends BaseController
             $media = Media::find($request->id);
 
             $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/' . $request->id, session()->get("tokenUserActive"), $inputs);
-                if ($series) {
-                    return redirect()->back()->with("msg", "Modification réussie");
+                // if ($series) {
+                //     return redirect()->back()->with("msg", "Modification réussie");
 
-                } else {
-                    return redirect()->back()->with("msg", "Erreur de modification");
+                // } else {
+                //     return redirect()->back()->with("msg", "Erreur de modification");
 
-                }
+                // }
 
             if ($request->file('cover_url') != null) {
                 // Upload cover
