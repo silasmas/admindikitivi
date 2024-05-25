@@ -268,6 +268,7 @@ class MediaController extends BaseController
             ]);
         }
         if ($request->file('thumbnail_url') != null) {
+            dd($media->id);
             // Upload cover
             $thumbnail_url = 'images/medias/' . $media->id . '/thumbnail';
 

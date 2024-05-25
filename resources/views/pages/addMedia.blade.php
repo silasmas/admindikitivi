@@ -182,6 +182,22 @@
                                     </figure>
                                     @endif
                                     @endisset
+                                    @isset($media)
+                                    @if ($media->thumbnail!=null)
+                                        <figure class="figure">
+                                        <!-- .figure-img -->
+                                        <div class="figure-img">
+                                            <img class="img-fluid" src="{{$media->thumbnail_url}}" alt="Card image cap">
+                                            <a href="{{ asset($media->thumbnail_url) }}" class="img-link" data-size="600x450">
+                                                <span class="tile tile-circle bg-danger"><span class="oi oi-eye"></span>
+                                                </span> <span class="img-caption d-none">Image caption goes here</span></a>
+                                            <div class="figure-action">
+                                                <a href="#" class="btn btn-block btn-sm btn-primary">Voir en detail</a>
+                                            </div>
+                                        </div>
+                                    </figure>
+                                    @endif
+                                    @endisset
                                 </div>
                                 <div class="form-group">
                                     <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
