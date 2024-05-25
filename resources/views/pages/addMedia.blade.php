@@ -183,7 +183,7 @@
                                     @endif
                                     @endisset
                                     @isset($media)
-                                    @if ($media->thumbnail!=null)
+                                    @if ($media->thumbnail_url!=null)
                                         <figure class="figure">
                                         <!-- .figure-img -->
                                         <div class="figure-img">
