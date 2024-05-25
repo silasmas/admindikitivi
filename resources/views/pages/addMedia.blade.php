@@ -160,7 +160,7 @@
                                     </div>
                                     <label for="tf3">Uploader thumbnail
                                         <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
-                                        data-container="body" title="Une image qui sera affichée lorsque la vidéo n'est pas encore lue"></i>
+                                        data-container="body" title="Une image qui sera affichée lorsque la vidéo n'est pas encore lue (270X310)"></i>
                                     </label>
                                     <div class="custom-file">
                                         <input name="thumbnail_url" type="file" class="custom-file-input" id="thumbnail_url" multiple>
@@ -188,7 +188,7 @@
                                         <!-- .figure-img -->
                                         <div class="figure-img">
                                             <img class="img-fluid" src="{{$media->thumbnail_url}}" alt="Card image cap">
-                                            <a href="{{ asset($media->thumbnail_url) }}" class="img-link" data-size="600x450">
+                                            <a href="{{ asset($media->thumbnail_url) }}" class="img-link" data-size="270x310">
                                                 <span class="tile tile-circle bg-danger"><span class="oi oi-eye"></span>
                                                 </span> <span class="img-caption d-none">Image caption goes here</span></a>
                                             <div class="figure-action">
