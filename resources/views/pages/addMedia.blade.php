@@ -171,9 +171,10 @@
                                                 <a href="#" class="btn btn-block btn-sm btn-primary">Voir en detail</a>
                                             </div>
                                         </div>
-                                    </figure>
+                                    </figure> <br>
                                     @endif
                                     @endisset
+
                                     <label for="tf3">Uploader thumbnail
                                         <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
                                         data-container="body" title="Une image qui sera affichée lorsque la vidéo n'est pas encore lue (270X310)"></i>
