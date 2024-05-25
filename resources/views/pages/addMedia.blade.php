@@ -158,14 +158,6 @@
                                         <input name="cover_url" type="file" class="custom-file-input" id="cover_url" multiple>
                                         <label class="custom-file-label" for="">Choisir fichier</label>
                                     </div>
-                                    <label for="tf3">Uploader thumbnail
-                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
-                                        data-container="body" title="Une image qui sera affichée lorsque la vidéo n'est pas encore lue (270X310)"></i>
-                                    </label>
-                                    <div class="custom-file">
-                                        <input name="thumbnail_url" type="file" class="custom-file-input" id="thumbnail_url" multiple>
-                                        <label class="custom-file-label" for="">Choisir fichier</label>
-                                    </div>
                                     @isset($media)
                                     @if ($media->cover_url!=null)
                                         <figure class="figure">
@@ -182,6 +174,15 @@
                                     </figure>
                                     @endif
                                     @endisset
+                                    <label for="tf3">Uploader thumbnail
+                                        <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
+                                        data-container="body" title="Une image qui sera affichée lorsque la vidéo n'est pas encore lue (270X310)"></i>
+                                    </label>
+                                    <div class="custom-file">
+                                        <input name="thumbnail_url" type="file" class="custom-file-input" id="thumbnail_url" multiple>
+                                        <label class="custom-file-label" for="">Choisir fichier</label>
+                                    </div>
+
                                     @isset($media)
                                     @if ($media->thumbnail_url!=null)
                                         <figure class="figure">
