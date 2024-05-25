@@ -244,8 +244,8 @@ class MediaController extends BaseController
             'type_id' => $request->type_id,
             'user_id' => $request->user_id,
         ];
-        dd($request->id);
         $media = Media::find($request->id);
+        dd($media);
 
         $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/' . $request->id, session()->get("tokenUserActive"), $inputs);
         // if ($series) {
