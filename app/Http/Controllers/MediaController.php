@@ -39,7 +39,7 @@ class MediaController extends BaseController
      * @return \Illuminate\Http\Response
      */
 
-     public function store(Request $request)
+    public function store(Request $request)
     {
         // Get inputs
         $inputs = [
@@ -109,6 +109,17 @@ class MediaController extends BaseController
 
             $media->update([
                 'cover_url' => '/' . $cover_url,
+                'updated_at' => now(),
+            ]);
+        }
+        if ($request->file('thumbnail_url') != null) {
+            // Upload cover
+            $request->thumbnail_url->storeAs('images/medias/' . $media->id, 'thumbnail.' . $request->file('thumbnail_url')->extension());
+
+            $cover_url = 'images/medias/' . $media->id . '/thumbnail.' . $request->file('thumbnail_url')->extension();
+
+            $media->update([
+                'thumbnail_url' => '/' . $cover_url,
                 'updated_at' => now(),
             ]);
         }
@@ -212,56 +223,67 @@ class MediaController extends BaseController
      */
     public function update(Request $request, Media $media)
     {
-            // Get inputs
-            $inputs = [
-                'id' => $request->id,
-                'media_title' => $request->media_title,
-                'media_description' => $request->media_description,
-                'source' => $request->source,
-                'belonging_count' => $request->belonging_count,
-                'time_length' => $request->time_length,
-                'media_url' => $request->media_url,
-                'author_names' => $request->author_names,
-                'artist_names' => $request->artist_names,
-                'writer' => $request->writer,
-                'director' => $request->director,
-                'published_date' => $request->published_date,
-                'price' => $request->price,
-                'for_youth' => $request->for_youth,
-                'is_live' => $request->is_live,
-                'belongs_to' => $request->belongs_to,
-                'type_id' => $request->type_id,
-                'user_id' => $request->user_id,
-            ];
+        // Get inputs
+        $inputs = [
+            'id' => $request->id,
+            'media_title' => $request->media_title,
+            'media_description' => $request->media_description,
+            'source' => $request->source,
+            'belonging_count' => $request->belonging_count,
+            'time_length' => $request->time_length,
+            'media_url' => $request->media_url,
+            'author_names' => $request->author_names,
+            'artist_names' => $request->artist_names,
+            'writer' => $request->writer,
+            'director' => $request->director,
+            'published_date' => $request->published_date,
+            'price' => $request->price,
+            'for_youth' => $request->for_youth,
+            'is_live' => $request->is_live,
+            'belongs_to' => $request->belongs_to,
+            'type_id' => $request->type_id,
+            'user_id' => $request->user_id,
+        ];
 
-            $media = Media::find($request->id);
+        $media = Media::find($request->id);
 
-            $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/' . $request->id, session()->get("tokenUserActive"), $inputs);
-                // if ($series) {
-                //     return redirect()->back()->with("msg", "Modification réussie");
+        $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/' . $request->id, session()->get("tokenUserActive"), $inputs);
+        // if ($series) {
+        //     return redirect()->back()->with("msg", "Modification réussie");
 
-                // } else {
-                //     return redirect()->back()->with("msg", "Erreur de modification");
+        // } else {
+        //     return redirect()->back()->with("msg", "Erreur de modification");
 
-                // }
+        // }
 
-            if ($request->file('cover_url') != null) {
-                // Upload cover
-                $cover_url = 'images/medias/' . $media->id . '/cover';
+        if ($request->file('cover_url') != null) {
+            // Upload cover
+            $cover_url = 'images/medias/' . $media->id . '/cover';
 
-                // Upload URL
-                $t=Storage::url(Storage::disk('public')->put($cover_url, $request->file('cover_url')));
-                $media->update([
-                    'cover_url' => '/' . $t,
-                    'updated_at' => now(),
-                ]);
-            }
+            // Upload URL
+            $t = Storage::url(Storage::disk('public')->put($cover_url, $request->file('cover_url')));
+            $media->update([
+                'cover_url' => '/' . $t,
+                'updated_at' => now(),
+            ]);
+        }
+        if ($request->file('thumbnail_url') != null) {
+            // Upload cover
+            $thumbnail_url = 'images/medias/' . $media->id . '/thumbnail';
 
-            if ($request->categories_ids != null and count($request->categories_ids) > 0) {
-                $media->categories()->attach($request->categories_ids);
-            }
+            // Upload URL
+            $t = Storage::url(Storage::disk('public')->put($thumbnail_url, $request->file('thumbnail_url')));
+            $media->update([
+                'thumbnail_url' => '/' . $t,
+                'updated_at' => now(),
+            ]);
+        }
 
-            return redirect()->back()->with('msg', 'Média ajouté !');
+        if ($request->categories_ids != null and count($request->categories_ids) > 0) {
+            $media->categories()->attach($request->categories_ids);
+        }
+
+        return redirect()->back()->with('msg', 'Média ajouté !');
 
     }
     // public function update(Request $request, Media $media)
