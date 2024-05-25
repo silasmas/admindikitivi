@@ -245,7 +245,7 @@ class MediaController extends BaseController
             'user_id' => $request->user_id,
         ];
         $media = Media::find($request->id);
-        dd($media);
+        // dd($media);
 
         $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/' . $request->id, session()->get("tokenUserActive"), $inputs);
         // if ($series) {
@@ -268,7 +268,7 @@ class MediaController extends BaseController
             ]);
         }
         if ($request->file('thumbnail_url') != null) {
-            dd($media);
+            // dd($media);
             // Upload cover
             $thumbnail_url = 'images/medias/' . $media->id . '/thumbnail';
 
