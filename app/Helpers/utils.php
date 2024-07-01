@@ -18,7 +18,8 @@ if (!function_exists('getWebURL')) {
 if (!function_exists('getApiURL')) {
     function getApiURL()
     {
-        return 'https://apidikitivi.jptshienda.com/api';
+        return 'https://api.dikitivi.com/api';
+        // return 'https://apidikitivi.jptshienda.com/api';
     }
 }
 
@@ -65,7 +66,7 @@ if (!function_exists('deleteExplodedArrayItem')) {
         $explodes = explode($separator, $subject);
         $clean_inventory = array();
 
-        foreach($explodes as $explode) {
+        foreach ($explodes as $explode) {
             if (!isset($clean_inventory[$explode])) {
                 $clean_inventory[$explode] = 0;
             }
