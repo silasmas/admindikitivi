@@ -25,7 +25,41 @@
                     </p>
 
                 </div><!-- /.section-block -->
+                <div class="row">
+                    <div class="card-body">
+                        <hr>
+                        <div class="el-example">
+                            <ul class="pagination">
+                                @if(!request()->has('page')|| request()->get('page')==1)
+                                <li class="page-item disabled" hidden>
+                                    <a class="page-link" href="">«</a>
+                                </li>
+                                @else
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">«</a>
+                                </li>
+                                @endif
+                                {{-- {{ dd($medias->lastPage) }} --}}
+                                @for ($i=1; $i <= $medias->lastPage; $i++)
+                                    <li
+                                        class="page-item {{!request()->has('page') || request()->get('page')==$i ? ' active' : '' }}">
+                                        <a class="page-link" href="{{ '/media?page=' . $i }}">{{ $i }}</a>
+                                    </li>
 
+                                    @endfor
+                                    @if(request()->get('page')==$medias->lastPage)
+                                    <li class="page-item" hidden>
+                                        <a class="page-link" href="?{{ $medias->lastPage }}">»</a>
+                                    </li>
+                                    @else
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ $medias->lastPage }}">»</a>
+                                    </li>
+                                    @endif
+                            </ul>
+                        </div>
+                    </div>
+                </div>
                 <!-- grid row -->
                 <div class="row">
                     @forelse ($medias->data as $m)
