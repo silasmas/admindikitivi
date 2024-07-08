@@ -54,7 +54,7 @@ class BaseController extends Controller
     {
         $membres = $this::$api_client_manager::call('GET', getApiURL() . '/user/find_by_role/fr/Membre', session()->get("tokenUserActive"));
         $type = $this::$api_client_manager::call('GET', getApiURL() . '/media/find_all_by_age_type/0/4', session()->get("tokenUserActive"));
-        dd($type);
+        // dd($type);
 
         return view("pages.client", compact('membres'));
     }
