@@ -17,7 +17,7 @@
                 <div class="section-block d-sm-flex justify-content-between">
 
                     <h2 class="section-title">Page des medias</h2>
-                    <P>{{$medias->count }} Media(s) trouvés</P>
+                    <P>{{count($medias->data) }} Media(s) trouvés</P>
                     <p class="text-muted">
                         <a href="{{ route('createMedia') }}" class="btn btn-success">
                             Ajouter
