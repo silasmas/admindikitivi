@@ -20,7 +20,7 @@ class BaseController extends Controller
     public function dashbord()
     {
         $membres = $this::$api_client_manager::call('GET', getApiURL() . '/user/find_by_role/fr/Membre', session()->get("tokenUserActive"));
-        $medias = $this::$api_client_manager::call('GET', getApiURL() . '/media?page=' . request()->get('page'));
+        $medias = $this::$api_client_manager::call('GET', getApiURL() . '/media');
         $dons = $this::$api_client_manager::call('GET', getApiURL() . '/donation', session()->get("tokenUserActive"));
         $o = $this::$api_client_manager::call('GET', getApiURL() . '/userOnline', session()->get("tokenUserActive"));
         $online = htmlspecialchars($o->data);

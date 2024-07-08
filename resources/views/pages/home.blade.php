@@ -79,7 +79,7 @@
                     <!-- metric column -->
                     <div class="col">
                       <!-- .metric -->
-                      <a href="user-projects.html" class="metric metric-bordered align-items-center">
+                      <a href="{{ route('media') }}" class="metric metric-bordered align-items-center">
                         <h2 class="metric-label"> Tout les medias </h2>
                         <p class="metric-value h3">
                           <sub><i class="fas fa-film"></i></sub> <span class="value">{{ count($medias->data) }}</span>
