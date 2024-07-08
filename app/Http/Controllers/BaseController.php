@@ -24,14 +24,14 @@ class BaseController extends Controller
         $dons = $this::$api_client_manager::call('GET', getApiURL() . '/donation', session()->get("tokenUserActive"));
         $o = $this::$api_client_manager::call('GET', getApiURL() . '/userOnline', session()->get("tokenUserActive"));
         $online = htmlspecialchars($o->data);
-        //    dd($membres);
+        // dd($medias->count);
 
         return view('pages.home', compact('membres', "medias", "dons", 'online'));
     }
     public function index()
     {
         $medias = $this::$api_client_manager::call('GET', getApiURL() . '/media?page=' . request()->get('page'));
-
+        // dd($medias);
         return view("pages.film", compact('medias'));
     }
 

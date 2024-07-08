@@ -17,7 +17,7 @@
                 <div class="section-block d-sm-flex justify-content-between">
 
                     <h2 class="section-title">Page des medias</h2>
-                    <P>{{count($medias->data) }} Media(s) trouvés</P>
+                    <P>{{$medias->count }} Media(s) trouvés</P>
                     <p class="text-muted">
                         <a href="{{ route('createMedia') }}" class="btn btn-success">
                             Ajouter
@@ -76,7 +76,7 @@
                     <div class="col-sm-6 board">
                         @if (!empty($m->media_url))
                         <div class="card card-body list-group-item">
-                            <span>{{ $m->media_title }}</span>
+                            <span>{{ Str::limit($m->media_title, 50, '...') }}</span>
                             <div class="embed-responsive embed-responsive-16by9 w-100">
                                 <iframe id="youtube-9854" frameborder="0" allowfullscreen="1"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
