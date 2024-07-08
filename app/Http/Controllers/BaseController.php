@@ -17,10 +17,21 @@ class BaseController extends Controller
         $this::$api_client_manager = new ApiClientManager();
     }
 
+    public function dashbord()
+    {
+        $membres = $this::$api_client_manager::call('GET', getApiURL() . '/user/find_by_role/fr/Membre', session()->get("tokenUserActive"));
+        $medias = $this::$api_client_manager::call('GET', getApiURL() . '/media?page=' . request()->get('page'));
+        $dons = $this::$api_client_manager::call('GET', getApiURL() . '/donation', session()->get("tokenUserActive"));
+        $o = $this::$api_client_manager::call('GET', getApiURL() . '/userOnline', session()->get("tokenUserActive"));
+        $online = htmlspecialchars($o->data);
+        //    dd($membres);
+
+        return view('pages.home', compact('membres', "medias", "dons", 'online'));
+    }
     public function index()
     {
         $medias = $this::$api_client_manager::call('GET', getApiURL() . '/media?page=' . request()->get('page'));
-        // dd($medias);
+
         return view("pages.film", compact('medias'));
     }
 
@@ -41,7 +52,11 @@ class BaseController extends Controller
     }
     public function client()
     {
-        return view("pages.client");
+        $membres = $this::$api_client_manager::call('GET', getApiURL() . '/user/find_by_role/fr/Membre', session()->get("tokenUserActive"));
+        $type = $this::$api_client_manager::call('GET', getApiURL() . '/media/find_all_by_age_type/0/4', session()->get("tokenUserActive"));
+        dd($type);
+
+        return view("pages.client", compact('membres'));
     }
 
     /**

@@ -9,7 +9,7 @@
 <main class="app-main">
     <div class="wrapper">
         <!-- .page -->
-        <div class="page py-0">
+        <div class="py-0 page">
             <!-- .page-inner -->
             <div class="page-inner">
 
@@ -23,7 +23,17 @@
                             Ajouter
                         </a>
                     </p>
-
+                   <div class="row">
+                    <div class="input-group has-clearable">
+                        <button type="button" class="close" aria-label="Close">
+                            <span aria-hidden="true"><i class="fa fa-times-circle"></i></span>
+                        </button>
+                        <label class="input-group-prepend" for="searchClients">
+                            <span class="input-group-text"><span class="oi oi-magnifying-glass"></span>
+                            </span></label> <input type="text" class="form-control" id="searchClients"
+                            data-filter=".board .list-group-item" placeholder="Trouvez un membre">
+                    </div>
+                   </div>
                 </div><!-- /.section-block -->
                 <div class="row">
                     <div class="card-body">
@@ -63,9 +73,10 @@
                 <!-- grid row -->
                 <div class="row">
                     @forelse ($medias->data as $m)
-                    <div class="col-sm-6">
+                    <div class="col-sm-6 board">
                         @if (!empty($m->media_url))
-                        <div class="card card-body">
+                        <div class="card card-body list-group-item">
+                            <span>{{ $m->media_title }}</span>
                             <div class="embed-responsive embed-responsive-16by9 w-100">
                                 <iframe id="youtube-9854" frameborder="0" allowfullscreen="1"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -74,9 +85,9 @@
                                     src="{{ $m->media_url }}?autoplay=0&amp;controls=0&amp;disablekb=1&amp;playsinline=1&amp;cc_load_policy=0&amp;cc_lang_pref=auto&amp;widget_referrer=file%3A%2F%2F%2FB%3A%2Ftheme-boostrap%2Flooper-bak%2Fdist%2Fcomponent-rich-media.html&amp;noCookie=false&amp;rel=0&amp;showinfo=0&amp;iv_load_policy=3&amp;modestbranding=1&amp;enablejsapi=1&amp;widgetid=1">
                                 </iframe>
                             </div>
-                            <div class="row mb-1 mt-3 ml-5">
+                            <div class="mt-3 mb-1 ml-5 row">
                                 <figcaption class="figure-caption">
-                                    <ul class="list-inline text-muted mb-0">
+                                    <ul class="mb-0 list-inline text-muted">
                                         {{-- <li class="list-inline-item">
                                             <a href="{{ route('editeMedia',['id'=>$m->id]) }}">
                                                 <span class="oi oi-eye"></span>
@@ -87,7 +98,7 @@
                                                 <span class="oi oi-pencil"></span>
                                             </a>
                                         </li>
-                                        <li class="list-inline-item float-right">
+                                        <li class="float-right list-inline-item">
                                             <a href="{{ route('deleteMedia',['id'=>$m->id]) }}"
                                                 onclick="event.preventDefault();deletemedia({{$m->id}})">
                                                 <span class="oi oi-trash"></span>
@@ -98,9 +109,9 @@
                             </div>
                         </div><!-- /.card -->
                         @else
-                        <div class="pswp-gallery ratio ratio-16x9">
-                            <!-- .card -->
+                        <div class="pswp-gallery ratio ratio-16x9 list-group-item">
                             <div class="card card-figure">
+                                <span>{{ $m->media_title }}</span>
                                 <!-- .card-figure -->
                                 <figure class="figure">
                                     <!-- .figure-img -->
@@ -113,9 +124,9 @@
                                             <a href="#" class="btn btn-block btn-sm btn-primary">Voir en detail</a>
                                         </div>
                                     </div><!-- /.figure-img -->
-                                    <div class="row mb-1 mt-3 ml-5">
+                                    <div class="mt-3 mb-1 ml-5 row">
                                         <figcaption class="figure-caption">
-                                            <ul class="list-inline text-muted mb-0">
+                                            <ul class="mb-0 list-inline text-muted">
                                                 <li class="list-inline-item">
                                                     <a href="{{ route('editeMedia',['id'=>$m->id]) }}">
                                                         <span class="oi oi-eye"></span>
@@ -126,7 +137,7 @@
                                                         <span class="oi oi-pencil"></span>
                                                     </a>
                                                 </li>
-                                                <li class="list-inline-item float-right">
+                                                <li class="float-right list-inline-item">
                                                     <a href="{{ route('deleteMedia',['id'=>$m->id]) }}"
                                                         onclick="event.preventDefault();deletemedia({{$m->id}})">
                                                         <span class="oi oi-trash"></span>

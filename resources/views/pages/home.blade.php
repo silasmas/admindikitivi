@@ -15,7 +15,10 @@
           <header class="page-title-bar">
             <div class="d-flex flex-column flex-md-row">
               <p class="lead">
-                <span class="font-weight-bold">Hi, Beni.</span> <span class="d-block text-muted">Here’s what’s happening with your business today.</span>
+                <span class="font-weight-bold">Salut, {{ Auth::user()->firstname . ' ' . Auth::user()->lastname }} </span>
+                <span class="d-block text-muted">Voici ici une vu globale des information sur dikitivi.
+{{-- {{ session()->get("tokenUserActive") }} --}}
+                </span>
               </p>
               <div class="ml-auto">
                 <!-- .dropdown -->
@@ -66,10 +69,10 @@
                     <!-- metric column -->
                     <div class="col">
                       <!-- .metric -->
-                      <a href="user-teams.html" class="metric metric-bordered align-items-center">
-                        <h2 class="metric-label"> Teams </h2>
+                      <a href="{{ route('client') }}" class="metric metric-bordered align-items-center">
+                        <h2 class="metric-label"> Tous les membres </h2>
                         <p class="metric-value h3">
-                          <sub><i class="oi oi-people"></i></sub> <span class="value">8</span>
+                          <sub><i class="oi oi-people"></i></sub> <span class="value">{{ count($membres->data) }}</span>
                         </p>
                       </a> <!-- /.metric -->
                     </div><!-- /metric column -->
@@ -77,9 +80,9 @@
                     <div class="col">
                       <!-- .metric -->
                       <a href="user-projects.html" class="metric metric-bordered align-items-center">
-                        <h2 class="metric-label"> Projects </h2>
+                        <h2 class="metric-label"> Tout les medias </h2>
                         <p class="metric-value h3">
-                          <sub><i class="oi oi-fork"></i></sub> <span class="value">12</span>
+                          <sub><i class="fas fa-film"></i></sub> <span class="value">{{ count($medias->data) }}</span>
                         </p>
                       </a> <!-- /.metric -->
                     </div><!-- /metric column -->
@@ -87,9 +90,9 @@
                     <div class="col">
                       <!-- .metric -->
                       <a href="user-tasks.html" class="metric metric-bordered align-items-center">
-                        <h2 class="metric-label"> Active Tasks </h2>
+                        <h2 class="metric-label"> Tout les dons </h2>
                         <p class="metric-value h3">
-                          <sub><i class="fa fa-tasks"></i></sub> <span class="value">64</span>
+                          <sub><i class="fa fa-gift"></i></sub> <span class="value">{{ count($dons->data) }}</span>
                         </p>
                       </a> <!-- /.metric -->
                     </div><!-- /metric column -->
@@ -99,10 +102,11 @@
                   <!-- .metric -->
                   <a href="user-tasks.html" class="metric metric-bordered">
                     <div class="metric-badge">
-                      <span class="badge badge-lg badge-success"><span class="oi oi-media-record pulse mr-1"></span> ONGOING TASKS</span>
+                      <span class="badge badge-lg badge-success"><span class="oi oi-media-record pulse mr-1">
+                        </span>Les utilisatairs en ligne</span>
                     </div>
                     <p class="metric-value h3">
-                      <sub><i class="oi oi-timer"></i></sub> <span class="value">8</span>
+                      <sub><i class="fas fa-user-circle"></i></sub> <span class="value">{{$online}}</span>
                     </p>
                   </a> <!-- /.metric -->
                 </div><!-- /metric column -->
@@ -502,4 +506,8 @@
     <!-- /.wrapper -->
   </main><!-- /.app-main -->
 
+  @endsection
+
+  @section("script")
+  <script src="{{ asset('assets/javascript/pages/dashboard-demo.js') }}"></script>
   @endsection

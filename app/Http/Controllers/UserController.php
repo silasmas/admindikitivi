@@ -2,26 +2,33 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\Notification;
-use App\Models\PasswordReset;
-use App\Models\Status;
+use stdClass;
 use App\Models\User;
+use App\Models\Status;
 use Nette\Utils\Random;
 use Illuminate\Support\Str;
+use App\Models\Notification;
 use Illuminate\Http\Request;
+use App\Models\PasswordReset;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
-use stdClass;
+use App\Http\Controllers\ApiClientManager;
 use App\Http\Resources\User as ResourcesUser;
 use App\Http\Resources\PasswordReset as ResourcesPasswordReset;
-
+use App\Http\Controllers\Controller;
 /**
  * @author Xanders
  * @see https://www.linkedin.com/in/xanders-samoth-b2770737/
  */
-class UserController extends BaseController
+class UserController extends Controller
 {
+    public static $api_client_manager;
+
+    public function __construct()
+    {
+        $this::$api_client_manager = new ApiClientManager();
+    }
     /**
      * Display a listing of the resource.
      *
@@ -29,9 +36,11 @@ class UserController extends BaseController
      */
     public function index()
     {
-        $users = User::orderByDesc('created_at')->get();
+        $membres = $this::$api_client_manager::call('GET', getApiURL() . '/user/find_by_not_role/en/Membre', session()->get("tokenUserActive"));
 
-        return $this->handleResponse(ResourcesUser::collection($users), __('notifications.find_all_users_success'));
+        //  dd(count($membres->data));
+
+         return view('pages.home', compact('membres'));
     }
 
     /**
@@ -625,7 +634,7 @@ class UserController extends BaseController
                                     $query->where('role_name->' . $locale, $role_name);
                                 })->orderByDesc('users.created_at')->get();
 
-        return $this->handleResponse(ResourcesUser::collection($users), __('notifications.find_all_users_success'));    
+        return $this->handleResponse(ResourcesUser::collection($users), __('notifications.find_all_users_success'));
     }
 
     /**
@@ -641,7 +650,7 @@ class UserController extends BaseController
                                     $query->where('role_name->' . $locale, $role_name);
                                 })->orderByDesc('users.created_at')->get();
 
-        return $this->handleResponse(ResourcesUser::collection($users), __('notifications.find_all_users_success'));    
+        return $this->handleResponse(ResourcesUser::collection($users), __('notifications.find_all_users_success'));
     }
 
     /**

@@ -1,5 +1,6 @@
 <?php
 
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BaseController;
 use App\Http\Controllers\RoleController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\API\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,13 +22,9 @@ use App\Http\Controllers\ProfileController;
 |
  */
 
-Route::get('/', function () {
-    return view('welcome');
-})->middleware(['auth', 'verified']);
+Route::get('/',[BaseController::class, 'dashbord'])->middleware(['auth', 'verified']);
 
-Route::get('/dashboard', function () {
-    return view('pages.home');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [BaseController::class, 'dashbord'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -63,7 +61,6 @@ Route::middleware('auth')->group(function () {
     Route::get('deleteGroupe/{id}', [GroupController::class, 'destroy'])->name('deleteGroupe');
     Route::get('deletePays/{id}', [CountryController::class, 'destroy'])->name('deletePays');
     Route::get('deleteRole/{id}', [RoleController::class, 'destroy'])->name('deleteRole');
-
 
     Route::post('registerMedia', [MediaController::class, 'store'])->name('registerMedia');
     Route::post('addCat', [MediaController::class, 'store_cat'])->name('addCat');

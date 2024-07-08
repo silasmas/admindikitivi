@@ -5,12 +5,30 @@
  */
 
 use Carbon\Carbon;
+use PhpParser\Node\Stmt\Switch_;
 
 // Get web URL
 if (!function_exists('getWebURL')) {
     function getWebURL()
     {
         return (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+    }
+}
+if (!function_exists('sexe')) {
+    function sexe($info)
+    {
+        switch ($info) {
+            case 'M':
+            return 'Homme';
+                break;
+            case 'F':
+            return 'Femme';
+                break;
+
+            default:
+                return "Pas d'info du genre";
+                break;
+        }
     }
 }
 
