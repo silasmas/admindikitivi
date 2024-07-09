@@ -113,7 +113,7 @@
               </div><!-- /metric row -->
             </div><!-- /.section-block -->
             <!-- grid row -->
-            <div class="row">
+            {{-- <div class="row">
               <!-- grid column -->
               <div class="col-12 col-lg-12 col-xl-4">
                 <!-- .card -->
@@ -497,7 +497,7 @@
                   <a href="#" class="card-footer-item">View all <i class="fa fa-fw fa-angle-right"></i></a>
                 </div><!-- /.card-footer -->
               </div><!-- /.card -->
-            </div><!-- /card-deck-xl -->
+            </div><!-- /card-deck-xl --> --}}
           </div><!-- /.page-section -->
         </div><!-- /.page-inner -->
       </div><!-- /.page -->
