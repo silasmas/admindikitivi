@@ -31,7 +31,8 @@ class BaseController extends Controller
     public function index()
     {
         $medias = $this::$api_client_manager::call('GET', getApiURL() . '/media?page=' . request()->get('page'));
-        // dd($medias->data[0]->type   );
+        // dd($medias);
+
         return view("pages.film", compact('medias'));
     }
 

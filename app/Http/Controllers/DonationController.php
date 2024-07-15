@@ -1,17 +1,25 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
+use App\Http\Controllers\ApiClientManager;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\Donation as ResourcesDonation;
 use App\Models\Donation;
 use Illuminate\Http\Request;
-use App\Http\Resources\Donation as ResourcesDonation;
 
 /**
  * @author Xanders
  * @see https://www.linkedin.com/in/xanders-samoth-b2770737/
  */
-class DonationController extends BaseController
+class DonationController extends Controller
 {
+    public static $api_client_manager;
+
+    public function __construct()
+    {
+        $this::$api_client_manager = new ApiClientManager();
+    }
     /**
      * Display a listing of the resource.
      *
@@ -19,9 +27,12 @@ class DonationController extends BaseController
      */
     public function index()
     {
-        $donations = Donation::orderByDesc('created_at')->get();
+        $donations = $this::$api_client_manager::call('GET', getApiURL() . '/donation', session()->get("tokenUserActive"));
 
-        return $this->handleResponse(ResourcesDonation::collection($donations), __('notifications.find_all_donations_success'));
+        // dd($donations->data[0]->currency);
+
+        return view("pages.donations", compact('donations'));
+
     }
 
     /**
@@ -36,7 +47,7 @@ class DonationController extends BaseController
         $inputs = [
             'amount' => $request->amount,
             'pricing_id' => $request->pricing_id,
-            'user_id' => $request->user_id
+            'user_id' => $request->user_id,
         ];
 
         // Validate required fields
@@ -79,7 +90,7 @@ class DonationController extends BaseController
         $inputs = [
             'amount' => $request->amount,
             'pricing_id' => $request->pricing_id,
-            'user_id' => $request->user_id
+            'user_id' => $request->user_id,
         ];
 
         if ($inputs['amount'] != null) {

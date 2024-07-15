@@ -60,6 +60,7 @@ class MediaController extends BaseController
             'belongs_to' => $request->belongs_to,
             'type_id' => $request->type_id,
             'user_id' => $request->user_id,
+            'media_file_url' => $request->media_file_url,
         ];
 
         $media = Media::create($inputs);

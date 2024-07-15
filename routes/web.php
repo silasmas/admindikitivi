@@ -9,7 +9,8 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\DonationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::get('groupes', [GroupController::class, 'index'])->name('groupes');
     Route::get('pays', [CountryController::class, 'index'])->name('pays');
     Route::get('roles', [RoleController::class, 'index'])->name('roles');
+    Route::get('gifted', [DonationController::class, 'index'])->name('gifted');
 
     Route::get('createMedia', [MediaController::class, 'create'])->name('createMedia');
     Route::get('creatGroup', [GroupController::class, 'create'])->name('creatGroup');

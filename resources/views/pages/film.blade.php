@@ -120,53 +120,98 @@
                             </div>
                             <div class="col-sm-9 text-right">
                                 <div class="item">
-                                    <a href="{{ route('types') }}">{{ $m->type->type_name }}</a>
+                                    <span>Type :</span>
+                                    <a href="{{ route('types') }}">{{ $m->type->type_name }}</a> /
+                                    <span>Groupe :</span>
+                                    <a href="{{ route('groupes') }}">{{ $m->type->group->group_name }}</a> /
+
+                                    <span>Catégories :</span>
+                                    @forelse ($m->categories as $cat)
+                                    <a href="{{ route('categories') }}">{{ $cat->category_name }}</a>,
+                                    @empty
+
+                                    @endforelse
                                 </div>
                             </div>
                         </div>
                     </div><!-- /.card -->
                     @else
-                    <div class="pswp-gallery ratio ratio-16x9">
-                        <div class=" item">
-                            <div class="card card-figure">
-                                <span>{{ $m->media_title }}</span>
-                                <!-- .card-figure -->
-                                <figure class="figure">
-                                    <!-- .figure-img -->
-                                    <div class="figure-img">
-                                        <img class="img-fluid" src="{{ asset($m->cover_url)}}" alt="Card image cap">
-                                        <a href="{{ asset($m->cover_url) }}" class="img-link" data-size="600x450">
-                                            <span class="tile tile-circle bg-danger"><span class="oi oi-eye"></span>
-                                            </span> <span class="img-caption d-none">Image caption goes here</span></a>
-                                        <div class="figure-action">
-                                            <a href="#" class="btn btn-block btn-sm btn-primary">Voir en detail</a>
-                                        </div>
-                                    </div><!-- /.figure-img -->
-                                    <div class="mt-3 mb-1 ml-5 row">
-                                        <figcaption class="figure-caption">
-                                            <ul class="mb-0 list-inline text-muted">
-                                                <li class="list-inline-item">
-                                                    <a href="{{ route('editeMedia',['id'=>$m->id]) }}">
-                                                        <span class="oi oi-eye"></span>
-                                                    </a>
-                                                </li>
-                                                <li class="list-inline-item">
-                                                    <a href="{{ route('editeMedia',['id'=>$m->id]) }}">
-                                                        <span class="oi oi-pencil"></span>
-                                                    </a>
-                                                </li>
-                                                <li class="float-right list-inline-item">
-                                                    <a href="{{ route('deleteMedia',['id'=>$m->id]) }}"
-                                                        onclick="event.preventDefault();deletemedia({{$m->id}})">
-                                                        <span class="oi oi-trash"></span>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </figcaption>
-                                    </div>
-                                </figure><!-- /.card-figure -->
-                            </div><!-- /.card -->
+                    <div class="card card-body  item">
+                        <span>{{ Str::limit($m->media_title, 50, '...') }}</span>
+                        <div class="pswp-gallery ratio ratio-16x9">
+                                <div class="card card-figure">
+                                    <!-- .card-figure -->
+                                    <figure class="figure">
+                                        <!-- .figure-img -->
+                                        <div class="figure-img">
+                                            <img class="img-fluid" src="{{ asset($m->cover_url)}}" alt="Card image cap">
+                                            <a href="{{ asset($m->cover_url) }}" class="img-link" data-size="600x450">
+                                                <span class="tile tile-circle bg-danger"><span class="oi oi-eye"></span>
+                                                </span> <span class="img-caption d-none">Image caption goes
+                                                    here</span></a>
+                                            <div class="figure-action">
+                                                <a href="#" class="btn btn-block btn-sm btn-primary">Voir en detail</a>
+                                            </div>
+                                        </div><!-- /.figure-img -->
+                                        {{-- <div class="mt-3 mb-1 ml-5 row">
+                                            <figcaption class="figure-caption">
+                                                <ul class="mb-0 list-inline text-muted">
+                                                    <li class="list-inline-item">
+                                                        <a href="{{ route('editeMedia',['id'=>$m->id]) }}">
+                                                            <span class="oi oi-eye"></span>
+                                                        </a>
+                                                    </li>
+                                                    <li class="list-inline-item">
+                                                        <a href="{{ route('editeMedia',['id'=>$m->id]) }}">
+                                                            <span class="oi oi-pencil"></span>
+                                                        </a>
+                                                    </li>
+                                                    <li class="float-right list-inline-item">
+                                                        <a href="{{ route('deleteMedia',['id'=>$m->id]) }}"
+                                                            onclick="event.preventDefault();deletemedia({{$m->id}})">
+                                                            <span class="oi oi-trash"></span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </figcaption>
+                                        </div> --}}
+                                    </figure><!-- /.card-figure -->
+                                </div><!-- /.card -->
                         </div>
+                        <div class="mt-3 mb-1 ml-5 row">
+                            <div class="col-sm-3">
+                                <figcaption class="figure-caption">
+                                    <ul class="mb-0 list-inline text-muted">
+                                        <li class="list-inline-item">
+                                            <a href="{{ route('editeMedia',['id'=>$m->id]) }}">
+                                                <span class="oi oi-pencil"></span>
+                                            </a>
+                                        </li>
+                                        <li class="float-right list-inline-item">
+                                            <a href="{{ route('deleteMedia',['id'=>$m->id]) }}"
+                                                onclick="event.preventDefault();deletemedia({{$m->id}})">
+                                                <span class="oi oi-trash"></span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </figcaption>
+                            </div>
+                            <div class="col-sm-9 text-right">
+                                <div class="item">
+                                    <span>Type :</span>
+                                    <a href="{{ route('types') }}">{{ $m->type->type_name }}</a> /
+                                    <span>Groupe :</span>
+                                    <a href="{{ route('groupes') }}">{{ $m->type->group->group_name }}</a> /
+
+                                    <span>Catégories :</span>
+                                    @forelse ($m->categories as $cat)
+                                    <a href="{{ route('categories') }}">{{ $cat->category_name }}</a>,
+                                    @empty
+
+                                    @endforelse
+                                </div>
+                            </div>
+                    </div>
                     </div>
                     @endif
                 </div>

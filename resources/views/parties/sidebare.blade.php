@@ -45,15 +45,15 @@
                             <span class="menu-text">Medias</span>
                         </a>
                     </li>
-                    <li class="menu-item {{ Route::current()->getName() == 'serie' ? 'has-active' : ''}}">
+                    <li class="menu-item {{ Route::current()->getName() == 'categories' ? 'has-active' : ''}}">
                         <a href="{{ route('categories') }}" class="menu-link">
-                            <span class="menu-icon fas fa-rocket"></span>
+                            <span class="menu-icon fas fa-tags"></span>
                             <span class="menu-text">Gestion Catégorie</span>
                         </a>
                     </li>
                     <li class="menu-item {{ Route::current()->getName() == 'types' ? 'has-active' : ''}}">
                         <a href="{{ route('types') }}" class="menu-link">
-                            <span class="menu-icon fas fa-rocket"></span>
+                            <span class="menu-icon fas fa-list-ul"></span>
                             <span class="menu-text">Gestion des types</span>
                         </a>
                     </li>
@@ -65,13 +65,13 @@
                     </li>
                     <li class="menu-item {{ Route::current()->getName() == 'pays' ? 'has-active' : ''}}">
                         <a href="{{ route('pays') }}" class="menu-link">
-                            <span class="menu-icon fas fa-rocket"></span>
+                            <span class="menu-icon fas fa-globe"></span>
                             <span class="menu-text">Gestion des pays</span>
                         </a>
                     </li>
                     <li class="menu-item {{ Route::current()->getName() == 'roles' ? 'has-active' : ''}}">
                         <a href="{{ route('roles') }}" class="menu-link">
-                            <span class="menu-icon fas fa-rocket"></span>
+                            <span class="menu-icon fas fa-user-circle"></span>
                             <span class="menu-text">Gestion des roles</span>
                         </a>
                     </li>
@@ -83,9 +83,16 @@
                     </li><!-- /.menu-item -->
                     <!-- .menu-header -->
                     <li class="menu-header">Partenaire </li><!-- /.menu-header -->
-                    <a href="#" class="menu-link">
-                        <span class="menu-icon fas fa-rocket"></span>
-                        <span class="menu-text">Landing Page</span>
+                    <li class=" {{ Route::current()->getName() == 'gifted' ? 'has-active' : ''}}">
+                        <a href="{{ route('gifted') }}" class="menu-link">
+                            <span class="menu-icon fas fa-gift"></span>
+                            <span class="menu-text">Donations</span>
+                        </a>
+
+                    </li>
+                    <a href="{{ route('gifted') }}" class="menu-link">
+                        <span class="menu-icon fas fa-handshake"></span>
+                        <span class="menu-text">Fournisseur</span>
                     </a>
 
                 </ul><!-- /.menu -->
