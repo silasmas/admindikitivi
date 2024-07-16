@@ -3,7 +3,10 @@
 @section("style")
 <link rel="stylesheet" href="{{ asset('assets/vendor/photoswipe/photoswipe.css') }} ">
 <link rel="stylesheet" href="{{ asset('assets/vendor/photoswipe/default-skin/default-skin.css') }} ">
-<link rel="stylesheet" href="{{ asset('assets/vendor/plyr/plyr.css') }}" @endsection @section("content")>
+<link rel="stylesheet" href="{{ asset('assets/vendor/plyr/plyr.css') }}">
+@endsection
+
+@section("content")>
 
 <main class="app-main">
     <!-- .wrapper -->
@@ -43,8 +46,9 @@
                         <!-- .card-body -->
                         <div class="card-body">
 
-                            <form method="POST" action="{{isset($media)?route('updateMedia') :route('registerMedia') }}"
-                                enctype="multipart/form-data">
+                            {{-- <form method="POST" action="{{isset($media)?route('updateMedia') :route('registerMedia') }}"
+                                enctype="multipart/form-data" id="data"> --}}
+                            <form id="data">
                                 @csrf
                                 <!-- .fieldset -->
                                 <fieldset>
@@ -168,11 +172,11 @@
                                     <div class="form-group">
                                         <label for="tf3">Uploader la vidéo
                                             <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
-                                                data-container="body"
-                                                title="Uploader la vidéo du media"></i>
+                                                data-container="body" title="Uploader la vidéo du media"></i>
                                         </label>
                                         <div class="custom-file">
-                                            <input name="media_file_url" type="file" class="custom-file-input" id="media_file_url"  multiple>
+                                            <input name="media_file_url" type="file" class="custom-file-input"
+                                                id="media_file_url" multiple>
                                             <label class="custom-file-label" for="">Choisir la video</label>
                                         </div>
                                     </div>
@@ -325,7 +329,9 @@
                                         @endforelse
                                     </div>
                                     <!-- /.form-group -->
-                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                    <button type="submit" class="btn btn-primary">Enregistrer</button><br>
+                                    <div class="d-flex justify-content-center mt-5 text-center request-message"></div>
+
                                 </fieldset><!-- /.fieldset -->
                             </form>
                         </div>
@@ -335,5 +341,136 @@
         </div>
     </div>
 </main>
+
+<script>
+
+</script>
+@endsection
+
+@section("script")
+<script>
+    const navigator = window.navigator;
+    const currentLanguage = $('html').attr('lang');
+    const currentUser = $('[name="dktv-visitor"]').attr('content');
+    const currentHost = $('[name="dktv-url"]').attr('content');
+    const apiHost = $('[name="dktv-api-url"]').attr('content');
+    /* Register form-data */
+$('form#data').submit(function (e) {
+    e.preventDefault();
+
+    var formData = new FormData(this);
+    var categories = [];
+
+    document.querySelectorAll('[name="categories_ids"]').forEach(item => {
+        if (item.checked === true) {
+            categories.push(parseInt(item.value));
+        }
+    });
+
+    for (let i = 0; i < categories.length; i++) {
+        formData.append('categories_ids[' + i + ']', categories[i]);
+    }
+
+    $.ajax({
+        headers: { 'Authorization': 'Bearer 23|fEmzaqAOGb6ld8Cej6NMU0VdXl3UISFkMDhoMLPp1754add6', 'Accept': 'multipart/form-data', 'X-localization': navigator.language },
+        type: 'POST',
+        contentType: 'multipart/form-data',
+        url: apiHost + '/media',
+        data: formData,
+        beforeSend: function () {
+            // $('form#data .request-message').html('<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
+            Swal.fire({
+                        title: 'Merci de patienter...',
+                        icon: 'info'
+                    })
+        },
+        success: function (res) {
+            console.log(res.data)
+            console.log( formData)
+            var formElement = document.getElementById('form#data');
+            formData.append('idMedia', res.data.id);
+            add(formData, 'POST', 'registerMedia',"#data")
+            // if ($('form#data .request-message').hasClass('text-danger')) {
+            //     $('form#data .request-message').removeClass('text-danger');
+            // }
+
+            // $('form#data .request-message').addClass('text-success').html(res.message);
+
+            // document.getElementById('data').reset();
+            // location.reload();
+        },
+        cache: false,
+        contentType: false,
+        processData: false,
+        error: function (xhr, error, status_description) {
+            if ($('form#data .request-message').hasClass('text-success')) {
+                $('form#data .request-message').removeClass('text-success');
+            }
+
+            if (xhr.responseJSON) {
+                $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
+                console.log(xhr.responseJSON);
+            }
+
+            console.log(xhr.status);
+            console.log(error);
+            console.log(status_description);
+        }
+    });
+});
+function add(form, mothode, url,idf) {
+                    var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    var f = form;
+                    var u = url;
+                    var idform = idf;
+                    Swal.fire({
+                        title: 'Merci de patienter...',
+                        icon: 'info'
+                    })
+                        console.log(form)
+                    $.ajax({
+                        url: u,
+                        method: mothode,
+                        data: form,
+                        processData: false,
+                        contentType: false,
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        success: function (data) {
+
+                            if (!data.reponse) {
+                                Swal.fire({
+                                    title: data.msg,
+                                    icon: 'error'
+                                })
+                            } else {
+                                Swal.fire({
+                                    title: data.msg,
+                                    icon: 'success'
+                                })
+
+                                $(idform)[0].reset();
+                                actualiser();
+                            }
+
+                        },
+                        error: function(xhr, status, error){
+                            // alrte("ok")
+                            var errors = xhr.responseJSON.errors;
+                            var errorMessage = '';
+                            $.each(errors, function(key, value){
+                                errorMessage += value + '<br>';
+                            });
+                             // Afficher les erreurs de validation à l'utilisateur
+                                Swal.fire({
+                                    title: xhr.msg,
+                                    html: errorMessage,
+                                        icon: 'error'
+                                    })
+                            }
+                    });
+                }
+</script>
 
 @endsection

@@ -14,6 +14,15 @@
     <link rel="canonical" href="https://dikitivi.com">
     <meta property="og:url" content="https://dikitivi.com">
     <meta property="og:site_name" content="Dikitivi">
+
+    <meta name="keywords" content="@lang('miscellaneous.keywords')">
+        <meta name="dktv-url" content="{{ getWebURL() }}">
+        <meta name="dktv-api-url" content="{{ getApiURL() }}">
+        <meta name="dktv-visitor" content="{{ !empty(Auth::user()) ? Auth::user()->id : null }}">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="dktv-ref" content="{{ !empty(Auth::user()) ? Auth::user()->api_token : null }}">
+
+
     <script type="application/ld+json">
       {
         "name": "Dikitivi - Dasboard",

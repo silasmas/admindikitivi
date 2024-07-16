@@ -61,15 +61,9 @@ class MediaController extends BaseController
             'type_id' => $request->type_id,
             'user_id' => $request->user_id,
         ];
-        $inputs2 = [
-            'media_title' => $request->media_title,
-            'for_youth' => $request->for_youth,
-            'is_live' => $request->is_live,
-            'media_file_url' => $request->media_file_url,
-        ];
 
-        $media = Media::create($inputs);
-        $series = $this::$api_client_manager::call('POST', getApiURL() . '/media', session()->get("tokenUserActive"), $inputs2);
+        // $media = Media::create($inputs);
+        $media = Media::find($request->idMedia);
 
         if ($inputs['belongs_to'] != null) {
             $media_parent = Media::find($inputs['belongs_to']);

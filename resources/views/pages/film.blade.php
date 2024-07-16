@@ -93,12 +93,18 @@
                     <div class="card card-body  item">
                         <span>{{ Str::limit($m->media_title, 50, '...') }}</span>
                         <div class="embed-responsive embed-responsive-16by9 w-100">
+                            @if ($m->source=="AWS")
+                                <video  autoplay="false" controls>
+                                    <source src="{{ $m->media_url }}" type="video/mp4">
+                                </video>
+                            @else
                             <iframe id="youtube-9854" frameborder="0" allowfullscreen="1"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                 referrerpolicy="strict-origin-when-cross-origin" title="{{ $m->media_title }}"
                                 class="embed-responsive-item"
                                 src="{{ $m->media_url }}?autoplay=0&amp;controls=0&amp;disablekb=1&amp;playsinline=1&amp;cc_load_policy=0&amp;cc_lang_pref=auto&amp;widget_referrer=file%3A%2F%2F%2FB%3A%2Ftheme-boostrap%2Flooper-bak%2Fdist%2Fcomponent-rich-media.html&amp;noCookie=false&amp;rel=0&amp;showinfo=0&amp;iv_load_policy=3&amp;modestbranding=1&amp;enablejsapi=1&amp;widgetid=1">
                             </iframe>
+                            @endif
                         </div>
                         <div class="mt-3 mb-1 ml-5 row">
                             <div class="col-sm-3">
