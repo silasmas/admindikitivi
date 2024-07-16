@@ -471,6 +471,9 @@ function add(form, mothode, url,idf) {
                             }
                     });
                 }
+                function actualiser() {
+                    location.reload();
+                }
 </script>
 
 @endsection
