@@ -329,7 +329,7 @@
                                         @endforelse
                                     </div>
                                     <!-- /.form-group -->
-                                    <button type="submit" class="btn btn-primary">Enregistrer</button><br>
+                                    <button type="submit" class="btn btn-primary">{{ isset($media)?"Modifier":"Enregistrer" }}</button><br>
                                     <div class="d-flex justify-content-center mt-5 text-center request-message"></div>
 
                                 </fieldset><!-- /.fieldset -->
