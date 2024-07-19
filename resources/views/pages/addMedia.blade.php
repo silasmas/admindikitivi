@@ -380,7 +380,7 @@ $('form#data').submit(function (e) {
         beforeSend: function () {
             // $('form#data .request-message').html('<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
             Swal.fire({
-                        title: 'Merci de patienter...',
+                        title: 'Merci de patienter upload de la vidéo...',
                         icon: 'info'
                     })
         },
@@ -424,7 +424,7 @@ function add(form, mothode, url,idf) {
                     var u = url;
                     var idform = idf;
                     Swal.fire({
-                        title: 'Merci de patienter...',
+                        title: 'Merci de patienter enregistrement des données...',
                         icon: 'info'
                     })
                         console.log(form)
