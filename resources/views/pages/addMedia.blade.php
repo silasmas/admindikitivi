@@ -48,7 +48,7 @@
 
                             {{-- <form method="POST" action="{{isset($media)?route('updateMedia') :route('registerMedia') }}"
                                 enctype="multipart/form-data" id="data"> --}}
-                            <form id="data">
+                            <form id="{{isset($media)?'data' :'dataUpdate' }}">
                                 @csrf
                                 <!-- .fieldset -->
                                 <fieldset>
@@ -411,7 +411,67 @@ $('form#data').submit(function (e) {
                 $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
                 console.log(xhr.responseJSON);
             }
+            Swal.fire({
+                        title: xhr.responseJSON.message,
+                        icon: 'error'
+                    })
+            console.log(xhr.status);
+            console.log(error);
+            console.log(status_description);
+        }
+    });
+});
+$('form#dataUpdate').submit(function (e) {
+    e.preventDefault();
 
+    var formData = new FormData(this);
+    var categories = [];
+    var idMedia = document.getElementById('id');
+    document.querySelectorAll('[name="categories_ids"]').forEach(item => {
+        if (item.checked === true) {
+            categories.push(parseInt(item.value));
+        }
+    });
+
+    for (let i = 0; i < categories.length; i++) {
+        formData.append('categories_ids[' + i + ']', categories[i]);
+    }
+
+    $.ajax({
+        headers: { 'Authorization': 'Bearer 23|fEmzaqAOGb6ld8Cej6NMU0VdXl3UISFkMDhoMLPp1754add6', 'Accept': 'multipart/form-data', 'X-localization': navigator.language },
+        type: 'POST',
+        contentType: 'multipart/form-data',
+        url: apiHost + '/media/'+idMedia.value,
+        data: formData,
+        beforeSend: function () {
+            Swal.fire({
+                        title: 'Merci de patienter upload de la vidéo...',
+                        icon: 'info'
+                    })
+        },
+        success: function (res) {
+            console.log(res.data)
+            console.log( formData)
+            var formElement = document.getElementById('form#data');
+            formData.append('idMedia', res.data.id);
+            add(formData, 'POST', 'registerMedia',"#data")
+        },
+        cache: false,
+        contentType: false,
+        processData: false,
+        error: function (xhr, error, status_description) {
+            if ($('form#data .request-message').hasClass('text-success')) {
+                $('form#data .request-message').removeClass('text-success');
+            }
+
+            if (xhr.responseJSON) {
+                $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
+                console.log(xhr.responseJSON);
+            }
+            Swal.fire({
+                        title: xhr.responseJSON.message,
+                        icon: 'error'
+                    })
             console.log(xhr.status);
             console.log(error);
             console.log(status_description);
