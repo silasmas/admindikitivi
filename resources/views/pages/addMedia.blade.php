@@ -48,7 +48,7 @@
 
                             {{-- <form method="POST" action="{{isset($media)?route('updateMedia') :route('registerMedia') }}"
                                 enctype="multipart/form-data" id="data"> --}}
-                            <form id="{{isset($media)?'data' :'dataUpdate' }}">
+                            <form id="{{isset($media)?'dataUpdate' :'dadta' }}">
                                 @csrf
                                 <!-- .fieldset -->
                                 <fieldset>
