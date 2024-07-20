@@ -439,7 +439,7 @@ $('form#dataUpdate').submit(function (e) {
 
     $.ajax({
         headers: { 'Authorization': 'Bearer 23|fEmzaqAOGb6ld8Cej6NMU0VdXl3UISFkMDhoMLPp1754add6', 'Accept': 'multipart/form-data', 'X-localization': navigator.language },
-        type: 'POST',
+        type: 'PUT',
         contentType: 'multipart/form-data',
         url: apiHost + '/media/'+idMedia.value,
         data: formData,
