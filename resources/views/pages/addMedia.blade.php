@@ -460,6 +460,7 @@ $('form#dataUpdate').submit(function (e) {
         contentType: false,
         processData: false,
         error: function (xhr, error, status_description) {
+            console.log(xhr);
             if ($('form#data .request-message').hasClass('text-success')) {
                 $('form#data .request-message').removeClass('text-success');
             }
