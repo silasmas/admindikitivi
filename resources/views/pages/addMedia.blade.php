@@ -517,7 +517,7 @@ function add(form, mothode, url,idf) {
 
                         },
                         error: function(xhr, status, error){
-                            // alrte("ok")
+                            console.log(xhr);
                             var errors = xhr.responseJSON.errors;
                             var errorMessage = '';
                             $.each(errors, function(key, value){
