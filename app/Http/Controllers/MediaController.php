@@ -281,6 +281,7 @@ class MediaController extends BaseController
             // Upload cover
             $thumbnail_url = 'images/medias/' . $media->id . '/thumbnail';
             $photo = public_path() . '/storage/' . $thumbnail_url . "/" . $media->thumbnail_url;
+            dd(file_exists($photo));
             file_exists($photo) ? unlink($photo) : '';
             file_exists($photo) ? Storage::delete($photo) : '';
             // Upload URL
