@@ -445,7 +445,7 @@ $('form#dataUpdate').submit(function (e) {
         data: formData,
         beforeSend: function () {
             Swal.fire({
-                        title: 'Merci de patienter upload de la vidéo...',
+                        title: 'Merci de patienter la modification de la vidéo...',
                         icon: 'info'
                     })
         },
