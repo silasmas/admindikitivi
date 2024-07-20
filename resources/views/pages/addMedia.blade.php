@@ -454,7 +454,7 @@ $('form#dataUpdate').submit(function (e) {
             console.log( formData)
             var formElement = document.getElementById('form#data');
             formData.append('idMedia', res.data.id);
-            add(formData, 'POST', 'registerMedia',"#data")
+            add(formData, 'POST', '../registerMedia',"#data")
         },
         cache: false,
         contentType: false,
