@@ -289,8 +289,13 @@ class MediaController extends BaseController
         if ($request->categories_ids != null and count($request->categories_ids) > 0) {
             $media->categories()->attach($request->categories_ids);
         }
+        if ($request->categories_ids != null and count($request->categories_ids) > 0) {
+            return response()->json(['reponse' => true, 'msg' => "Modification réussie!!"]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur de modification."]);
 
-        return redirect()->back()->with('msg', 'Média ajouté !');
+        }
+        // return redirect()->back()->with('msg', 'Média ajouté !');
 
     }
     // public function update(Request $request, Media $media)
