@@ -54,7 +54,7 @@
                                 <fieldset>
                                     <legend>Base style</legend> <!-- .form-group -->
                                     <div class="form-group">
-                                        <input name="id" type="text" class="form-control" placeholder=""
+                                        <input name="id" id="idMedia" type="text" class="form-control" placeholder=""
                                             value="{{isset($media)?$media->id:"" }}" hidden>
                                         <label>Titre du Media
                                             <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
@@ -426,7 +426,7 @@ $('form#dataUpdate').submit(function (e) {
 
     var formData = new FormData(this);
     var categories = [];
-    var idMedia = document.getElementById('id');
+    var idMedia = document.getElementById('idMedia');
     document.querySelectorAll('[name="categories_ids"]').forEach(item => {
         if (item.checked === true) {
             categories.push(parseInt(item.value));
