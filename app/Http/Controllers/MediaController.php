@@ -265,7 +265,7 @@ class MediaController extends BaseController
         if ($request->file('cover_url') != null) {
             // Upload cover
             $cover_url = 'images/medias/' . $media->id . '/cover';
-            $photo = public_path() . '/storage/' . $cover_url . "/" . $media->cover_url;
+            $photo = public_path() . '/' . $media->cover_url;
             file_exists($photo) ? unlink($photo) : '';
             file_exists($photo) ? Storage::delete($photo) : '';
 
@@ -280,10 +280,10 @@ class MediaController extends BaseController
             // dd($media);
             // Upload cover
             $thumbnail_url = 'images/medias/' . $media->id . '/thumbnail';
-            $photo = public_path() . '/storage/' . $thumbnail_url . "/" . $media->thumbnail_url;
-            dd(file_exists($photo) . "-" . $photo);
+            $photo = public_path() . $media->thumbnail_url;
+            // dd(file_exists($photo) . "-" . $photo);
             file_exists($photo) ? unlink($photo) : '';
-            file_exists($photo) ? Storage::delete($photo) : '';
+            // file_exists($photo) ? Storage::delete($photo) : '';
             // Upload URL
             $t = Storage::url(Storage::disk('public')->put($thumbnail_url, $request->file('thumbnail_url')));
             $media->update([
