@@ -286,7 +286,7 @@ class MediaController extends BaseController
             // file_exists($photo) ? Storage::delete($photo) : '';
             // Upload URL
             $t = Storage::url(Storage::disk('public')->put($thumbnail_url, $request->file('thumbnail_url')));
-            $media->update([
+            $thumb = $media->update([
                 'thumbnail_url' => '/' . $t,
                 'updated_at' => now(),
             ]);
@@ -295,7 +295,7 @@ class MediaController extends BaseController
         if ($request->categories_ids != null and count($request->categories_ids) > 0) {
             $media->categories()->attach($request->categories_ids);
         }
-        if ($request->categories_ids != null and count($request->categories_ids) > 0) {
+        if ($media) {
             return response()->json(['reponse' => true, 'msg' => "Modification réussie!!"]);
         } else {
             return response()->json(['reponse' => false, 'msg' => "Erreur de modification."]);
