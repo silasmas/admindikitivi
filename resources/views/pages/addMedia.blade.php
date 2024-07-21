@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="{{ asset('assets/vendor/plyr/plyr.css') }}">
 @endsection
 
-@section("content")>
+@section("content")
 
 <main class="app-main">
     <!-- .wrapper -->
@@ -45,10 +45,9 @@
                     <div id="base-style" class="card">
                         <!-- .card-body -->
                         <div class="card-body">
-
                             {{-- <form method="POST" action="{{isset($media)?route('updateMedia') :route('registerMedia') }}"
                                 enctype="multipart/form-data" id="data"> --}}
-                            <form id="{{isset($media)?'dataUpdate' :'dadta' }}">
+                            <form id="{{isset($media)?'dataUpdate':'data'}}">
                                 @csrf
                                 <!-- .fieldset -->
                                 <fieldset>
@@ -332,7 +331,8 @@
                                     <button type="submit" class="btn btn-primary">{{ isset($media)?"Modifier":"Enregistrer" }}</button><br>
                                     <div class="d-flex justify-content-center mt-5 text-center request-message"></div>
 
-                                </fieldset><!-- /.fieldset -->
+                                </fieldset>
+                                <!-- /.fieldset -->
                             </form>
                         </div>
                     </div>
@@ -342,199 +342,197 @@
     </div>
 </main>
 
-<script>
+{{-- <script>
 
-</script>
+</script> --}}
 @endsection
 
 @section("script")
-<script>
-    const navigator = window.navigator;
-    const currentLanguage = $('html').attr('lang');
-    const currentUser = $('[name="dktv-visitor"]').attr('content');
-    const currentHost = $('[name="dktv-url"]').attr('content');
-    const apiHost = $('[name="dktv-api-url"]').attr('content');
-    /* Register form-data */
-$('form#data').submit(function (e) {
-    e.preventDefault();
+    <script>
+        // alert('ok')
+        const navigator = window.navigator;
+        const currentLanguage = $('html').attr('lang');
+        const currentUser = $('[name="dktv-visitor"]').attr('content');
+        const currentHost = $('[name="dktv-url"]').attr('content');
+        const apiHost = $('[name="dktv-api-url"]').attr('content');
+        /* Register form-data */
+        $('form#data').submit(function (e) {
+            e.preventDefault();
 
-    var formData = new FormData(this);
-    var categories = [];
+            var formData = new FormData(this);
+            var categories = [];
 
-    document.querySelectorAll('[name="categories_ids"]').forEach(item => {
-        if (item.checked === true) {
-            categories.push(parseInt(item.value));
-        }
-    });
+            document.querySelectorAll('[name="categories_ids"]').forEach(item => {
+                if (item.checked === true) {
+                    categories.push(parseInt(item.value));
+                }
+            });
 
-    for (let i = 0; i < categories.length; i++) {
-        formData.append('categories_ids[' + i + ']', categories[i]);
-    }
-
-    $.ajax({
-        headers: { 'Authorization': 'Bearer 23|fEmzaqAOGb6ld8Cej6NMU0VdXl3UISFkMDhoMLPp1754add6', 'Accept': 'multipart/form-data', 'X-localization': navigator.language },
-        type: 'POST',
-        contentType: 'multipart/form-data',
-        url: apiHost + '/media',
-        data: formData,
-        beforeSend: function () {
-            // $('form#data .request-message').html('<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
-            Swal.fire({
-                        title: 'Merci de patienter upload de la vidéo...',
-                        icon: 'info'
-                    })
-        },
-        success: function (res) {
-            console.log(res.data)
-            console.log( formData)
-            var formElement = document.getElementById('form#data');
-            formData.append('idMedia', res.data.id);
-            add(formData, 'POST', 'registerMedia',"#data")
-            // if ($('form#data .request-message').hasClass('text-danger')) {
-            //     $('form#data .request-message').removeClass('text-danger');
-            // }
-
-            // $('form#data .request-message').addClass('text-success').html(res.message);
-
-            // document.getElementById('data').reset();
-            // location.reload();
-        },
-        cache: false,
-        contentType: false,
-        processData: false,
-        error: function (xhr, error, status_description) {
-            if ($('form#data .request-message').hasClass('text-success')) {
-                $('form#data .request-message').removeClass('text-success');
+            for (let i = 0; i < categories.length; i++) {
+                formData.append('categories_ids[' + i + ']', categories[i]);
             }
 
-            if (xhr.responseJSON) {
-                $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
-                console.log(xhr.responseJSON);
-            }
-            Swal.fire({
-                        title: xhr.responseJSON.message,
-                        icon: 'error'
-                    })
-            console.log(xhr.status);
-            console.log(error);
-            console.log(status_description);
-        }
-    });
-});
-$('form#dataUpdate').submit(function (e) {
-    e.preventDefault();
-
-    var formData = new FormData(this);
-    var categories = [];
-    var idMedia = document.getElementById('idMedia');
-    document.querySelectorAll('[name="categories_ids"]').forEach(item => {
-        if (item.checked === true) {
-            categories.push(parseInt(item.value));
-        }
-    });
-
-    for (let i = 0; i < categories.length; i++) {
-        formData.append('categories_ids[' + i + ']', categories[i]);
-    }
-
-    $.ajax({
-        headers: { 'Authorization': 'Bearer 23|fEmzaqAOGb6ld8Cej6NMU0VdXl3UISFkMDhoMLPp1754add6', 'Accept': 'multipart/form-data', 'X-localization': navigator.language },
-        type: 'PUT',
-        contentType: 'multipart/form-data',
-        url: apiHost + '/media/'+idMedia.value,
-        data: formData,
-        beforeSend: function () {
-            Swal.fire({
-                        title: 'Merci de patienter la modification de la vidéo...',
-                        icon: 'info'
-                    })
-        },
-        success: function (res) {
-            console.log(res.data)
-            console.log( formData)
-            var formElement = document.getElementById('form#dataUpdate');
-            formData.append('idMedia', res.data.id);
-            add(formData, 'POST', '../updateMedia',"#dataUpdate")
-        },
-        cache: false,
-        contentType: false,
-        processData: false,
-        error: function (xhr, error, status_description) {
-            console.log(xhr);
-            if ($('form#data .request-message').hasClass('text-success')) {
-                $('form#data .request-message').removeClass('text-success');
-            }
-
-            if (xhr.responseJSON) {
-                $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
-                console.log(xhr.responseJSON);
-            }
-            Swal.fire({
-                        title: xhr.responseJSON.message,
-                        icon: 'error'
-                    })
-            console.log(xhr.status);
-            console.log(error);
-            console.log(status_description);
-        }
-    });
-});
-function add(form, mothode, url,idf) {
-                    var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                    var f = form;
-                    var u = url;
-                    var idform = idf;
+            $.ajax({
+                headers: { 'Authorization': 'Bearer 23|fEmzaqAOGb6ld8Cej6NMU0VdXl3UISFkMDhoMLPp1754add6', 'Accept': 'multipart/form-data', 'X-localization': navigator.language },
+                type: 'POST',
+                contentType: 'multipart/form-data',
+                url: apiHost + '/media',
+                data: formData,
+                beforeSend: function () {
+                    // $('form#data .request-message').html('<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
                     Swal.fire({
-                        title: 'Merci de patienter enregistrement des données...',
-                        icon: 'info'
-                    })
-                        console.log(form)
-                    $.ajax({
-                        url: u,
-                        method: mothode,
-                        data: form,
-                        processData: false,
-                        contentType: false,
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken
-                        },
-                        success: function (data) {
+                                title: 'Merci de patienter upload de la vidéo...',
+                                icon: 'info'
+                            })
+                },
+                success: function (res) {
+                    console.log(res.data)
+                    console.log( formData)
+                    var formElement = document.getElementById('form#data');
+                    formData.append('idMedia', res.data.id);
+                    add(formData, 'POST', 'registerMedia',"#data")
+                    // if ($('form#data .request-message').hasClass('text-danger')) {
+                    //     $('form#data .request-message').removeClass('text-danger');
+                    // }
 
-                            if (!data.reponse) {
-                                Swal.fire({
-                                    title: data.msg,
-                                    icon: 'error'
-                                })
-                            } else {
-                                Swal.fire({
-                                    title: data.msg,
-                                    icon: 'success'
-                                })
+                    // $('form#data .request-message').addClass('text-success').html(res.message);
 
-                                $(idform)[0].reset();
-                                actualiser();
-                            }
+                    // document.getElementById('data').reset();
+                    // location.reload();
+                },
+                cache: false,
+                contentType: false,
+                processData: false,
+                error: function (xhr, error, status_description) {
+                    if ($('form#data .request-message').hasClass('text-success')) {
+                        $('form#data .request-message').removeClass('text-success');
+                    }
 
-                        },
-                        error: function(xhr, status, error){
-                            console.log(xhr);
+                    if (xhr.responseJSON) {
+                        $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
+                        console.log(xhr.responseJSON);
+                    }
+                    Swal.fire({
+                                title: xhr.responseJSON.message,
+                                icon: 'error'
+                            })
+                    console.log(xhr.status);
+                    console.log(error);
+                    console.log(status_description);
+                }
+            });
+        });
+        $('form#dataUpdate').submit(function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+            var categories = [];
+            var idMedia = document.getElementById('idMedia');
+            document.querySelectorAll('[name="categories_ids"]').forEach(item => {
+                if (item.checked === true) {
+                    categories.push(parseInt(item.value));
+                }
+            });
+
+            for (let i = 0; i < categories.length; i++) {
+                formData.append('categories_ids[' + i + ']', categories[i]);
+            }
+
+            $.ajax({
+                headers: { 'Authorization': 'Bearer 23|fEmzaqAOGb6ld8Cej6NMU0VdXl3UISFkMDhoMLPp1754add6', 'Accept': 'multipart/form-data', 'X-localization': navigator.language },
+                type: 'PUT',
+                contentType: 'multipart/form-data',
+                url: apiHost + '/media/'+idMedia.value,
+                data: formData,
+                beforeSend: function () {
+                    Swal.fire({
+                                title: 'Merci de patienter la modification de la vidéo...',
+                                icon: 'info'
+                            })
+                },
+                success: function (res) {
+                    console.log(res.data)
+                    console.log( formData)
+                    var formElement = document.getElementById('form#dataUpdate');
+                    formData.append('idMedia', res.data.id);
+                    add(formData, 'POST', '../updateMedia',"#dataUpdate")
+                },
+                cache: false,
+                contentType: false,
+                processData: false,
+                error: function (xhr, error, status_description) {
+                    console.log(xhr);
+                    if ($('form#data .request-message').hasClass('text-success')) {
+                        $('form#data .request-message').removeClass('text-success');
+                    }
+
+                    if (xhr.responseJSON) {
+                        $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
+                        console.log(xhr.responseJSON);
+                    }
+                    Swal.fire({
+                                title: xhr.responseJSON.message,
+                                icon: 'error'
+                            })
+                    console.log(xhr.status);
+                    console.log(error);
+                    console.log(status_description);
+                }
+            });
+        });
+        function add(form, mothode, url,idf) {
+                var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                var f = form;
+                var u = url;
+                var idform = idf;
+                Swal.fire({
+                title: 'Merci de patienter enregistrement des données...',
+                icon: 'info'
+                })
+                console.log(form)
+                $.ajax({
+                    url: u,
+                    method: mothode,
+                    data: form,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function (data) {
+                    if (!data.reponse) {
+                        Swal.fire({
+                            title: data.msg,
+                            icon: 'error'
+                            })
+                        } else {
+                        Swal.fire({
+                            title: data.msg,
+                            icon: 'success'
+                            })
+
+                        $(idform)[0].reset();
+                        actualiser();
+                        }
+                    },
+                    error: function(xhr, status, error){
+                        console.log(xhr);
                             var errors = xhr.responseJSON.errors;
                             var errorMessage = '';
                             $.each(errors, function(key, value){
-                                errorMessage += value + '<br>';
+                            errorMessage += value + '<br>';
                             });
-                             // Afficher les erreurs de validation à l'utilisateur
-                                Swal.fire({
-                                    title: xhr.msg,
-                                    html: errorMessage,
-                                        icon: 'error'
-                                    })
-                            }
-                    });
-                }
-                function actualiser() {
-                    location.reload();
-                }
-</script>
-
+                                        // Afficher les erreurs de validation à l'utilisateur
+                            Swal.fire({
+                                title: xhr.msg,
+                                html: errorMessage,
+                                icon: 'error'
+                            })
+                    }
+                });
+        }
+        function actualiser() {
+        location.reload();
+        }
+    </script>
 @endsection

@@ -14,6 +14,7 @@
 <script src="{{ asset('assets/javascript/theme.min.js') }}"></script> <!-- END THEME JS -->
 <script  src="{{ asset('assets/custom/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
 <!-- BEGIN PAGE LEVEL JS -->
+@yield("script")
 <script>
     var skin = localStorage.getItem('skin') || 'default';
     var isCompact = JSON.parse(localStorage.getItem('hasCompactMenu'));
@@ -23,7 +24,7 @@
     disabledSkinStylesheet.setAttribute('disabled', true);
     // add flag class to html immediately
     if (isCompact == true) document.querySelector('html').classList.add('preparing-compact-menu');
-  </script>
-@yield("script")
+</script>
+
 </body>
 </html>
