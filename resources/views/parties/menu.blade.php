@@ -65,7 +65,7 @@
                     <div class="list-group-item py-2">
                       <a href="#" class="stretched-link"><span class="sr-only">Go to search result</span></a>
                       <div class="user-avatar user-avatar-sm bg-muted">
-                        <img src="assets/images/avatars/bootstrap.svg" alt="">
+                        <img src="{{ asset('assets/images/avatars/bootstrap.svg') }}" alt="">
                       </div>
                       <div class="ml-2">
                         <div class="mb-n1"> Bootstrap </div><small class="text-muted">Just now</small>
@@ -75,7 +75,7 @@
                     <div class="list-group-item py-2">
                       <a href="#" class="stretched-link"><span class="sr-only">Go to search result</span></a>
                       <div class="user-avatar user-avatar-sm bg-muted">
-                        <img src="assets/images/avatars/slack.svg" alt="">
+                        <img src="{{ asset('assets/images/avatars/slack.svg') }}" alt="">
                       </div>
                       <div class="ml-2">
                         <div class="mb-n1"> Slack </div><small class="text-muted">Updated 25 minutes ago</small>
@@ -280,7 +280,8 @@
           <!-- .btn-account -->
           <div class="dropdown d-none d-md-flex">
             <button class="btn-account" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="user-avatar user-avatar-md"><img src="assets/images/avatars/profile.jpg" alt=""></span>
+                <span class="user-avatar user-avatar-md">
+                    <img src="{{ asset('assets/images/avatars/profile.jpg') }}" alt=""></span>
                  <span class="account-summary pr-lg-4 d-none d-lg-block"><span class="account-name">{{ Auth::user()->firstname . ' ' . Auth::user()->lastname }} </span> <span class="account-description">Marketing Manager</span></span></button> <!-- .dropdown-menu -->
             <div class="dropdown-menu">
               <div class="dropdown-arrow d-lg-none" x-arrow=""></div>
