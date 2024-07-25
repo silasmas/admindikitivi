@@ -142,7 +142,7 @@
                   <!-- .dropdown-item -->
                   <a href="#" class="dropdown-item">
                     <div class="user-avatar">
-                      <img src="assets/images/avatars/uifaces18.jpg" alt="">
+                      <img src="{{ asset('assets/images/avatars/uifaces18.jpg') }}" alt="">
                     </div>
                     <div class="dropdown-item-body">
                       <p class="text"> Arthur Carroll updated a project </p><span class="date">1 day ago</span>
