@@ -253,7 +253,7 @@ class MediaController extends BaseController
         $media = Media::find($request->id);
         // dd($media);
 
-        $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/' . $request->id, session()->get("tokenUserActive"), $inputs);
+        // $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/' . $request->id, session()->get("tokenUserActive"), $inputs);
         // if ($series) {
         //     return redirect()->back()->with("msg", "Modification réussie");
 
