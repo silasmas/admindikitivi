@@ -91,10 +91,11 @@
                 <div class="col-sm-6">
                     @if (!empty($m->media_url))
                     <div class="card card-body  item">
+                        {{-- playsinline --}}
                         <span>{{Str::limit($m->media_title, 50, '...')}}</span>
                         <div class="embed-responsive embed-responsive-16by9 w-100">
                             @if ($m->source=="AWS")
-                                <video muted playsinline poster="{{$m->cover_url?$m->cover_url:"" }}" controls>
+                                <video muted  poster="{{$m->cover_url?$m->cover_url:"" }}" controls>
                                     <source src="{{ $m->media_url }}" type="video/mp4">
                                 </video>
                             @else
