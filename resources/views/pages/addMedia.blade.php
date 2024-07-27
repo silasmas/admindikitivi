@@ -462,16 +462,16 @@
                 processData: false,
                 error: function (xhr, error, status_description) {
                     console.log(xhr);
-                    if ($('form#data .request-message').hasClass('text-success')) {
-                        $('form#data .request-message').removeClass('text-success');
-                    }
+                    // if ($('form#data .request-message').hasClass('text-success')) {
+                    //     $('form#data .request-message').removeClass('text-success');
+                    // }
 
-                    if (xhr.responseJSON) {
-                        $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
-                        console.log(xhr.responseJSON);
-                    }
+                    // if (xhr.responseJSON) {
+                    //     $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
+                    //     console.log(xhr.responseJSON);
+                    // }
                     Swal.fire({
-                                title: xhr.responseJSON.message,
+                                title: xhr,
                                 icon: 'error'
                             })
                     console.log(xhr.status);
