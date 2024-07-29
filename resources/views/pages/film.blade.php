@@ -92,7 +92,7 @@
                     @if (!empty($m->media_url))
                     <div class="card card-body  item">
                         {{-- playsinline --}}
-                        <span>{{Str::limit($m->media_title, 50, '...')}}</span>
+                        {{-- <span>{{Str::limit($m->media_title, 50, '...')}}</span> --}}
                         <div class="embed-responsive embed-responsive-16by9 w-100">
                             @if ($m->source=="AWS")
                             {{-- <video muted poster="{{$m->cover_url?$m->cover_url:"" }}" controls>
@@ -103,7 +103,7 @@
                                 <figure class="figure">
                                     <!-- .figure-img -->
                                     <div class="figure-img">
-                                        <img class="img-fluid" src="{{$m->cover_url?$m->cover_url:"assets/images/dummy/img-7.jpg" }}" alt="Card image cap">
+                                        <img class="img-fluid" src="{{$m->cover_url?$m->cover_url:"assets/blank-media-cover.webp" }}" alt="Card image cap">
                                         <div class="figure-description">
                                             <h6 class="figure-title"> Figure description </h6>
                                             <p class="text-muted mb-0">
