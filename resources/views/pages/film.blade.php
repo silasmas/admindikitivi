@@ -103,7 +103,7 @@
                                 <figure class="figure">
                                     <!-- .figure-img -->
                                     <div class="figure-img">
-                                        <img class="img-fluid" src="{{$m->cover_url?$m->cover_url:"assets/blank-media-cover.webp" }}" alt="Card image cap">
+                                        <img class="img-fluid" src="{{$m->cover_url?$m->cover_url:asset('"assets/blank-media-cover.webp"') }}" alt="Card image cap">
                                         <div class="figure-description">
                                             <h6 class="figure-title"> Figure description </h6>
                                             <p class="text-muted mb-0">
@@ -131,7 +131,7 @@
                             {{-- @endif --}}
                         {{-- </div> --}}
                         <div class="mt-3 mb-1 ml-5 row">
-                            <div class="col-sm-3">
+                            <div class="col-sm-12">
                                 <figcaption class="figure-caption">
                                     <ul class="mb-0 list-inline text-muted">
                                         <li class="list-inline-item">
@@ -148,7 +148,7 @@
                                     </ul>
                                 </figcaption>
                             </div>
-                            <div class="col-sm-9 text-right">
+                            <div class="col-sm-12 text-right">
                                 <div class="item">
                                     <span>Type :</span>
                                     <a href="{{ route('types') }}">{{ $m->type->type_name }}</a> /
