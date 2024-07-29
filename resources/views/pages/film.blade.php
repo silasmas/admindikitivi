@@ -128,7 +128,7 @@
                                 class="embed-responsive-item"
                                 src="{{ $m->media_url }}?autoplay=0&amp;controls=0&amp;disablekb=1&amp;playsinline=1&amp;cc_load_policy=0&amp;cc_lang_pref=auto&amp;widget_referrer=file%3A%2F%2F%2FB%3A%2Ftheme-boostrap%2Flooper-bak%2Fdist%2Fcomponent-rich-media.html&amp;noCookie=false&amp;rel=0&amp;showinfo=0&amp;iv_load_policy=3&amp;modestbranding=1&amp;enablejsapi=1&amp;widgetid=1">
                             </iframe> --}}
-                            @endif
+                            {{-- @endif --}}
                         {{-- </div> --}}
                         <div class="mt-3 mb-1 ml-5 row">
                             <div class="col-sm-3">
