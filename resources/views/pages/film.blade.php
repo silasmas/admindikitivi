@@ -112,7 +112,6 @@
                                                 <video muted poster="{{$m->cover_url?$m->cover_url:"" }}" controls>
                                                     <source src="{{ $m->media_url }}" type="video/mp4">
                                                 </video>
-
                                             </div>
                                             @else
                                             <iframe id="youtube-9854" frameborder="0" allowfullscreen="1"
@@ -127,10 +126,10 @@
                                             <a href="#" class="tile tile-circle tile-sm mr-auto"><span
                                                     class="oi oi-data-transfer-download"></span></a> <span
                                                 class="badge badge-warning">{{$m->source}}</span>
-                                        </div> --}}
+                                        </div>
                                         <div class="figure-action">
                                             <a href="#" class="btn btn-block btn-sm btn-primary">Lire la vidéo</a>
-                                        </div>
+                                        </div>--}}
                                     </div><!-- /.figure-img -->
                                 </figure><!-- /.card-figure -->
                             </div>
