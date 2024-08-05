@@ -88,7 +88,7 @@
             <!-- grid row -->
             <div class="row">
                 @forelse ($medias->data as $m)
-                <div class="col-xl-3 col-lg-4 col-sm-6">
+                <div class="col-xl-4 col-lg-4 col-sm-6">
                     @if (!empty($m->media_url))
                     <div class="card card-body  item">
                         {{-- playsinline --}}
