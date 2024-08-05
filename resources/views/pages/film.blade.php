@@ -109,7 +109,7 @@
                                             </p> --}}
                                             @if ($m->source=="AWS")
                                             <div class="ratio ratio-16x9">
-                                                <video muted poster="{{$m->cover_url?$m->cover_url:"" }}" controls>
+                                                <video autoplay muted poster="{{$m->cover_url?$m->cover_url:"" }}" controls>
                                                     <source src="{{ $m->media_url }}" type="video/mp4">
                                                 </video>
                                             </div>
