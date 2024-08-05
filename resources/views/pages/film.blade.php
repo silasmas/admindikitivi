@@ -108,9 +108,12 @@
                                                 <small>{{Str::limit($m->media_title, 50, '...')}}</small>
                                             </p> --}}
                                             @if ($m->source=="AWS")
-                                            <video muted poster="{{$m->cover_url?$m->cover_url:"" }}" controls>
-                                                <source src="{{ $m->media_url }}" type="video/mp4">
-                                            </video>
+                                            <div class="ratio ratio-16x9">
+                                                <video muted poster="{{$m->cover_url?$m->cover_url:"" }}" controls>
+                                                    <source src="{{ $m->media_url }}" type="video/mp4">
+                                                </video>
+
+                                            </div>
                                             @else
                                             <iframe id="youtube-9854" frameborder="0" allowfullscreen="1"
                                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -120,11 +123,11 @@
                                             </iframe>
                                             @endif
                                         </div>
-                                        <div class="figure-tools">
+                                        {{-- <div class="figure-tools">
                                             <a href="#" class="tile tile-circle tile-sm mr-auto"><span
                                                     class="oi oi-data-transfer-download"></span></a> <span
                                                 class="badge badge-warning">{{$m->source}}</span>
-                                        </div>
+                                        </div> --}}
                                         <div class="figure-action">
                                             <a href="#" class="btn btn-block btn-sm btn-primary">Lire la vidéo</a>
                                         </div>
