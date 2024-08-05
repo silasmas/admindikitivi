@@ -24,7 +24,7 @@ class BaseController extends Controller
         $dons = $this::$api_client_manager::call('GET', getApiURL() . '/donation', session()->get("tokenUserActive"));
         $online = $this::$api_client_manager::call('GET', getApiURL() . '/userOnline', session()->get("tokenUserActive"));
 
-        // dd($medias->count);
+        dd($online->count);
 
         return view('pages.home', compact('membres', "medias", "dons", 'online'));
     }
