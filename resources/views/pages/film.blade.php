@@ -117,11 +117,11 @@
                                         <!-- .figure-img -->
 
                                         <div class="image-container">
-                                            <img src="{{$m->cover_url?$m->cover_url:asset('"
-                                                assets/blank-media-cover.webp"') }}" alt="Image" id="hover-image"
-                                                width="300">
                                             @if ($m->source=="AWS")
                                             <div class="ratio ratio-16x9">
+                                                <img src="{{$m->cover_url?$m->cover_url:asset('"
+                                                    assets/blank-media-cover.webp"') }}" alt="Image" id="hover-image"
+                                                    width="300">
                                                 {{-- <video autoplay muted poster="{{$m->cover_url?$m->cover_url:"" }}"
                                                     controls>
                                                     <source src="{{ $m->media_url }}" type="video/mp4">
