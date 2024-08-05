@@ -332,6 +332,20 @@
     let items = document.querySelectorAll('.item');
     let count = 0;
 
+    const image = document.getElementById('hover-image');
+    const video = document.getElementById('hover-video');
+
+    image.addEventListener('mouseenter', () => {
+        video.style.display = 'block'; // Afficher la vidéo
+        video.play(); // Démarrer la lecture de la vidéo
+    });
+
+    image.addEventListener('mouseleave', () => {
+        video.pause(); // Mettre en pause la vidéo
+        video.currentTime = 0; // Revenir au début de la vidéo
+        video.style.display = 'none'; // Masquer la vidéo
+    });
+
     items.forEach(item => {
         let text = item.textContent.toLowerCase();
         if (text.includes(query)) {
