@@ -70,7 +70,7 @@
                         </span>Les utilisatairs en ligne</span>
                     </div>
                     <p class="metric-value h3">
-                      <sub><i class="fas fa-user-circle"></i></sub> <span class="value">{{$online}}</span>
+                      <sub><i class="fas fa-user-circle"></i></sub> <span class="value">{{$online->count}}</span>
                     </p>
                   </a> <!-- /.metric -->
                 </div><!-- /metric column -->
