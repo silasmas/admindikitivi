@@ -414,18 +414,18 @@
                     if ($('form#data .request-message').hasClass('text-success')) {
                         $('form#data .request-message').removeClass('text-success');
                     }
-
-                    if (xhr.responseJSON) {
-                        $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
-                        console.log(xhr.responseJSON);
-                    }
                     Swal.fire({
-                                title: xhr.responseJSON.message,
+                                title: "Erreur de traitement",
                                 icon: 'error'
                             })
                     console.log(xhr.status);
                     console.log(error);
                     console.log(status_description);
+
+                    if (xhr.responseJSON) {
+                        $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
+                        console.log(xhr.responseJSON);
+                    }
                 }
             });
         });
