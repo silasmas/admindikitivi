@@ -380,6 +380,9 @@
                 url:'registerMedia',
                 // url: apiHost + '/media',
                 data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
                 beforeSend: function () {
                     // $('form#data .request-message').html('<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
                     Swal.fire({
@@ -407,10 +410,7 @@
                     // var formElement = document.getElementById('form#data');
                     // formData.append('idMedia', res.data.id);
                     // add(formData, 'POST', 'registerMedia',"#data")
-                },
-                cache: false,
-                contentType: false,
-                processData: false,
+                },                
                 error: function (xhr, error, status_description) {
                     if ($('form#data .request-message').hasClass('text-success')) {
                         $('form#data .request-message').removeClass('text-success');

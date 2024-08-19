@@ -39,157 +39,256 @@ class MediaController extends BaseController
      * @return \Illuminate\Http\Response
      */
 
+    public function old_store(Request $request)
+    {
+        //     $request->validate([
+        //         'media_title' => ['required', 'unique:' . Media::class],
+        //         'type_id' => ['required'],
+        //         'source' => ['required'],
+        //     ]);
+        //     // Get inputs
+        //     $inputs = [
+        //         'media_title' => $request->media_title,
+        //         'media_description' => $request->media_description,
+        //         'source' => $request->source,
+        //         'belonging_count' => $request->belonging_count,
+        //         'time_length' => $request->time_length,
+        //         'media_url' => $request->media_url,
+        //         'author_names' => $request->author_names,
+        //         'artist_names' => $request->artist_names,
+        //         'writer' => $request->writer,
+        //         'director' => $request->director,
+        //         'published_date' => $request->published_date,
+        //         'price' => $request->price,
+        //         'for_youth' => $request->for_youth,
+        //         'is_live' => $request->is_live,
+        //         'belongs_to' => $request->belongs_to,
+        //         'type_id' => $request->type_id,
+        //         'user_id' => $request->user_id,
+        //     ];
+        //     $media = Media::create($inputs);
+        //     if ($request->source == "AWS") {
+        //         // $media = Media::find($request->idMedia);
+        //         if ($request->hasFile('media_file_url')) {
+        //             $file = $request->file('media_file_url');
+        //             $filename = $file->getClientOriginalName();
+        //             $path_url = 'images/medias/' . $media->id . '/' . $filename;
+        //             try {
+        //                 $file->storeAs('images/medias/' . $media->id, $filename, 's3');
+        //             } catch (\Throwable $th) {
+        //                 return response()->json(['reponse' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
+
+        //             }
+
+        //             $media->update([
+        //                 'media_url' => config('filesystems.disks.s3.url') . $path_url,
+        //                 'updated_at' => now(),
+        //             ]);
+        //         }
+        //     }
+        //     if ($inputs['belongs_to'] != null) {
+        //         $media_parent = Media::find($inputs['belongs_to']);
+
+        //         if (is_null($media_parent)) {
+        //             // return redirect()->back()->with('msg', 'Les parents n\'existe pas');
+        //             return response()->json(['reponse' => false, 'msg' => 'Les parents n\'existe pas']);
+
+        //         }
+
+        //         if ($media_parent->belonging_count != null) {
+        //             $count = (int) $media_parent->belonging_count;
+
+        //             $count++;
+
+        //             $media_parent->update([
+        //                 'belonging_count' => $count,
+        //                 'updated_at' => now(),
+        //             ]);
+
+        //         } else {
+        //             $media_parent->update([
+        //                 'belonging_count' => 1,
+        //                 'updated_at' => now(),
+        //             ]);
+        //         }
+        //     }
+
+        //     if ($request->file('teaser_url') != null) {
+        //         $teaser_url = 'images/medias/' . $media->id . '/teaser.' . $request->file('teaser_url')->extension();
+
+        //         // Upload URL
+        //         Storage::url(Storage::disk('public')->put($teaser_url, $inputs['teaser_url']));
+
+        //         $media->update([
+        //             'teaser_url' => '/' . $teaser_url,
+        //             'updated_at' => now(),
+        //         ]);
+        //     }
+
+        //     if ($request->file('cover_url') != null) {
+        //         // Upload cover
+        //         $request->cover_url->storeAs('images/medias/' . $media->id, 'cover.' . $request->file('cover_url')->extension());
+
+        //         $cover_url = 'images/medias/' . $media->id . '/cover.' . $request->file('cover_url')->extension();
+
+        //         $media->update([
+        //             'cover_url' => '/' . $cover_url,
+        //             'updated_at' => now(),
+        //         ]);
+        //     }
+        //     if ($request->file('thumbnail_url') != null) {
+        //         // Upload cover
+        //         $request->thumbnail_url->storeAs('images/medias/' . $media->id, 'thumbnail.' . $request->file('thumbnail_url')->extension());
+
+        //         $cover_url = 'images/medias/' . $media->id . '/thumbnail.' . $request->file('thumbnail_url')->extension();
+
+        //         $media->update([
+        //             'thumbnail_url' => '/' . $cover_url,
+        //             'updated_at' => now(),
+        //         ]);
+        //     }
+
+        //     if ($request->categories_ids != null and count($request->categories_ids) > 0) {
+        //         $media->categories()->attach($request->categories_ids);
+        //     }
+        //     if ($request->categories_ids != null and count($request->categories_ids) > 0) {
+        //         return response()->json(['reponse' => true, 'msg' => "Enregistrement réussi"]);
+        //     } else {
+        //         return response()->json(['reponse' => false, 'msg' => "Erreur d'enregistrement"]);
+
+        //     }
+        // }
+
+        // public function store(Request $request)
+        // {
+        //     // dd($request->categories_ids);
+        //     // Get inputs
+        //     $inputs = [
+        //         'media_title' => $request->media_title,
+        //         'media_description' => $request->media_description,
+        //         'belonging_count' => $request->belonging_count,
+        //         'source' => $request->source,
+        //         'time_length' => $request->time_length,
+        //         'media_url' => $request->media_url,
+        //         'teaser_url' => $request->teaser_url,
+        //         // 'teaser_url' => $request->file('teaser_url'),
+        //         'author_names' => $request->author_names,
+        //         'artist_names' => $request->artist_names,
+        //         'writer' => $request->writer,
+        //         'director' => $request->director,
+        //         'published_date' => $request->published_date,
+        //         'cover_url' => $request->file('cover_url'),
+        //         'price' => $request->price,
+        //         'for_youth' => $request->for_youth,
+        //         'is_live' => $request->is_live,
+        //         'belongs_to' => $request->belongs_to,
+        //         'type_id' => $request->type_id,
+        //         'user_id' => $request->user_id,
+        //         'categories_ids' => $request->categories_ids,
+        //     ];
+        //     // dd($inputs);
+        //     $series = $this::$api_client_manager::call('POST', getApiURL() . '/media', session()->get("tokenUserActive"), $inputs);
+        //     return redirect()->back()->with("msg", "Enregistrement réussi");
+    }
     public function store(Request $request)
     {
+        // Validate incoming request
         $request->validate([
             'media_title' => ['required', 'unique:' . Media::class],
             'type_id' => ['required'],
             'source' => ['required'],
         ]);
-        // Get inputs
-        $inputs = [
-            'media_title' => $request->media_title,
-            'media_description' => $request->media_description,
-            'source' => $request->source,
-            'belonging_count' => $request->belonging_count,
-            'time_length' => $request->time_length,
-            'media_url' => $request->media_url,
-            'author_names' => $request->author_names,
-            'artist_names' => $request->artist_names,
-            'writer' => $request->writer,
-            'director' => $request->director,
-            'published_date' => $request->published_date,
-            'price' => $request->price,
-            'for_youth' => $request->for_youth,
-            'is_live' => $request->is_live,
-            'belongs_to' => $request->belongs_to,
-            'type_id' => $request->type_id,
-            'user_id' => $request->user_id,
-        ];
+
+        // Prepare input data for media creation
+        $inputs = $request->only([
+            'media_title',
+            'media_description',
+            'source',
+            'belonging_count',
+            'time_length',
+            'media_url',
+            'author_names',
+            'artist_names',
+            'writer',
+            'director',
+            'published_date',
+            'price',
+            'for_youth',
+            'is_live',
+            'belongs_to',
+            'type_id',
+            'user_id',
+        ]);
+
+        // Create the media record
         $media = Media::create($inputs);
-        if ($request->source == "AWS") {
-            // $media = Media::find($request->idMedia);
-            if ($request->hasFile('media_file_url')) {
-                $file = $request->file('media_file_url');
-                $filename = $file->getClientOriginalName();
-                $path_url = 'images/medias/' . $media->id . '/' . $filename;
-                try {
-                    $file->storeAs('images/medias/' . $media->id, $filename, 's3');
-                } catch (\Throwable $th) {
-                    return response()->json(['reponse' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
 
-                }
+        // Handle file upload if source is AWS
+        if ($request->source == "AWS" && $request->hasFile('media_file_url')) {
+            $file = $request->file('media_file_url');
+            $filename = $file->getClientOriginalName();
+            $path_url = 'images/medias/' . $media->id . '/' . $filename;
 
+            try {
+                $file->storeAs('images/medias/' . $media->id, $filename, 's3');
                 $media->update([
                     'media_url' => config('filesystems.disks.s3.url') . $path_url,
                     'updated_at' => now(),
                 ]);
+            } catch (\Throwable $th) {
+                return response()->json(['response' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
             }
         }
+
+        // Update belonging count if applicable
         if ($inputs['belongs_to'] != null) {
             $media_parent = Media::find($inputs['belongs_to']);
 
             if (is_null($media_parent)) {
-                // return redirect()->back()->with('msg', 'Les parents n\'existe pas');
-                return response()->json(['reponse' => false, 'msg' => 'Les parents n\'existe pas']);
-
+                return response()->json(['response' => false, 'msg' => 'Les parents n\'existe pas']);
             }
 
-            if ($media_parent->belonging_count != null) {
-                $count = (int) $media_parent->belonging_count;
-
-                $count++;
-
-                $media_parent->update([
-                    'belonging_count' => $count,
-                    'updated_at' => now(),
-                ]);
-
-            } else {
-                $media_parent->update([
-                    'belonging_count' => 1,
-                    'updated_at' => now(),
-                ]);
-            }
+            // Increment belonging count
+            $media_parent->increment('belonging_count', 1);
         }
 
-        if ($request->file('teaser_url') != null) {
-            $teaser_url = 'images/medias/' . $media->id . '/teaser.' . $request->file('teaser_url')->extension();
-
-            // Upload URL
-            Storage::url(Storage::disk('public')->put($teaser_url, $inputs['teaser_url']));
+        // Handle teaser URL upload
+        if ($request->hasFile('teaser_url')) {
+            $teaserPath = 'images/medias/' . $media->id . '/teaser.' . $request->file('teaser_url')->extension();
+            Storage::disk('public')->put($teaserPath, file_get_contents($request->file('teaser_url')));
 
             $media->update([
-                'teaser_url' => '/' . $teaser_url,
+                'teaser_url' => '/' . $teaserPath,
                 'updated_at' => now(),
             ]);
         }
 
-        if ($request->file('cover_url') != null) {
-            // Upload cover
-            $request->cover_url->storeAs('images/medias/' . $media->id, 'cover.' . $request->file('cover_url')->extension());
-
-            $cover_url = 'images/medias/' . $media->id . '/cover.' . $request->file('cover_url')->extension();
-
-            $media->update([
-                'cover_url' => '/' . $cover_url,
-                'updated_at' => now(),
-            ]);
-        }
-        if ($request->file('thumbnail_url') != null) {
-            // Upload cover
-            $request->thumbnail_url->storeAs('images/medias/' . $media->id, 'thumbnail.' . $request->file('thumbnail_url')->extension());
-
-            $cover_url = 'images/medias/' . $media->id . '/thumbnail.' . $request->file('thumbnail_url')->extension();
+        // Handle cover URL upload
+        if ($request->hasFile('cover_url')) {
+            $coverPath = 'images/medias/' . $media->id . '/cover.' . $request->file('cover_url')->extension();
+            $request->file('cover_url')->storeAs('images/medias/' . $media->id, 'cover.' . $request->file('cover_url')->extension());
 
             $media->update([
-                'thumbnail_url' => '/' . $cover_url,
+                'cover_url' => '/' . $coverPath,
                 'updated_at' => now(),
             ]);
         }
 
-        if ($request->categories_ids != null and count($request->categories_ids) > 0) {
-            $media->categories()->attach($request->categories_ids);
-        }
-        if ($request->categories_ids != null and count($request->categories_ids) > 0) {
-            return response()->json(['reponse' => true, 'msg' => "Enregistrement réussi"]);
-        } else {
-            return response()->json(['reponse' => false, 'msg' => "Erreur d'enregistrement"]);
+        // Handle thumbnail URL upload
+        if ($request->hasFile('thumbnail_url')) {
+            $thumbnailPath = 'images/medias/' . $media->id . '/thumbnail.' . $request->file('thumbnail_url')->extension();
+            $request->file('thumbnail_url')->storeAs('images/medias/' . $media->id, 'thumbnail.' . $request->file('thumbnail_url')->extension());
 
+            // Update the media record with the thumbnail URL
+            $media->update([
+                'thumbnail_url' => '/' . $thumbnailPath,
+                'updated_at' => now(),
+            ]);
         }
+
+        return response()->json(['response' => true, 'msg' => 'Media created successfully', 'data' => $media]);
     }
 
-    // public function store(Request $request)
-    // {
-    //     // dd($request->categories_ids);
-    //     // Get inputs
-    //     $inputs = [
-    //         'media_title' => $request->media_title,
-    //         'media_description' => $request->media_description,
-    //         'belonging_count' => $request->belonging_count,
-    //         'source' => $request->source,
-    //         'time_length' => $request->time_length,
-    //         'media_url' => $request->media_url,
-    //         'teaser_url' => $request->teaser_url,
-    //         // 'teaser_url' => $request->file('teaser_url'),
-    //         'author_names' => $request->author_names,
-    //         'artist_names' => $request->artist_names,
-    //         'writer' => $request->writer,
-    //         'director' => $request->director,
-    //         'published_date' => $request->published_date,
-    //         'cover_url' => $request->file('cover_url'),
-    //         'price' => $request->price,
-    //         'for_youth' => $request->for_youth,
-    //         'is_live' => $request->is_live,
-    //         'belongs_to' => $request->belongs_to,
-    //         'type_id' => $request->type_id,
-    //         'user_id' => $request->user_id,
-    //         'categories_ids' => $request->categories_ids,
-    //     ];
-    //     // dd($inputs);
-    //     $series = $this::$api_client_manager::call('POST', getApiURL() . '/media', session()->get("tokenUserActive"), $inputs);
-    //     return redirect()->back()->with("msg", "Enregistrement réussi");
-    // }
     public function store_cat(Request $request)
     {
         // dd($request->category_name_fr);
