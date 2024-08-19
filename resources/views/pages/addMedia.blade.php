@@ -395,17 +395,18 @@
                 },
                 success: function (res) {
                     console.log(res)
-                    if (!res.reponse) {
+                    if (res.reponse==false) {
                         Swal.fire({
                             title: res.msg,
                             icon: 'error'
                         })
                         console.log(res.data)
-                        } else {
+                    } else {
                         Swal.fire({
                             title: res.msg,
                             icon: 'success'
-                            })
+                        })
+                        console.log(res.data)
 
                         $("#data")[0].reset();
                         actualiser();
@@ -419,7 +420,7 @@
                         $('form#data .request-message').removeClass('text-success');
                     }
                     Swal.fire({
-                                title: "Erreur de traitement",
+                                title: xhr.responseJSON.message?xhr.responseJSON.message:"Erreur de traitement",
                                 icon: 'error'
                             })
                     console.log(xhr.status);
