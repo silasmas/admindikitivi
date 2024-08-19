@@ -354,8 +354,8 @@
         const currentLanguage = $('html').attr('lang');
         // const currentUser = $('[name="dktv-visitor"]').attr('content');
         // const currentHost = $('[name="dktv-url"]').attr('content');
-        const apiHost = "";
-        // const apiHost = $('[name="dktv-api-url"]').attr('content');
+
+        const apiHost = $('[name="dktv-api-url"]').attr('content');
         /* Register form-data */
         $('form#data').submit(function (e) {
             e.preventDefault();
