@@ -389,17 +389,23 @@
                 success: function (res) {
                     console.log(res.data)
                     console.log( formData)
-                    var formElement = document.getElementById('form#data');
-                    formData.append('idMedia', res.data.id);
-                    add(formData, 'POST', 'registerMedia',"#data")
-                    // if ($('form#data .request-message').hasClass('text-danger')) {
-                    //     $('form#data .request-message').removeClass('text-danger');
-                    // }
+                    if (!res.reponse) {
+                        Swal.fire({
+                            title: res.msg,
+                            icon: 'error'
+                            })
+                        } else {
+                        Swal.fire({
+                            title: res.msg,
+                            icon: 'success'
+                            })
 
-                    // $('form#data .request-message').addClass('text-success').html(res.message);
-
-                    // document.getElementById('data').reset();
-                    // location.reload();
+                        $("#data")[0].reset();
+                        actualiser();
+                        }
+                    // var formElement = document.getElementById('form#data');
+                    // formData.append('idMedia', res.data.id);
+                    // add(formData, 'POST', 'registerMedia',"#data")
                 },
                 cache: false,
                 contentType: false,
