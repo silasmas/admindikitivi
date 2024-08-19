@@ -362,7 +362,7 @@
 
             var formData = new FormData(this);
             var categories = [];
-
+            var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             document.querySelectorAll('[name="categories_ids"]').forEach(item => {
                 if (item.checked === true) {
                     categories.push(parseInt(item.value));
@@ -374,7 +374,7 @@
             }
 
             $.ajax({
-                headers: { 'Authorization': 'Bearer 23|fEmzaqAOGb6ld8Cej6NMU0VdXl3UISFkMDhoMLPp1754add6', 'Accept': 'multipart/form-data', 'X-localization': navigator.language },
+                // headers: { 'Authorization': 'Bearer 23|fEmzaqAOGb6ld8Cej6NMU0VdXl3UISFkMDhoMLPp1754add6', 'Accept': 'multipart/form-data', 'X-localization': navigator.language },
                 type: 'POST',
                 contentType: 'multipart/form-data',
                 url:'registerMedia',
@@ -383,6 +383,9 @@
                 cache: false,
                 contentType: false,
                 processData: false,
+                headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        },
                 beforeSend: function () {
                     // $('form#data .request-message').html('<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
                     Swal.fire({
@@ -410,7 +413,7 @@
                     // var formElement = document.getElementById('form#data');
                     // formData.append('idMedia', res.data.id);
                     // add(formData, 'POST', 'registerMedia',"#data")
-                },                
+                },
                 error: function (xhr, error, status_description) {
                     if ($('form#data .request-message').hasClass('text-success')) {
                         $('form#data .request-message').removeClass('text-success');
