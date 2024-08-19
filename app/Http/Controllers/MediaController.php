@@ -372,23 +372,13 @@ class MediaController extends BaseController
             'user_id' => $request->user_id,
         ];
         $media = Media::find($request->id);
-        // dd($media);
-
-        // $series = $this::$api_client_manager::call('PUT', getApiURL() . '/media/' . $request->id, session()->get("tokenUserActive"), $inputs);
-        // if ($series) {
-        //     return redirect()->back()->with("msg", "Modification réussie");
-
-        // } else {
-        //     return redirect()->back()->with("msg", "Erreur de modification");
-
-        // }
 
         if ($request->file('cover_url') != null) {
             // Upload cover
             $cover_url = 'images/medias/' . $media->id . '/cover';
             $photo = public_path() . '/' . $media->cover_url;
             file_exists($photo) ? unlink($photo) : '';
-            file_exists($photo) ? Storage::delete($photo) : '';
+            // file_exists($photo) ? Storage::delete($photo) : '';
 
             // Upload URL
             $t = Storage::url(Storage::disk('public')->put($cover_url, $request->file('cover_url')));
