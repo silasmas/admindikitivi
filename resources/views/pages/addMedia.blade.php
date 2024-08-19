@@ -376,7 +376,8 @@
                 headers: { 'Authorization': 'Bearer 23|fEmzaqAOGb6ld8Cej6NMU0VdXl3UISFkMDhoMLPp1754add6', 'Accept': 'multipart/form-data', 'X-localization': navigator.language },
                 type: 'POST',
                 contentType: 'multipart/form-data',
-                url: apiHost + '/media',
+                url:'registerMedia',
+                // url: apiHost + '/media',
                 data: formData,
                 beforeSend: function () {
                     // $('form#data .request-message').html('<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');

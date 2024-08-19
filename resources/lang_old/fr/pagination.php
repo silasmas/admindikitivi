@@ -1,8 +1,4 @@
 <?php
-/**
- * @author Xanders
- * @see https://www.linkedin.com/in/xanders-samoth-b2770737/
- */
 
 return [
 
@@ -17,7 +13,7 @@ return [
     |
     */
 
-    'previous' => '&laquo; Pécédent',
-    'next' => 'Suivant &raquo;',
+    'previous' => '&laquo; Previous',
+    'next' => 'Next &raquo;',
 
 ];

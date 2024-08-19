@@ -1,4 +1,8 @@
 <?php
+/**
+ * @author Xanders
+ * @see https://www.linkedin.com/in/xanders-samoth-b2770737/
+ */
 
 return [
 
@@ -14,9 +18,9 @@ return [
     */
 
     'reset' => 'Votre mot de passe a été réinitialisé !',
-    'sent' => 'Nous vous avons envoyé votre lien de réinitialisation de mot de passe par e-mail !',
-    'throttled' => 'Veuillez patienter avant de réessayer.',
+    'sent' => 'Nous avons envoyé votre e-mail de réinitialisation de mot de passe !',
+    'throttled' => 'Veuillez attendre avant de rééssayer.',
     'token' => 'Ce jeton de réinitialisation de mot de passe est invalide.',
-    'user' => "Nous ne trouvons pas d'utilisateur avec cette adresse e-mail.",
+    'user' => "Nous n'avons pas trouvé un utilisateur avec cette addresse e-mail.",
 
 ];

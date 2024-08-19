@@ -61,15 +61,21 @@ class MediaController extends BaseController
             'type_id' => $request->type_id,
             'user_id' => $request->user_id,
         ];
-
-        // $media = Media::create($inputs);
-        $media = Media::find($request->idMedia);
+        $request->validate([
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'type_id' => ['required'],
+            'media_title' => ['required', 'unique:' . Media::class],
+        ]);
+        $media = Media::create($inputs);
+        // $media = Media::find($request->idMedia);
 
         if ($inputs['belongs_to'] != null) {
             $media_parent = Media::find($inputs['belongs_to']);
 
             if (is_null($media_parent)) {
-                return redirect()->back()->with('msg', 'Les parents n\'existe pas');
+                // return redirect()->back()->with('msg', 'Les parents n\'existe pas');
+                return response()->json(['reponse' => false, 'msg' => 'Les parents n\'existe pas']);
+
             }
 
             if ($media_parent->belonging_count != null) {
@@ -89,7 +95,22 @@ class MediaController extends BaseController
                 ]);
             }
         }
+        if ($request->hasFile('media_file_url')) {
+            $file = $request->file('media_file_url');
+            $filename = $file->getClientOriginalName();
+            $path_url = 'images/medias/' . $media->id . '/' . $filename;
+            try {
+                $file->storeAs('images/medias/' . $media->id, $filename, 's3');
+            } catch (\Throwable $th) {
+                return response()->json(['reponse' => false, 'msg' => "Erreur d'enregistrement de la vidéo"]);
 
+            }
+
+            $media->update([
+                'media_url' => config('filesystems.disks.s3.url') . $path_url,
+                'updated_at' => now(),
+            ]);
+        }
         if ($request->file('teaser_url') != null) {
             $teaser_url = 'images/medias/' . $media->id . '/teaser.' . $request->file('teaser_url')->extension();
 
@@ -134,7 +155,6 @@ class MediaController extends BaseController
             return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
 
         }
-        // return redirect()->back()->with('msg', 'Média ajouté !');
     }
 
     // public function store(Request $request)
