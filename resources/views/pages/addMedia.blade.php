@@ -387,13 +387,13 @@
                             })
                 },
                 success: function (res) {
-                    console.log(res.data)
-                    console.log( formData)
+                    console.log(res)
                     if (!res.reponse) {
                         Swal.fire({
                             title: res.msg,
                             icon: 'error'
-                            })
+                        })
+                        console.log(res.data)
                         } else {
                         Swal.fire({
                             title: res.msg,

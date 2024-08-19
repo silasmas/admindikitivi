@@ -102,7 +102,7 @@ class MediaController extends BaseController
             try {
                 $file->storeAs('images/medias/' . $media->id, $filename, 's3');
             } catch (\Throwable $th) {
-                return response()->json(['reponse' => false, 'msg' => "Erreur d'enregistrement de la vidéo"]);
+                return response()->json(['reponse' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
 
             }
 
