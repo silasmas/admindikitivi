@@ -427,7 +427,7 @@
                                     icon: 'error'
                                 });
                             }
-                        console.log("erreur": xhr);
+                        console.log("erreur", xhr);
                         console.log(xhr.status);
                         console.log(error);
 
@@ -489,7 +489,7 @@
                                     icon: 'error'
                                 });
                             }
-                        console.log("erreur": xhr);
+                        console.log("erreur", xhr);
                         console.log(xhr.status);
                         console.log(error);
 
@@ -547,7 +547,7 @@
                                     icon: 'error'
                                 });
                             }
-                        console.log("erreur": xhr);
+                        console.log("erreur", xhr);
                         console.log(xhr.status);
                         console.log(error);
 
