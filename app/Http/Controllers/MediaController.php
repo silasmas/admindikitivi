@@ -41,6 +41,11 @@ class MediaController extends BaseController
 
     public function store(Request $request)
     {
+        $request->validate([
+            'media_title' => ['required', 'unique:' . Media::class],
+            'type_id' => ['required'],
+            'source' => ['required'],
+        ]);
         // Get inputs
         $inputs = [
             'media_title' => $request->media_title,
@@ -61,28 +66,25 @@ class MediaController extends BaseController
             'type_id' => $request->type_id,
             'user_id' => $request->user_id,
         ];
-        $request->validate([
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'type_id' => ['required'],
-            'media_title' => ['required', 'unique:' . Media::class],
-        ]);
         $media = Media::create($inputs);
-        // $media = Media::find($request->idMedia);
-        if ($request->hasFile('media_file_url')) {
-            $file = $request->file('media_file_url');
-            $filename = $file->getClientOriginalName();
-            $path_url = 'images/medias/' . $media->id . '/' . $filename;
-            try {
-                $file->storeAs('images/medias/' . $media->id, $filename, 's3');
-            } catch (\Throwable $th) {
-                return response()->json(['reponse' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
+        if ($request->source == "AWS") {
+            // $media = Media::find($request->idMedia);
+            if ($request->hasFile('media_file_url')) {
+                $file = $request->file('media_file_url');
+                $filename = $file->getClientOriginalName();
+                $path_url = 'images/medias/' . $media->id . '/' . $filename;
+                try {
+                    $file->storeAs('images/medias/' . $media->id, $filename, 's3');
+                } catch (\Throwable $th) {
+                    return response()->json(['reponse' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
 
+                }
+
+                $media->update([
+                    'media_url' => config('filesystems.disks.s3.url') . $path_url,
+                    'updated_at' => now(),
+                ]);
             }
-
-            $media->update([
-                'media_url' => config('filesystems.disks.s3.url') . $path_url,
-                'updated_at' => now(),
-            ]);
         }
         if ($inputs['belongs_to'] != null) {
             $media_parent = Media::find($inputs['belongs_to']);
@@ -152,7 +154,7 @@ class MediaController extends BaseController
         if ($request->categories_ids != null and count($request->categories_ids) > 0) {
             return response()->json(['reponse' => true, 'msg' => "Enregistrement réussi"]);
         } else {
-            return response()->json(['reponse' => false, 'msg' => "Erreur de suppression."]);
+            return response()->json(['reponse' => false, 'msg' => "Erreur d'enregistrement"]);
 
         }
     }

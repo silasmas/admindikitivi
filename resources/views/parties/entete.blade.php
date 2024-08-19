@@ -19,7 +19,7 @@
 
     <meta name="keywords" content="@lang('miscellaneous.keywords')">
     <meta name="dktv-url" content="{{ getWebURL() }}">
-    <meta name="dktv-visitor" content="{{ !empty(Auth::user()) ? Auth::user()->id : null }}">
+    <meta name="dktv-visitor" content="{{!empty(Auth::user()) ? Auth::user()->id : null }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="dktv-ref" content="{{ !empty(Auth::user()) ? Auth::user()->api_token : null }}">
     <meta name="dktv-api-url" content="{{ getApiURL() }}">
