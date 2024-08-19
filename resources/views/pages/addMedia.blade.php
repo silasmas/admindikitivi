@@ -532,10 +532,17 @@
                         }
                     },
                     error: function(xhr, status, error){
-                        Swal.fire({
-                                title: xhr.responseJSON.message?xhr.responseJSON.message:"Erreur de traitement",
-                                icon: 'error'
-                            })
+                        if (xhr.status === 200) {
+                                Swal.fire({
+                                    title: xhr.responseJSON.message || "Succès",
+                                    icon: 'success'
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : "Erreur de traitement",
+                                    icon: 'error'
+                                });
+                            }
                         console.log(xhr.status);
                         console.log(error);
                         console.log(status_description);
