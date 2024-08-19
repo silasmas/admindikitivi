@@ -416,16 +416,20 @@
                     // add(formData, 'POST', 'registerMedia',"#data")
                 },
                 error: function (xhr, error, status_description) {
-                    if ($('form#data .request-message').hasClass('text-success')) {
-                        $('form#data .request-message').removeClass('text-success');
-                    }
-                    Swal.fire({
-                                title: xhr.responseJSON.message?xhr.responseJSON.message:"Erreur de traitement",
-                                icon: 'error'
-                            })
-                    console.log(xhr.status);
-                    console.log(error);
-                    console.log(status_description);
+                            if (xhr.status === 200) {
+                                Swal.fire({
+                                    title: xhr.responseJSON.message || "Succès",
+                                    icon: 'success'
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : "Erreur de traitement",
+                                    icon: 'error'
+                                });
+                            }
+                        console.log("erreur": xhr);
+                        console.log(xhr.status);
+                        console.log(error);
 
                     if (xhr.responseJSON) {
                         $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
@@ -473,7 +477,7 @@
                 contentType: false,
                 processData: false,
                 error: function (xhr, error, status_description) {
-                    console.log(xhr);
+
                             if (xhr.status === 200) {
                                 Swal.fire({
                                     title: xhr.responseJSON.message || "Succès",
@@ -485,9 +489,9 @@
                                     icon: 'error'
                                 });
                             }
-                    console.log(xhr.status);
-                    console.log(error);
-                    console.log(status_description);
+                        console.log("erreur": xhr);
+                        console.log(xhr.status);
+                        console.log(error);
 
                     if (xhr.responseJSON) {
                         $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
@@ -543,9 +547,9 @@
                                     icon: 'error'
                                 });
                             }
+                        console.log("erreur": xhr);
                         console.log(xhr.status);
                         console.log(error);
-                        console.log(status_description);
 
                         if (xhr.responseJSON) {
                             $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
