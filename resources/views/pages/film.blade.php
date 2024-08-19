@@ -103,7 +103,7 @@
                                 <figure class="figure">
                                     <!-- .figure-img -->
                                     <div class="figure-img">
-                                        <img class="img-fluid" src="{{$m->cover_url?$m->cover_url:asset('"assets/blank-media-cover.webp"') }}" alt="Pas des couverture">
+                                        <img class="img-fluid" src="{{$m->cover_url?$m->cover_url:asset('assets/blank-media-cover.webp') }}" alt="Pas des couverture">
                                         <div class="figure-description">
                                             <h6 class="figure-title"> Figure description </h6>
                                             <p class="text-muted mb-0">
@@ -174,7 +174,7 @@
                                 <figure class="figure">
                                     <!-- .figure-img -->
                                     <div class="figure-img">
-                                        <img class="img-fluid" src="{{ asset($m->cover_url)}}" alt="Card image cap">
+                                        <img class="img-fluid" src="{{$m->cover_url?$m->cover_url:asset('assets/blank-media-cover.webp') }}" alt="Pas des couverture">
                                         <a href="{{ asset($m->cover_url) }}" class="img-link" data-size="600x450">
                                             <span class="tile tile-circle bg-danger"><span class="oi oi-eye"></span>
                                             </span> <span class="img-caption d-none">Image caption goes
