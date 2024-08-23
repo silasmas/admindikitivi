@@ -254,38 +254,70 @@ class MediaController extends BaseController
 
         // Handle teaser URL upload
         if ($request->hasFile('teaser_url')) {
-            $teaserPath = 'images/medias/' . $media->id . '/teaser.' . $request->file('teaser_url')->extension();
-            Storage::disk('public')->put($teaserPath, file_get_contents($request->file('teaser_url')));
+            try {
+                // Définir le chemin du teaser
+                $teaserPath = 'images/medias/' . $media->id . '/teaser.' . $request->file('teaser_url')->extension();
 
-            $media->update([
-                'teaser_url' => '/' . $teaserPath,
-                'updated_at' => now(),
-            ]);
+                // Stocker le fichier dans le disque public
+                $fileContent = file_get_contents($request->file('teaser_url'));
+                Storage::disk('public')->put($teaserPath, $fileContent);
+
+                // Mettre à jour le modèle media
+                $media->update([
+                    'teaser_url' => '/' . $teaserPath,
+                    'updated_at' => now(),
+                ]);
+            } catch (\Exception $e) {
+                // Gérer l'exception (journaliser l'erreur, retourner une réponse appropriée, etc.)
+                // Log::error('Erreur lors du téléchargement du teaser : ' . $e->getMessage());
+                return response()->json(['response' => false, 'msg' => 'Erreur lors du téléchargement du teaser.'], 500);
+            }
         }
 
         // Handle cover URL upload
         if ($request->hasFile('cover_url')) {
-            $coverPath = 'images/medias/' . $media->id . '/cover.' . $request->file('cover_url')->extension();
-            $request->file('cover_url')->storeAs('images/medias/' . $media->id, 'cover.' . $request->file('cover_url')->extension());
+            try {
+                // Définir le chemin de la couverture
+                $coverPath = 'images/medias/' . $media->id . '/cover.' . $request->file('cover_url')->extension();
 
-            $media->update([
-                'cover_url' => '/' . $coverPath,
-                'updated_at' => now(),
-            ]);
+                // Stocker le fichier avec un nom spécifique
+                $fileContent = file_get_contents($request->file('teaser_url'));
+                Storage::disk('public')->put($coverPath, $fileContent);
+                // $request->file('cover_url')->storeAs('images/medias/' . $media->id, 'cover.' . $request->file('cover_url')->extension());
+
+                // Mettre à jour le modèle media
+                $media->update([
+                    'cover_url' => '/' . $coverPath,
+                    'updated_at' => now(),
+                ]);
+            } catch (\Exception $e) {
+                // Gérer l'exception (journaliser l'erreur, retourner une réponse appropriée, etc.)
+                return response()->json(['response' => false, 'msg' => 'Erreur lors du téléchargement de la couverture.'], 500);
+
+            }
         }
 
         // Handle thumbnail URL upload
         if ($request->hasFile('thumbnail_url')) {
-            $thumbnailPath = 'images/medias/' . $media->id . '/thumbnail.' . $request->file('thumbnail_url')->extension();
-            $request->file('thumbnail_url')->storeAs('images/medias/' . $media->id, 'thumbnail.' . $request->file('thumbnail_url')->extension());
+            try {
+                // Définir le chemin de la miniature
+                $thumbnailPath = 'images/medias/' . $media->id . '/thumbnail.' . $request->file('thumbnail_url')->extension();
 
-            // Update the media record with the thumbnail URL
-            $media->update([
-                'thumbnail_url' => '/' . $thumbnailPath,
-                'updated_at' => now(),
-            ]);
+                // Stocker le fichier dans le dossier storage
+                $request->file('thumbnail_url')->storeAs('public/' . $thumbnailPath, 'thumbnail.' . $request->file('thumbnail_url')->extension());
+
+                // Mettre à jour le modèle media avec l'URL de la miniature
+                $media->update([
+                    'thumbnail_url' => Storage::url($thumbnailPath), // Générer l'URL accessible
+                    'updated_at' => now(),
+                ]);
+            } catch (\Exception $e) {
+                // Gérer l'exception (journaliser l'erreur, retourner une réponse appropriée, etc.)
+                return response()->json(['response' => false, 'msg' => 'Erreur lors du téléchargement de la miniature.'], 500);
+
+            }
         }
-        
+
         return response()->json(['response' => true, 'msg' => 'Media created successfully', 'data' => $media]);
     }
 
