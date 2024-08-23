@@ -521,7 +521,7 @@
                     },
                     success: function (data) {
                         console.log(data.data)
-                    if (!data.reponse) {
+                    if (data.reponse==false) {
                         Swal.fire({
                             title: data.msg,
                             icon: 'error'
