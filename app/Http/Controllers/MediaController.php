@@ -385,6 +385,7 @@ class MediaController extends BaseController
     public function update(Request $request, Media $media)
     {
         // Get inputs
+
         // $inputs = [
         //     'id' => $request->id,
         //     'media_title' => $request->media_title,
@@ -405,6 +406,7 @@ class MediaController extends BaseController
         //     'type_id' => $request->type_id,
         //     'user_id' => $request->user_id,
         // ];
+
         $request->validate([
             'media_title' => 'required|string|max:255',
             'media_description' => 'nullable|string',
@@ -443,7 +445,7 @@ class MediaController extends BaseController
             'is_live',
             'belongs_to',
             'type_id',
-            'user_id'
+            'user_id',
         ]));
         // Fonction pour gérer le téléchargement des images
         $this->uploadFile($request, $media, 'cover_url', 'images/medias/' . $media->id . '/cover');
@@ -472,50 +474,50 @@ class MediaController extends BaseController
         }
     }
 
-        // $media = Media::find($request->id);
+    // $media = Media::find($request->id);
 
-        // if ($request->file('cover_url') != null) {
-        //     // Upload cover
-        //     $cover_url = 'images/medias/' . $media->id . '/cover';
-        //     $photo = public_path() . '/' . $media->cover_url;
-        //     file_exists($photo) ? unlink($photo) : '';
-        //     // file_exists($photo) ? Storage::delete($photo) : '';
+    // if ($request->file('cover_url') != null) {
+    //     // Upload cover
+    //     $cover_url = 'images/medias/' . $media->id . '/cover';
+    //     $photo = public_path() . '/' . $media->cover_url;
+    //     file_exists($photo) ? unlink($photo) : '';
+    //     // file_exists($photo) ? Storage::delete($photo) : '';
 
-        //     // Upload URL
-        //     $t = Storage::url(Storage::disk('public')->put($cover_url, $request->file('cover_url')));
-        //     $media->update([
-        //         'cover_url' => '/' . $t,
-        //         'updated_at' => now(),
-        //     ]);
-        // }
-        // if ($request->file('thumbnail_url') != null) {
-        //     // dd($media);
-        //     // Upload cover
-        //     $thumbnail_url = 'images/medias/' . $media->id . '/thumbnail';
-        //     $photo = public_path() . $media->thumbnail_url;
-        //     // dd(file_exists($photo) . "-" . $photo);
-        //     file_exists($photo) ? unlink($photo) : '';
-        //     // file_exists($photo) ? Storage::delete($photo) : '';
-        //     // Upload URL
-        //     $t = Storage::url(Storage::disk('public')->put($thumbnail_url, $request->file('thumbnail_url')));
-        //     $thumb = $media->update([
-        //         'thumbnail_url' => '/' . $t,
-        //         'updated_at' => now(),
-        //     ]);
-        // }
+    //     // Upload URL
+    //     $t = Storage::url(Storage::disk('public')->put($cover_url, $request->file('cover_url')));
+    //     $media->update([
+    //         'cover_url' => '/' . $t,
+    //         'updated_at' => now(),
+    //     ]);
+    // }
+    // if ($request->file('thumbnail_url') != null) {
+    //     // dd($media);
+    //     // Upload cover
+    //     $thumbnail_url = 'images/medias/' . $media->id . '/thumbnail';
+    //     $photo = public_path() . $media->thumbnail_url;
+    //     // dd(file_exists($photo) . "-" . $photo);
+    //     file_exists($photo) ? unlink($photo) : '';
+    //     // file_exists($photo) ? Storage::delete($photo) : '';
+    //     // Upload URL
+    //     $t = Storage::url(Storage::disk('public')->put($thumbnail_url, $request->file('thumbnail_url')));
+    //     $thumb = $media->update([
+    //         'thumbnail_url' => '/' . $t,
+    //         'updated_at' => now(),
+    //     ]);
+    // }
 
-        // if ($request->categories_ids != null and count($request->categories_ids) > 0) {
-        //     $media->categories()->attach($request->categories_ids);
-        // }
-        if ($media) {
-            return response()->json(['reponse' => true, 'msg' => "Modification réussie!!"]);
-        } else {
-            return response()->json(['reponse' => false, 'msg' => "Erreur de modification."]);
+    // if ($request->categories_ids != null and count($request->categories_ids) > 0) {
+    //     $media->categories()->attach($request->categories_ids);
+    // }
+    //     if ($media) {
+    //         return response()->json(['reponse' => true, 'msg' => "Modification réussie!!"]);
+    //     } else {
+    //         return response()->json(['reponse' => false, 'msg' => "Erreur de modification."]);
 
-        }
-        // return redirect()->back()->with('msg', 'Média ajouté !');
+    //     }
+    //     // return redirect()->back()->with('msg', 'Média ajouté !');
 
-    }
+    // }
     // public function update(Request $request, Media $media)
     // {
     //     // Get inputs
