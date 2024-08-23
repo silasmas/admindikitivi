@@ -520,6 +520,7 @@
                         'X-CSRF-TOKEN': csrfToken
                     },
                     success: function (data) {
+                        console.log(data.data)
                     if (!data.reponse) {
                         Swal.fire({
                             title: data.msg,

@@ -285,7 +285,7 @@ class MediaController extends BaseController
                 'updated_at' => now(),
             ]);
         }
-
+        
         return response()->json(['response' => true, 'msg' => 'Media created successfully', 'data' => $media]);
     }
 
