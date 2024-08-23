@@ -468,10 +468,15 @@ class MediaController extends BaseController
             if ($media->$fieldName) {
                 Storage::disk('public')->delete($media->$fieldName);
             }
+// Générer un nom de fichier aléatoire
+            $randomFileName = Str::random(10) . '.' . $request->file($fieldName)->extension();
 
-            // Stocker le nouveau fichier
-            $filePath = Storage::disk('public')->putFileAs($storagePath, $request->file($fieldName), basename($storagePath) . '.' . $request->file($fieldName)->extension());
-
+// Stocker le fichier avec le nom généré
+            $filePath = Storage::disk('public')->putFileAs(
+                $storagePath,
+                $request->file($fieldName),
+                $randomFileName
+            );
             // Mettre à jour l'URL dans le modèle
             $media->update([$fieldName => Storage::url($filePath)]);
         }
