@@ -450,10 +450,13 @@ class MediaController extends BaseController
         // Fonction pour gérer le téléchargement des images
         $this->uploadFile($request, $media, 'cover_url', 'images/medias/' . $media->id . '/cover');
         $this->uploadFile($request, $media, 'thumbnail_url', 'images/medias/' . $media->id . '/thumbnail');
+        $media_id = Media::find($request->id);
+        if ($media_id) {
+            // Mise à jour des catégories
+            if ($request->filled('categories_ids')) {
+                $media_id->categories()->sync($request->categories_ids);
+            }
 
-        // Mise à jour des catégories
-        if ($request->filled('categories_ids')) {
-            $media->categories()->sync($request->categories_ids);
         }
 
         return response()->json(['response' => true, 'msg' => "Modification réussie !!"]);
@@ -474,7 +477,7 @@ class MediaController extends BaseController
         }
     }
 
-    // $media = Media::find($request->id);
+    //
 
     // if ($request->file('cover_url') != null) {
     //     // Upload cover
