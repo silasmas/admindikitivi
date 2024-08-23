@@ -428,7 +428,8 @@ class MediaController extends BaseController
             'categories_ids' => 'nullable|array',
             'categories_ids.*' => 'integer|exists:categories,id',
         ]);
-        $media->update($request->only([
+        $media_id = Media::find($request->id);
+        $media_id->update($request->only([
             'media_title',
             'media_description',
             'source',
@@ -447,7 +448,6 @@ class MediaController extends BaseController
             'type_id',
             'user_id',
         ]));
-        $media_id = Media::find($request->id);
         // Fonction pour gérer le téléchargement des images
         $this->uploadFile($request, $media_id, 'cover_url', 'images/medias/' . $media_id->id . '/cover/');
         $this->uploadFile($request, $media_id, 'thumbnail_url', 'images/medias/' . $media_id->id . '/thumbnail/');
