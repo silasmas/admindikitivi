@@ -197,6 +197,8 @@ class MediaController extends BaseController
             'media_title' => ['required', 'unique:' . Media::class],
             'type_id' => ['required'],
             'source' => ['required'],
+            'cover_url' => ['required', 'image'],
+            'thumbnail_url' => ['required', 'image'],
         ]);
 
         // Prepare input data for media creation
