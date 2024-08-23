@@ -289,7 +289,7 @@ class MediaController extends BaseController
 
                 // Mettre à jour le modèle media
                 $media->update([
-                    'cover_url' => '/' . $coverPath,
+                    'cover_url' => Storage::url($coverPath),
                     'updated_at' => now(),
                 ]);
             } catch (\Exception $e) {
@@ -385,61 +385,128 @@ class MediaController extends BaseController
     public function update(Request $request, Media $media)
     {
         // Get inputs
-        $inputs = [
-            'id' => $request->id,
-            'media_title' => $request->media_title,
-            'media_description' => $request->media_description,
-            'source' => $request->source,
-            'belonging_count' => $request->belonging_count,
-            'time_length' => $request->time_length,
-            'media_url' => $request->media_url,
-            'author_names' => $request->author_names,
-            'artist_names' => $request->artist_names,
-            'writer' => $request->writer,
-            'director' => $request->director,
-            'published_date' => $request->published_date,
-            'price' => $request->price,
-            'for_youth' => $request->for_youth,
-            'is_live' => $request->is_live,
-            'belongs_to' => $request->belongs_to,
-            'type_id' => $request->type_id,
-            'user_id' => $request->user_id,
-        ];
-        $media = Media::find($request->id);
+        // $inputs = [
+        //     'id' => $request->id,
+        //     'media_title' => $request->media_title,
+        //     'media_description' => $request->media_description,
+        //     'source' => $request->source,
+        //     'belonging_count' => $request->belonging_count,
+        //     'time_length' => $request->time_length,
+        //     'media_url' => $request->media_url,
+        //     'author_names' => $request->author_names,
+        //     'artist_names' => $request->artist_names,
+        //     'writer' => $request->writer,
+        //     'director' => $request->director,
+        //     'published_date' => $request->published_date,
+        //     'price' => $request->price,
+        //     'for_youth' => $request->for_youth,
+        //     'is_live' => $request->is_live,
+        //     'belongs_to' => $request->belongs_to,
+        //     'type_id' => $request->type_id,
+        //     'user_id' => $request->user_id,
+        // ];
+        $request->validate([
+            'media_title' => 'required|string|max:255',
+            'media_description' => 'nullable|string',
+            'source' => 'nullable|string|max:255',
+            'belonging_count' => 'nullable|integer',
+            'time_length' => 'nullable|string|max:255',
+            'media_url' => 'nullable|string|max:255',
+            'author_names' => 'nullable|string|max:255',
+            'artist_names' => 'nullable|string|max:255',
+            'writer' => 'nullable|string|max:255',
+            'director' => 'nullable|string|max:255',
+            'published_date' => 'nullable|date',
+            'price' => 'nullable|numeric',
+            'for_youth' => 'nullable|boolean',
+            'is_live' => 'nullable|boolean',
+            'belongs_to' => 'nullable|string|max:255',
+            'type_id' => 'nullable|integer|exists:types,id',
+            'user_id' => 'nullable|integer|exists:users,id',
+            'categories_ids' => 'nullable|array',
+            'categories_ids.*' => 'integer|exists:categories,id',
+        ]);
+        $media->update($request->only([
+            'media_title',
+            'media_description',
+            'source',
+            'belonging_count',
+            'time_length',
+            'media_url',
+            'author_names',
+            'artist_names',
+            'writer',
+            'director',
+            'published_date',
+            'price',
+            'for_youth',
+            'is_live',
+            'belongs_to',
+            'type_id',
+            'user_id'
+        ]));
+        // Fonction pour gérer le téléchargement des images
+        $this->uploadFile($request, $media, 'cover_url', 'images/medias/' . $media->id . '/cover');
+        $this->uploadFile($request, $media, 'thumbnail_url', 'images/medias/' . $media->id . '/thumbnail');
 
-        if ($request->file('cover_url') != null) {
-            // Upload cover
-            $cover_url = 'images/medias/' . $media->id . '/cover';
-            $photo = public_path() . '/' . $media->cover_url;
-            file_exists($photo) ? unlink($photo) : '';
-            // file_exists($photo) ? Storage::delete($photo) : '';
-
-            // Upload URL
-            $t = Storage::url(Storage::disk('public')->put($cover_url, $request->file('cover_url')));
-            $media->update([
-                'cover_url' => '/' . $t,
-                'updated_at' => now(),
-            ]);
-        }
-        if ($request->file('thumbnail_url') != null) {
-            // dd($media);
-            // Upload cover
-            $thumbnail_url = 'images/medias/' . $media->id . '/thumbnail';
-            $photo = public_path() . $media->thumbnail_url;
-            // dd(file_exists($photo) . "-" . $photo);
-            file_exists($photo) ? unlink($photo) : '';
-            // file_exists($photo) ? Storage::delete($photo) : '';
-            // Upload URL
-            $t = Storage::url(Storage::disk('public')->put($thumbnail_url, $request->file('thumbnail_url')));
-            $thumb = $media->update([
-                'thumbnail_url' => '/' . $t,
-                'updated_at' => now(),
-            ]);
+        // Mise à jour des catégories
+        if ($request->filled('categories_ids')) {
+            $media->categories()->sync($request->categories_ids);
         }
 
-        if ($request->categories_ids != null and count($request->categories_ids) > 0) {
-            $media->categories()->attach($request->categories_ids);
+        return response()->json(['response' => true, 'msg' => "Modification réussie !!"]);
+    }
+    private function uploadFile(Request $request, Media $media, $fieldName, $storagePath)
+    {
+        if ($request->file($fieldName)) {
+            // Supprimer l'ancien fichier s'il existe
+            if ($media->$fieldName) {
+                Storage::disk('public')->delete($media->$fieldName);
+            }
+
+            // Stocker le nouveau fichier
+            $filePath = Storage::disk('public')->putFileAs($storagePath, $request->file($fieldName), basename($storagePath) . '.' . $request->file($fieldName)->extension());
+
+            // Mettre à jour l'URL dans le modèle
+            $media->update([$fieldName => Storage::url($filePath)]);
         }
+    }
+
+        // $media = Media::find($request->id);
+
+        // if ($request->file('cover_url') != null) {
+        //     // Upload cover
+        //     $cover_url = 'images/medias/' . $media->id . '/cover';
+        //     $photo = public_path() . '/' . $media->cover_url;
+        //     file_exists($photo) ? unlink($photo) : '';
+        //     // file_exists($photo) ? Storage::delete($photo) : '';
+
+        //     // Upload URL
+        //     $t = Storage::url(Storage::disk('public')->put($cover_url, $request->file('cover_url')));
+        //     $media->update([
+        //         'cover_url' => '/' . $t,
+        //         'updated_at' => now(),
+        //     ]);
+        // }
+        // if ($request->file('thumbnail_url') != null) {
+        //     // dd($media);
+        //     // Upload cover
+        //     $thumbnail_url = 'images/medias/' . $media->id . '/thumbnail';
+        //     $photo = public_path() . $media->thumbnail_url;
+        //     // dd(file_exists($photo) . "-" . $photo);
+        //     file_exists($photo) ? unlink($photo) : '';
+        //     // file_exists($photo) ? Storage::delete($photo) : '';
+        //     // Upload URL
+        //     $t = Storage::url(Storage::disk('public')->put($thumbnail_url, $request->file('thumbnail_url')));
+        //     $thumb = $media->update([
+        //         'thumbnail_url' => '/' . $t,
+        //         'updated_at' => now(),
+        //     ]);
+        // }
+
+        // if ($request->categories_ids != null and count($request->categories_ids) > 0) {
+        //     $media->categories()->attach($request->categories_ids);
+        // }
         if ($media) {
             return response()->json(['reponse' => true, 'msg' => "Modification réussie!!"]);
         } else {
