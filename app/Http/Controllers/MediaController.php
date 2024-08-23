@@ -436,6 +436,7 @@ class MediaController extends BaseController
             'belonging_count',
             'time_length',
             'media_url',
+            'teaser_url',
             'author_names',
             'artist_names',
             'writer',
