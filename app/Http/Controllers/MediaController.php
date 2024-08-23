@@ -447,10 +447,10 @@ class MediaController extends BaseController
             'type_id',
             'user_id',
         ]));
-        // Fonction pour gérer le téléchargement des images
-        $this->uploadFile($request, $media, 'cover_url', 'images/medias/' . $media->id . '/cover/');
-        $this->uploadFile($request, $media, 'thumbnail_url', 'images/medias/' . $media->id . '/thumbnail/');
         $media_id = Media::find($request->id);
+        // Fonction pour gérer le téléchargement des images
+        $this->uploadFile($request, $media_id, 'cover_url', 'images/medias/' . $media_id->id . '/cover/');
+        $this->uploadFile($request, $media_id, 'thumbnail_url', 'images/medias/' . $media_id->id . '/thumbnail/');
         if ($media_id) {
             // Mise à jour des catégories
             if ($request->filled('categories_ids')) {
