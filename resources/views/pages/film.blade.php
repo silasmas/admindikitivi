@@ -103,7 +103,7 @@
                                 <figure class="figure">
                                     <!-- .figure-img -->
                                     <div class="figure-img">
-                                        <img class="img-fluid" src="{{$m->cover_url?"storage/".$m->cover_url:asset('assets/blank-media-cover.webp') }}" alt="Pas des couverture">
+                                        <img class="img-fluid" src="{{$m->cover_url?$m->cover_url:asset('assets/blank-media-cover.webp') }}" alt="Pas des couverture">
                                         <div class="figure-description">
                                             <h6 class="figure-title"> Figure description </h6>
                                             <p class="text-muted mb-0">
