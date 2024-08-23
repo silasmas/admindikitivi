@@ -283,7 +283,7 @@ class MediaController extends BaseController
                 $coverPath = 'images/medias/' . $media->id . '/cover.' . $request->file('cover_url')->extension();
 
                 // Stocker le fichier avec un nom spécifique
-                $fileContent = file_get_contents($request->file('teaser_url'));
+                $fileContent = file_get_contents($request->file('cover_url'));
                 Storage::disk('public')->put($coverPath, $fileContent);
                 // $request->file('cover_url')->storeAs('images/medias/' . $media->id, 'cover.' . $request->file('cover_url')->extension());
 
