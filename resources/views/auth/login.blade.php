@@ -54,7 +54,7 @@
     </form><!-- /.auth-form -->
     <!-- .auth-announcement -->
     <div id="announcement" class="auth-announcement"
-        style="background-image: url(assets/images/illustration/img-1.png);">
+        style="background-image: url(assets/images/bg-home.webp);">
         <div class="announcement-body">
             <h2 class="announcement-title"> Profitez de notre plateforme</h2>
             <a href="https://dikitivi.com" class="btn btn-warning"><i class="fa fa-fw fa-angle-right"></i>Aller sur le site</a>
