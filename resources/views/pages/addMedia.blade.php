@@ -194,7 +194,7 @@
                                         @if ($media->cover_url!=null)
                                         <figure class="figure">
                                             <!-- .figure-img -->
-                                            <div class="figure-img">
+                                            <div class="figure-img"> 
                                                 <img class="img-fluid" src="{{$media->cover_url}}" alt="Card image cap">
                                                 <a href="{{ asset($media->cover_url) }}" class="img-link"
                                                     data-size="600x450">
