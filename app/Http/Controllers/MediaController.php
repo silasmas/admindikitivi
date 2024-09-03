@@ -250,20 +250,7 @@ class MediaController extends BaseController
         // Handle cover URL upload
         if ($request->hasFile('cover_url')) {
             try {
-                // Définir le chemin de la couverture
-                // $coverPath = 'images/medias/' . $media->id . '/cover.' . $request->file('cover_url')->extension();
-
-                // // Stocker le fichier avec un nom spécifique
-                // $fileContent = file_get_contents($request->file('cover_url'));
-                // Storage::disk('public')->put($coverPath, $fileContent);
-                // // $request->file('cover_url')->storeAs('images/medias/' . $media->id, 'cover.' . $request->file('cover_url')->extension());
-
-                // // Mettre à jour le modèle media
-                // $media->update([
-                //     'cover_url' => Storage::url($coverPath),
-                //     'updated_at' => now(),
-                // ]);
-                $this->uploadFile($request, $media, 'cover_url', 'images/medias/' . $media->id . '/cover/');
+                uploadFile($request, $media, 'cover_url', 'images/medias/' . $media->id . '/cover/');
 
             } catch (\Exception $e) {
                 // Gérer l'exception (journaliser l'erreur, retourner une réponse appropriée, etc.)
@@ -275,18 +262,7 @@ class MediaController extends BaseController
         // Handle thumbnail URL upload
         if ($request->hasFile('thumbnail_url')) {
             try {
-                // Définir le chemin de la miniature
-                // $thumbnailPath = 'images/medias/' . $media->id . '/thumbnail.' . $request->file('thumbnail_url')->extension();
-
-                // // Stocker le fichier dans le dossier storage
-                // $request->file('thumbnail_url')->storeAs('public/' . $thumbnailPath, 'thumbnail.' . $request->file('thumbnail_url')->extension());
-
-                // // Mettre à jour le modèle media avec l'URL de la miniature
-                // $media->update([
-                //     'thumbnail_url' => Storage::url($thumbnailPath), // Générer l'URL accessible
-                //     'updated_at' => now(),
-                // ]);
-                $this->uploadFile($request, $media, 'thumbnail_url', 'images/medias/' . $media->id . '/thumbnail_url/');
+                uploadFile($request, $media, 'thumbnail_url', 'images/medias/' . $media->id . '/thumbnail_url/');
 
             } catch (\Exception $e) {
                 // Gérer l'exception (journaliser l'erreur, retourner une réponse appropriée, etc.)
