@@ -15,7 +15,7 @@ return [
     | the validator class. Some of these rules have multiple versions such
     | as the size rules. Feel free to tweak each of these messages here.
     |
-    */
+     */
 
     'accepted' => ':attribute doit être accepté.',
     'accepted_if' => ':attribute doit être accepté lorsque :other est :value.',
@@ -109,7 +109,7 @@ return [
     'prohibited_unless' => 'Ce champ est interdit à moins que :other soit dans :values.',
     'prohibits' => 'Ce champ interdit :other d\'être présent.',
     'regex' => 'Le format de :attribute est invalide.',
-    'required' => 'Ce champ est obligatoire.',
+    'required' => 'Le champ :attribute est obligatoire.',
     'required_if' => 'Ce champ est obligatoire lorsque :other est :value.',
     'required_unless' => 'Ce champ est obligatoire à moins que :other soit dans :values.',
     'required_with' => 'Ce champ est obligatoire lorsque :values est pr&eacure;sent.',
@@ -140,7 +140,7 @@ return [
     | convention "attribute.rule" to name the lines. This makes it quick to
     | specify a specific custom language line for a given attribute rule.
     |
-    */
+     */
 
     'custom' => [
         'email' => [
@@ -160,62 +160,62 @@ return [
             'incorrect' => 'Le nouveau mot de passe doit respecter nos conditions',
         ],
         'email_or_phone' => [
-            'required' => 'L\'adresse email ou le n° de téléphone doit être défini'
+            'required' => 'L\'adresse email ou le n° de téléphone doit être défini',
         ],
         'group_name' => [
-            'exists' => 'Ce nom de groupe already exists'
+            'exists' => 'Ce nom de groupe already exists',
         ],
         'role_name' => [
-            'exists' => 'Ce nom de rôle existe déjà'
+            'exists' => 'Ce nom de rôle existe déjà',
         ],
         'code' => [
-            'exists' => 'Ce code existe déjà'
+            'exists' => 'Ce code existe déjà',
         ],
         'token' => [
-            'exists' => 'Ce jeton existe déjà'
+            'exists' => 'Ce jeton existe déjà',
         ],
         'content' => [
-            'exists' => 'Ce contenu existe déjà'
+            'exists' => 'Ce contenu existe déjà',
         ],
         'subject' => [
-            'exists' => 'Ce sujet existe déjà'
+            'exists' => 'Ce sujet existe déjà',
         ],
         'title' => [
             'required' => 'Veuillez mettre le titre s\'il vous plait',
-            'exists' => 'Ce titre existe déjà'
+            'exists' => 'Ce titre existe déjà',
         ],
         'subtitle' => [
-            'exists' => 'Ce sous-titre existe déjà'
+            'exists' => 'Ce sous-titre existe déjà',
         ],
         'description' => [
-            'exists' => 'This description already exists'
+            'exists' => 'This description already exists',
         ],
         'country_name' => [
-            'exists' => 'Ce pays existe déjà'
+            'exists' => 'Ce pays existe déjà',
         ],
         'deadline' => [
-            'exists' => 'Cette échéance existe déjà'
+            'exists' => 'Cette échéance existe déjà',
         ],
         'owner' => [
-            'required' => 'A quelle entité ça appartient ?'
+            'required' => 'A quelle entité ça appartient ?',
         ],
         'type' => [
-            'required' => 'Le type est obligatoire'
+            'required' => 'Le type est obligatoire',
         ],
         'type_name' => [
-            'exists' => 'Ce nom de type existe déjà'
+            'exists' => 'Ce nom de type existe déjà',
         ],
         'status' => [
-            'required' => 'L\'état est obligatoire'
+            'required' => 'L\'état est obligatoire',
         ],
         'status_name' => [
-            'exists' => 'Ce nom d\'état existe déjà'
+            'exists' => 'Ce nom d\'état existe déjà',
         ],
         'category' => [
-            'required' => 'La catégorie est obligatoire'
+            'required' => 'La catégorie est obligatoire',
         ],
         'category_name' => [
-            'exists' => 'Ce nom de catégorie existe déjà'
+            'exists' => 'Ce nom de catégorie existe déjà',
         ],
     ],
 
@@ -228,7 +228,7 @@ return [
     | with something more reader friendly such as "E-Mail Address" instead
     | of "email". This simply helps us make our message more expressive.
     |
-    */
+     */
 
     'attributes' => [],
 
