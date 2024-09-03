@@ -197,8 +197,8 @@ class MediaController extends BaseController
             'media_title' => ['required', 'unique:' . Media::class],
             'type_id' => ['required'],
             'source' => ['required'],
-            'cover_url' => ['required', 'image'],
-            'thumbnail_url' => ['required', 'image'],
+            'thumbnail_url' => 'required|file|mimes:jpeg,png,jpg,gif|max:2048',
+            'media_file_url' => 'required|file|mimes:mp4,mov,avi|max:20480',
         ]);
 
         // Prepare input data for media creation
@@ -275,7 +275,7 @@ class MediaController extends BaseController
                 //     'cover_url' => Storage::url($coverPath),
                 //     'updated_at' => now(),
                 // ]);
-                $this->uploadFile($request, $media, 'thumbnail_url', 'images/medias/' . $media->id . '/cover/');
+                $this->uploadFile($request, $media, 'cover_url', 'images/medias/' . $media->id . '/cover/');
 
             } catch (\Exception $e) {
                 // Gérer l'exception (journaliser l'erreur, retourner une réponse appropriée, etc.)
