@@ -225,23 +225,6 @@ class MediaController extends BaseController
         // Create the media record
         $media = Media::create($inputs);
 
-        // Handle file upload if source is AWS
-        if ($request->source == "AWS" && $request->hasFile('media_file_url')) {
-            $file = $request->file('media_file_url');
-            $filename = $file->getClientOriginalName();
-            $path_url = 'images/medias/' . $media->id . '/' . $filename;
-
-            try {
-                $file->storeAs('images/medias/' . $media->id, $filename, 's3');
-                $media->update([
-                    'media_url' => config('filesystems.disks.s3.url') . $path_url,
-                    'updated_at' => now(),
-                ]);
-            } catch (\Throwable $th) {
-                return response()->json(['response' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
-            }
-        }
-
         // Update belonging count if applicable
         if ($inputs['belongs_to'] != null) {
             $media_parent = Media::find($inputs['belongs_to']);
@@ -321,6 +304,22 @@ class MediaController extends BaseController
                 // Gérer l'exception (journaliser l'erreur, retourner une réponse appropriée, etc.)
                 return response()->json(['response' => false, 'msg' => 'Erreur lors du téléchargement de la miniature.'], 500);
 
+            }
+        }
+        // Handle file upload if source is AWS
+        if ($request->source == "AWS" && $request->hasFile('media_file_url')) {
+            $file = $request->file('media_file_url');
+            $filename = $file->getClientOriginalName();
+            $path_url = 'images/medias/' . $media->id . '/' . $filename;
+
+            try {
+                $file->storeAs('images/medias/' . $media->id, $filename, 's3');
+                $media->update([
+                    'media_url' => config('filesystems.disks.s3.url') . $path_url,
+                    'updated_at' => now(),
+                ]);
+            } catch (\Throwable $th) {
+                return response()->json(['response' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
             }
         }
 
