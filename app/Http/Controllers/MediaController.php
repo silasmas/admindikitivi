@@ -192,13 +192,16 @@ class MediaController extends BaseController
     }
     public function store(Request $request)
     {
+        $maxSize = 2048; // Par exemple, 2MB
         // Validate incoming request
         $request->validate([
             'media_title' => ['required', 'unique:' . Media::class],
             'type_id' => ['required'],
             'source' => ['required'],
-            'thumbnail_url' => 'required|file|mimes:jpeg,png,jpg,gif|max:2048',
-            'media_file_url' => 'required|file|mimes:mp4,mov,avi|max:20480',
+            'thumbnail_url' => 'required|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
+            'media_file_url' => 'required|file|mimes:mp4,mov,avi|max:' . $maxSize,
+        ], [
+            'thumbnail_url.max' => "La taille du fichier ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
         ]);
 
         // Prepare input data for media creation
