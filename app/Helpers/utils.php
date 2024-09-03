@@ -4,8 +4,11 @@
  * @see https://www.linkedin.com/in/xanders-samoth-b2770737/
  */
 
+use App\Models\Media;
 use Carbon\Carbon;
-use PhpParser\Node\Stmt\Switch_;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 // Get web URL
 if (!function_exists('getWebURL')) {
@@ -19,10 +22,10 @@ if (!function_exists('sexe')) {
     {
         switch ($info) {
             case 'M':
-            return 'Homme';
+                return 'Homme';
                 break;
             case 'F':
-            return 'Femme';
+                return 'Femme';
                 break;
 
             default:
@@ -32,6 +35,29 @@ if (!function_exists('sexe')) {
     }
 }
 
+// pour enregistrer un fichier
+if (!function_exists('uploadFile')) {
+    function uploadFile(Request $request, Media $media, $fieldName, $storagePath)
+    {
+        if ($request->file($fieldName)) {
+            // Supprimer l'ancien fichier s'il existe
+            if ($media->$fieldName) {
+                Storage::disk('public')->delete($media->$fieldName);
+            }
+// Générer un nom de fichier aléatoire
+            $randomFileName = Str::random(10) . '.' . $request->file($fieldName)->extension();
+
+// Stocker le fichier avec le nom généré
+            $filePath = Storage::disk('public')->putFileAs(
+                $storagePath,
+                $request->file($fieldName),
+                $randomFileName
+            );
+            // Mettre à jour l'URL dans le modèle
+            $media->update([$fieldName => Storage::url($filePath)]);
+        }
+    }
+}
 // Get APIs URL
 if (!function_exists('getApiURL')) {
     function getApiURL()

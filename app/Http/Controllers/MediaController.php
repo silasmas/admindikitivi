@@ -197,12 +197,17 @@ class MediaController extends BaseController
         $request->validate([
             'media_title' => ['required', 'unique:' . Media::class],
             'type_id' => ['required'],
-            'source' => ['required'],
             'thumbnail_url' => 'required|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
             'cover_url' => 'required|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
         ], [
             'thumbnail_url.max' => "La taille du fichier ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
         ]);
+        // Vérifier si le champ source contient le mot "media_fil"
+        if (strpos($request->input('source'), 'Youtube') !== false) {
+            $request->validate([
+                'media_url' => ['required'], // Rendre media_fil obligatoire si condition remplie
+            ]);
+        }
 
         // Prepare input data for media creation
         $inputs = $request->only([
@@ -212,6 +217,7 @@ class MediaController extends BaseController
             'belonging_count',
             'time_length',
             'media_url',
+            'teaser_url',
             'author_names',
             'artist_names',
             'writer',
@@ -238,28 +244,6 @@ class MediaController extends BaseController
 
             // Increment belonging count
             $media_parent->increment('belonging_count', 1);
-        }
-
-        // Handle teaser URL upload
-        if ($request->hasFile('teaser_url')) {
-            try {
-                // Définir le chemin du teaser
-                $teaserPath = 'images/medias/' . $media->id . '/teaser.' . $request->file('teaser_url')->extension();
-
-                // Stocker le fichier dans le disque public
-                $fileContent = file_get_contents($request->file('teaser_url'));
-                Storage::disk('public')->put($teaserPath, $fileContent);
-
-                // Mettre à jour le modèle media
-                $media->update([
-                    'teaser_url' => '/' . $teaserPath,
-                    'updated_at' => now(),
-                ]);
-            } catch (\Exception $e) {
-                // Gérer l'exception (journaliser l'erreur, retourner une réponse appropriée, etc.)
-                // Log::error('Erreur lors du téléchargement du teaser : ' . $e->getMessage());
-                return response()->json(['response' => false, 'msg' => 'Erreur lors du téléchargement du teaser.'], 500);
-            }
         }
 
         // Handle cover URL upload
@@ -434,8 +418,8 @@ class MediaController extends BaseController
             'user_id',
         ]));
         // Fonction pour gérer le téléchargement des images
-        $this->uploadFile($request, $media_id, 'cover_url', 'images/medias/' . $media_id->id . '/cover/');
-        $this->uploadFile($request, $media_id, 'thumbnail_url', 'images/medias/' . $media_id->id . '/thumbnail/');
+        uploadFile($request, $media_id, 'cover_url', 'images/medias/' . $media_id->id . '/cover/');
+        uploadFile($request, $media_id, 'thumbnail_url', 'images/medias/' . $media_id->id . '/thumbnail/');
         if ($media_id) {
             // Mise à jour des catégories
             if ($request->filled('categories_ids')) {
@@ -446,72 +430,7 @@ class MediaController extends BaseController
 
         return response()->json(['response' => true, 'msg' => "Modification réussie !!"]);
     }
-    private function uploadFile(Request $request, Media $media, $fieldName, $storagePath)
-    {
-        if ($request->file($fieldName)) {
-            // Supprimer l'ancien fichier s'il existe
-            if ($media->$fieldName) {
-                Storage::disk('public')->delete($media->$fieldName);
-            }
-// Générer un nom de fichier aléatoire
-            $randomFileName = Str::random(10) . '.' . $request->file($fieldName)->extension();
 
-// Stocker le fichier avec le nom généré
-            $filePath = Storage::disk('public')->putFileAs(
-                $storagePath,
-                $request->file($fieldName),
-                $randomFileName
-            );
-            // Mettre à jour l'URL dans le modèle
-            $media->update([$fieldName => Storage::url($filePath)]);
-        }
-    }
-
-    //
-
-    // if ($request->file('cover_url') != null) {
-    //     // Upload cover
-    //     $cover_url = 'images/medias/' . $media->id . '/cover';
-    //     $photo = public_path() . '/' . $media->cover_url;
-    //     file_exists($photo) ? unlink($photo) : '';
-    //     // file_exists($photo) ? Storage::delete($photo) : '';
-
-    //     // Upload URL
-    //     $t = Storage::url(Storage::disk('public')->put($cover_url, $request->file('cover_url')));
-    //     $media->update([
-    //         'cover_url' => '/' . $t,
-    //         'updated_at' => now(),
-    //     ]);
-    // }
-    // if ($request->file('thumbnail_url') != null) {
-    //     // dd($media);
-    //     // Upload cover
-    //     $thumbnail_url = 'images/medias/' . $media->id . '/thumbnail';
-    //     $photo = public_path() . $media->thumbnail_url;
-    //     // dd(file_exists($photo) . "-" . $photo);
-    //     file_exists($photo) ? unlink($photo) : '';
-    //     // file_exists($photo) ? Storage::delete($photo) : '';
-    //     // Upload URL
-    //     $t = Storage::url(Storage::disk('public')->put($thumbnail_url, $request->file('thumbnail_url')));
-    //     $thumb = $media->update([
-    //         'thumbnail_url' => '/' . $t,
-    //         'updated_at' => now(),
-    //     ]);
-    // }
-
-    // if ($request->categories_ids != null and count($request->categories_ids) > 0) {
-    //     $media->categories()->attach($request->categories_ids);
-    // }
-    //     if ($media) {
-    //         return response()->json(['reponse' => true, 'msg' => "Modification réussie!!"]);
-    //     } else {
-    //         return response()->json(['reponse' => false, 'msg' => "Erreur de modification."]);
-
-    //     }
-    //     // return redirect()->back()->with('msg', 'Média ajouté !');
-
-    // }
-    // public function update(Request $request, Media $media)
     // {
     //     // Get inputs
     //     $inputs = [
