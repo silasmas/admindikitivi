@@ -199,7 +199,7 @@ class MediaController extends BaseController
             'type_id' => ['required'],
             'source' => ['required'],
             'thumbnail_url' => 'required|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
-            'media_file_url' => 'required|file|mimes:mp4,mov,avi|max:' . $maxSize,
+            'cover_url' => 'required|file|mimes:mp4,mov,avi|max:' . $maxSize,
         ], [
             'thumbnail_url.max' => "La taille du fichier ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
         ]);
