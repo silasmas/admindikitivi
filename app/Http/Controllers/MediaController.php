@@ -403,6 +403,23 @@ class MediaController extends BaseController
         // Fonction pour gérer le téléchargement des images
         uploadFile($request, $media_id, 'cover_url', 'images/medias/' . $media_id->id . '/cover/');
         uploadFile($request, $media_id, 'thumbnail_url', 'images/medias/' . $media_id->id . '/thumbnail/');
+
+        // Handle file upload if source is AWS
+        if ($request->source == "AWS" && $request->hasFile('media_file_url')) {
+            $file = $request->file('media_file_url');
+            $filename = $file->getClientOriginalName();
+            $path_url = 'images/medias/' . $media->id . '/' . $filename;
+
+            try {
+                $file->storeAs('images/medias/' . $media->id, $filename, 's3');
+                $media->update([
+                    'media_url' => config('filesystems.disks.s3.url') . $path_url,
+                    'updated_at' => now(),
+                ]);
+            } catch (\Throwable $th) {
+                return response()->json(['response' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
+            }
+        }
         if ($media_id) {
             // Mise à jour des catégories
             if ($request->filled('categories_ids')) {
