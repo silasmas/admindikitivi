@@ -374,6 +374,7 @@ class MediaController extends BaseController
      */
     public function update(Request $request, Media $media)
     {
+        $maxSize = 2048; // Par exemple, 2MB
         // Get inputs
         $request->validate([
             'media_title' => 'required|string|max:255',
@@ -395,6 +396,10 @@ class MediaController extends BaseController
             'user_id' => 'nullable|integer|exists:users,id',
             'categories_ids' => 'nullable|array',
             'categories_ids.*' => 'integer|exists:categories,id',
+            'thumbnail_url' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
+            'cover_url' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
+        ], [
+            'thumbnail_url.max' => "La taille du fichier ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
         ]);
         $media_id = Media::find($request->id);
         $media_id->update($request->only([
