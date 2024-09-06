@@ -197,6 +197,7 @@ class MediaController extends BaseController
         $request->validate([
             'media_title' => ['required', 'unique:' . Media::class],
             'type_id' => ['required'],
+            'categories_ids' => 'required|array',
             'thumbnail_url' => 'required|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
             'cover_url' => 'required|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
         ], [
@@ -269,6 +270,9 @@ class MediaController extends BaseController
                 return response()->json(['response' => false, 'msg' => 'Erreur lors du téléchargement de la miniature.'], 500);
 
             }
+        }
+        if ($request->categories_ids != null and count($request->categories_ids) > 0) {
+            $media->categories()->attach($request->categories_ids);
         }
         // Handle file upload if source is AWS
         if ($request->source == "AWS" && $request->hasFile('media_file_url')) {
