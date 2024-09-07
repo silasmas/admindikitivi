@@ -468,7 +468,8 @@ class MediaController extends BaseController
 
             try {
                 // Stocker le fichier dans S3
-                $file->storeAs($directoryPath, $filename, 's3');
+                // $file->storeAs($directoryPath, $filename, 's3');
+                $file->storeAs('images/medias/' . $media->id, $filename, 's3');
 
                 // Mettre à jour l'URL du média
                 $media->update([
