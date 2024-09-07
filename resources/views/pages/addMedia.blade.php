@@ -178,19 +178,19 @@
                                                 id="media_file_url" multiple>
                                             <label class="custom-file-label" for="">Choisir la video</label>
                                         </div>
+                                        @isset($media)
+                                        @if ($media->source==="AWS")
+                                        <figure class="figure">
+                                            <!-- .figure-img -->
+                                            <div class="figure-img">
+                                                <video muted poster="{{$media->cover_url?$media->cover_url:"" }}" controls>
+                                                    <source src="{{ $media->media_url }}" type="video/mp4">
+                                                </video>
+                                            </div>
+                                        </figure>
+                                        @endif
+                                        @endisset
                                     </div>
-                                    @isset($media)
-                                    @if ($media->source==="AWS")
-                                    <figure class="figure">
-                                        <!-- .figure-img -->
-                                        <div class="figure-img">
-                                            <video muted poster="{{$media->cover_url?$media->cover_url:"" }}" controls>
-                                                <source src="{{ $media->media_url }}" type="video/mp4">
-                                            </video>
-                                        </div>
-                                    </figure>
-                                    @endif
-                                    @endisset
                                     <div class="form-group">
                                         <label for="tf3">Uploader Couverture
                                             <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
