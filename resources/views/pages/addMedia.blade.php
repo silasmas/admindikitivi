@@ -435,7 +435,7 @@
                                 });
                             } else {
                                 Swal.fire({
-                                    title: (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : "Erreur de traitement",
+                                    title: (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message :xhr.msg,
                                     icon: 'error'
                                 });
                             }
@@ -497,7 +497,7 @@
                                 });
                             } else {
                                 Swal.fire({
-                                    title: (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : "Erreur de traitement",
+                                    title: (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : xhr.msg,
                                     icon: 'error'
                                 });
                             }
@@ -556,7 +556,7 @@
                                 });
                             } else {
                                 Swal.fire({
-                                    title: (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : "Erreur de traitement",
+                                    title: (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : xhr.msg,
                                     icon: 'error'
                                 });
                             }
