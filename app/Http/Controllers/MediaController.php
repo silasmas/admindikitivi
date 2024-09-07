@@ -274,20 +274,48 @@ class MediaController extends BaseController
         if ($request->categories_ids != null and count($request->categories_ids) > 0) {
             $media->categories()->attach($request->categories_ids);
         }
+        // // Handle file upload if source is AWS
+        // if ($request->source == "AWS" && $request->hasFile('media_file_url')) {
+        //     $file = $request->file('media_file_url');
+        //     $filename = $file->getClientOriginalName();
+        //     $path_url = 'images/medias/' . $media->id . '/' . $filename;
+
+        //     try {
+        //         $file->storeAs('images/medias/' . $media->id, $filename, 's3');
+        //         $media->update([
+        //             'media_url' => config('filesystems.disks.s3.url') . $path_url,
+        //             'updated_at' => now(),
+        //         ]);
+        //     } catch (\Throwable $th) {
+        //         return response()->json(['response' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
+        //     }
+        // }
         // Handle file upload if source is AWS
-        if ($request->source == "AWS" && $request->hasFile('media_file_url')) {
+        if ($request->source === "AWS" && $request->hasFile('media_file_url')) {
             $file = $request->file('media_file_url');
+
+            // Vérifier si le fichier est valide
+            if (!$file->isValid()) {
+                return response()->json(['response' => false, 'msg' => "Le fichier téléchargé n'est pas valide."], 400);
+            }
+
             $filename = $file->getClientOriginalName();
-            $path_url = 'images/medias/' . $media->id . '/' . $filename;
+            $directoryPath = 'images/medias/' . $media->id;
+            $pathUrl = $directoryPath . '/' . $filename;
 
             try {
-                $file->storeAs('images/medias/' . $media->id, $filename, 's3');
+                // Stocker le fichier dans S3
+                $file->storeAs($directoryPath, $filename, 's3');
+
+                // Mettre à jour l'URL du média
                 $media->update([
-                    'media_url' => config('filesystems.disks.s3.url') . $path_url,
+                    'media_url' => config('filesystems.disks.s3.url') . '/' . $pathUrl,
                     'updated_at' => now(),
                 ]);
+
+                return response()->json(['response' => true, 'msg' => "Fichier téléchargé avec succès."]);
             } catch (\Throwable $th) {
-                return response()->json(['response' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
+                return response()->json(['response' => false, 'data' => $th->getMessage(), 'msg' => "Erreur d'enregistrement de la vidéo"], 500);
             }
         }
 
@@ -409,21 +437,51 @@ class MediaController extends BaseController
         uploadFile($request, $media_id, 'thumbnail_url', 'images/medias/' . $media_id->id . '/thumbnail/');
 
         // Handle file upload if source is AWS
-        if ($request->source == "AWS" && $request->hasFile('media_file_url')) {
+        // if ($request->source == "AWS" && $request->hasFile('media_file_url')) {
+        //     $file = $request->file('media_file_url');
+        //     $filename = $file->getClientOriginalName();
+        //     $path_url = 'images/medias/' . $media->id . '/' . $filename;
+
+        //     try {
+        //         $file->storeAs('images/medias/' . $media->id, $filename, 's3');
+        //         $media->update([
+        //             'media_url' => config('filesystems.disks.s3.url') . $path_url,
+        //             'updated_at' => now(),
+        //         ]);
+        //     } catch (\Throwable $th) {
+        //         return response()->json(['response' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
+        //     }
+        // }
+
+        // Handle file upload if source is AWS
+        if ($request->source === "AWS" && $request->hasFile('media_file_url')) {
             $file = $request->file('media_file_url');
+
+            // Vérifier si le fichier est valide
+            if (!$file->isValid()) {
+                return response()->json(['response' => false, 'msg' => "Le fichier téléchargé n'est pas valide."], 400);
+            }
+
             $filename = $file->getClientOriginalName();
-            $path_url = 'images/medias/' . $media->id . '/' . $filename;
+            $directoryPath = 'images/medias/' . $media->id;
+            $pathUrl = $directoryPath . '/' . $filename;
 
             try {
-                $file->storeAs('images/medias/' . $media->id, $filename, 's3');
+                // Stocker le fichier dans S3
+                $file->storeAs($directoryPath, $filename, 's3');
+
+                // Mettre à jour l'URL du média
                 $media->update([
-                    'media_url' => config('filesystems.disks.s3.url') . $path_url,
+                    'media_url' => config('filesystems.disks.s3.url') . '/' . $pathUrl,
                     'updated_at' => now(),
                 ]);
+
+                return response()->json(['response' => true, 'msg' => "Fichier téléchargé avec succès."]);
             } catch (\Throwable $th) {
-                return response()->json(['response' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
+                return response()->json(['response' => false, 'data' => $th->getMessage(), 'msg' => "Erreur d'enregistrement de la vidéo"], 500);
             }
         }
+
         if ($media_id) {
             // Mise à jour des catégories
             if ($request->filled('categories_ids')) {
