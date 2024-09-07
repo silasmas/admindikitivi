@@ -459,6 +459,7 @@
                         console.log("erreur", xhr);
                         console.log(xhr.status);
                         console.log(error);
+                        console.log(xhr.msg);
 
                     if (xhr.responseJSON) {
                         $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
@@ -580,7 +581,7 @@
                         console.log("erreur", xhr);
                         console.log(xhr.status);
                         console.log(error);
-
+                        console.log(xhr.msg);
                         if (xhr.responseJSON) {
                             $('form#data .request-message').addClass('text-danger').html(xhr.responseJSON.message);
                             console.log(xhr.responseJSON);
