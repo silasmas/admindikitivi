@@ -186,18 +186,17 @@
                                             @isset($media)
                                             @if ($media->source==="AWS")
                                             <div class="card card-body  item">
-                                            <div class="embed-responsive embed-responsive-16by9 w-100">
-                                                <figure class="figure">
-                                                    <!-- .figure-img -->
-                                                    <div class="figure-img">
-                                                        <video muted
-                                                            poster="{{$media->cover_url?$media->cover_url:"" }}"
-                                                            controls>
-                                                            <source src="{{ $media->media_url }}" type="video/mp4">
-                                                        </video>
-                                                    </div>
-                                                </figure>
-                                            </div>
+                                                {{-- <div class="embed-responsive embed-responsive-16by9 w-100"> --}}
+                                                    <figure class="figure">
+                                                        <!-- .figure-img -->
+                                                        <div class="figure-img">
+                                                            <video muted
+                                                                poster="{{$media->cover_url?$media->cover_url:"" }}"
+                                                                controls>
+                                                                <source src="{{ $media->media_url }}" type="video/mp4">
+                                                            </video>
+                                                        </div>
+                                                    </figure>
                                             </div>
                                             @endif
                                             @endisset
