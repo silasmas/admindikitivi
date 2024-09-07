@@ -304,12 +304,14 @@ class MediaController extends BaseController
             $pathUrl = $directoryPath . '/' . $filename;
 
             try {
-                // Stocker le fichier dans S3
-                $file->storeAs($directoryPath, $filename, 's3');
+                // Construire l'URL avec la région
+                $region = config('filesystems.disks.s3.region');
+                $bucket = config('filesystems.disks.s3.bucket');
+                $baseUrl = "https://s3.{$region}.amazonaws.com/{$bucket}";
 
                 // Mettre à jour l'URL du média
                 $media->update([
-                    'media_url' => config('filesystems.disks.s3.url') . $pathUrl,
+                    'media_url' => $baseUrl . '/' . ltrim($pathUrl, '/'),
                     'updated_at' => now(),
                 ]);
 
