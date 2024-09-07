@@ -201,8 +201,8 @@ class MediaController extends BaseController
             'thumbnail_url' => 'required|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
             'cover_url' => 'required|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
         ], [
-            'thumbnail_url.max' => "La taille du fichier ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
-            'cover_url.max' => "La taille du fichier ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
+            'thumbnail_url.max' => "La taille du thumbnail ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
+            'cover_url.max' => "La taille de la couverture ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
         ]);
         // Vérifier si le champ source contient le mot "media_fil"
         if (strpos($request->input('source'), 'Youtube') !== false) {
