@@ -313,7 +313,7 @@ class MediaController extends BaseController
                     'updated_at' => now(),
                 ]);
 
-                return response()->json(['response' => true, 'msg' => "Fichier téléchargé avec succès."]);
+                // return response()->json(['response' => true, 'msg' => "Fichier téléchargé avec succès."]);
             } catch (\Throwable $th) {
                 return response()->json(['response' => false, 'data' => $th->getMessage(), 'msg' => "Erreur d'enregistrement de la vidéo"], 500);
             }
@@ -477,7 +477,7 @@ class MediaController extends BaseController
                     'updated_at' => now(),
                 ]);
 
-                return response()->json(['response' => true, 'msg' => "Fichier téléchargé avec succès."]);
+                // return response()->json(['response' => true, 'msg' => "Fichier téléchargé avec succès."]);
             } catch (\Throwable $th) {
                 return response()->json(['response' => false, 'data' => $th->getMessage(), 'msg' => "Erreur d'enregistrement de la vidéo"], 500);
             }
