@@ -180,7 +180,7 @@
                                         </div>
                                     </div>
                                     @isset($media)
-                                    @if ($media->source==="AWS" && $media->media_file_url!=null)
+                                    @if ($media->source==="AWS" && $media->media_url!=null)
                                     <figure class="figure">
                                         <!-- .figure-img -->
                                         <div class="figure-img">
