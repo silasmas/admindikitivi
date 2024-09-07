@@ -185,6 +185,7 @@
                                             </div>
                                             @isset($media)
                                             @if ($media->source==="AWS")
+                                            <div class="card card-body  item">
                                             <div class="embed-responsive embed-responsive-16by9 w-100">
                                                 <figure class="figure">
                                                     <!-- .figure-img -->
@@ -196,6 +197,7 @@
                                                         </video>
                                                     </div>
                                                 </figure>
+                                            </div>
                                             </div>
                                             @endif
                                             @endisset
