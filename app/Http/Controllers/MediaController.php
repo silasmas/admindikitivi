@@ -305,13 +305,14 @@ class MediaController extends BaseController
 
             try {
                 // Construire l'URL avec la région
-                $region = config('filesystems.disks.s3.region');
-                $bucket = config('filesystems.disks.s3.bucket');
-                $baseUrl = "https://s3.{$region}.amazonaws.com/{$bucket}";
-
+                // $region = config('filesystems.disks.s3.region');
+                // $bucket = config('filesystems.disks.s3.bucket');
+                // $baseUrl = "https://s3.{$region}.amazonaws.com/{$bucket}";
+                $file->storeAs($directoryPath, $filename, 's3');
                 // Mettre à jour l'URL du média
                 $media->update([
-                    'media_url' => $baseUrl . '/' . ltrim($pathUrl, '/'),
+                    // 'media_url' => $baseUrl . '/' . ltrim($pathUrl, '/'),
+                    'media_url' => config('filesystems.disks.s3.url') . $pathUrl,
                     'updated_at' => now(),
                 ]);
 
@@ -470,12 +471,15 @@ class MediaController extends BaseController
 
             try {
                 // Stocker le fichier dans S3
-                // $file->storeAs($directoryPath, $filename, 's3');
-                $file->storeAs('images/medias/' . $media->id, $filename, 's3');
-
+                // Construire l'URL avec la région
+                // $region = config('filesystems.disks.s3.region');
+                // $bucket = config('filesystems.disks.s3.bucket');
+                // $baseUrl = "https://s3.{$region}.amazonaws.com/{$bucket}";
+                $file->storeAs($directoryPath, $filename, 's3');
                 // Mettre à jour l'URL du média
                 $media->update([
-                    'media_url' => config('filesystems.disks.s3.url') . $pathUrl,
+                    // 'media_url' => $baseUrl . '/' . ltrim($pathUrl, '/'),
+                    'media_url' =>  config('filesystems.disks.s3.url') . $pathUrl,
                     'updated_at' => now(),
                 ]);
 

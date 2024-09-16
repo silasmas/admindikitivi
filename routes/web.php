@@ -1,16 +1,14 @@
 <?php
 
-
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BaseController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\TypeController;
+use App\Http\Controllers\CountryController;
+use App\Http\Controllers\DonationController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MediaController;
-use App\Http\Controllers\CountryController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\DonationController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\TypeController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,7 +21,7 @@ use App\Http\Controllers\DonationController;
 |
  */
 
-Route::get('/',[BaseController::class, 'dashbord'])->middleware(['auth', 'verified']);
+Route::get('/', [BaseController::class, 'dashbord'])->middleware(['auth', 'verified']);
 
 Route::get('/dashboard', [BaseController::class, 'dashbord'])->middleware(['auth', 'verified'])->name('dashboard');
 
