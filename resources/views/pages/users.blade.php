@@ -1,4 +1,4 @@
-@extends("layouts.template",['titre'=>"Client"])
+@extends("layouts.template",['titre'=>"Agents"])
 
 
 
@@ -15,7 +15,7 @@
                     <!-- .input-group -->
                     <div class="input-group has-clearable">
                         <label class="input-group-prepend" for="searchClients">
-                            <span class="input-group-text">{{ count($membres->data) }} </span>
+                            <span class="input-group-text">{{ count($membres->data).' Client'.s($membres->data) }} </span>
                         </label>
                     </div><!-- /.input-group -->
                 </header>

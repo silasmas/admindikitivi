@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\BaseController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\DonationController;
@@ -9,6 +8,7 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TypeController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*

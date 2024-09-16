@@ -74,6 +74,16 @@ if (!function_exists('getApiToken')) {
         return '';
     }
 }
+if (!function_exists('s')) {
+    function s($nbr)
+    {
+        if (count($nbr) > 0) {
+            return 's';
+        } else {
+            return '';
+        }
+    }
+}
 
 // Check if a value exists into an multidimensional array
 if (!function_exists('inArrayR')) {
