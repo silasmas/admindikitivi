@@ -479,7 +479,7 @@ class MediaController extends BaseController
                 // Mettre à jour l'URL du média
                 $media->update([
                     // 'media_url' => $baseUrl . '/' . ltrim($pathUrl, '/'),
-                    'media_url' =>  config('filesystems.disks.s3.url') . $pathUrl,
+                    'media_url' => config('filesystems.disks.s3.url') . $pathUrl,
                     'updated_at' => now(),
                 ]);
 

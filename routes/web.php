@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\BaseController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\DonationController;
@@ -42,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::get('pays', [CountryController::class, 'index'])->name('pays');
     Route::get('roles', [RoleController::class, 'index'])->name('roles');
     Route::get('gifted', [DonationController::class, 'index'])->name('gifted');
+    Route::get('users', [UserController::class, 'indexAgent'])->name('users');
 
     Route::get('createMedia', [MediaController::class, 'create'])->name('createMedia');
     Route::get('creatGroup', [GroupController::class, 'create'])->name('creatGroup');
@@ -54,6 +56,7 @@ Route::middleware('auth')->group(function () {
     Route::get('editPays/{id}', [CountryController::class, 'show'])->name('editPays');
     Route::get('editRole/{id}', [RoleController::class, 'show'])->name('editRole');
     Route::get('editCat/{id}', [MediaController::class, 'show_cat'])->name('editCat');
+    Route::get('editeUser/{id}', [UserController::class, 'show_Agent'])->name('editeUser');
 
     Route::get('deleteMedia/{id}', [MediaController::class, 'destroy'])->name('deleteMedia');
     Route::get('deleteCategorie/{id}', [MediaController::class, 'destroyCat'])->name('deleteCategorie');
@@ -61,6 +64,7 @@ Route::middleware('auth')->group(function () {
     Route::get('deleteGroupe/{id}', [GroupController::class, 'destroy'])->name('deleteGroupe');
     Route::get('deletePays/{id}', [CountryController::class, 'destroy'])->name('deletePays');
     Route::get('deleteRole/{id}', [RoleController::class, 'destroy'])->name('deleteRole');
+    Route::get('deleteUser/{id}', [UserController::class, 'destroyAgent'])->name('deleteUser');
 
     Route::post('registerMedia', [MediaController::class, 'store'])->name('registerMedia');
     Route::post('addCat', [MediaController::class, 'store_cat'])->name('addCat');
@@ -68,6 +72,7 @@ Route::middleware('auth')->group(function () {
     Route::post('addGroupe', [GroupController::class, 'store'])->name('addGroupe');
     Route::post('addPays', [CountryController::class, 'store'])->name('addPays');
     Route::post('addRole', [RoleController::class, 'store'])->name('addRole');
+    Route::post('creatUsers', [UserController::class, 'createAgent'])->name('creatUsers');
 
     Route::post('updateMedia', [MediaController::class, 'update'])->name('updateMedia');
     Route::post('updateCat', [TypeController::class, 'update_categorie'])->name('updateCat');
@@ -75,6 +80,7 @@ Route::middleware('auth')->group(function () {
     Route::post('updateGroupe', [GroupController::class, 'update'])->name('updateGroupe');
     Route::post('updatePays', [CountryController::class, 'update'])->name('updatePays');
     Route::post('updateRole', [RoleController::class, 'update'])->name('updateRole');
+    Route::post('updateUser', [UserController::class, 'updateAgent'])->name('updateUser');
 
 });
 

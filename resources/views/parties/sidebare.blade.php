@@ -75,12 +75,20 @@
                             <span class="menu-text">Gestion des roles</span>
                         </a>
                     </li>
-                        <li class="menu-item {{ Route::current()->getName() == 'client' ? 'has-active' : ''}}">
+
+                    <li class="menu-item {{ Route::current()->getName() == 'client' ? 'has-active' : ''}}">
                         <a href="{{ route('client') }}" class="menu-link">
                             <span class="menu-icon fas fa-users"></span>
                             <span class="menu-text">Clients</span>
                         </a>
-                    </li><!-- /.menu-item -->
+                    </li>
+                    <li class="menu-item {{ Route::current()->getName() == 'users' ? 'has-active' : ''}}">
+                        <a href="{{ route('users') }}" class="menu-link">
+                            <span class="menu-icon fas fa-users"></span>
+                            <span class="menu-text">Utilisateurs</span>
+                        </a>
+                    </li>
+                    <!-- /.menu-item -->
                     <!-- .menu-header -->
                     <li class="menu-header">Partenaire </li><!-- /.menu-header -->
                     <li class=" {{ Route::current()->getName() == 'gifted' ? 'has-active' : ''}}">

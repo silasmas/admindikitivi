@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers\API;
 
-use stdClass;
-use App\Models\User;
-use App\Models\Status;
-use Nette\Utils\Random;
-use Illuminate\Support\Str;
-use App\Models\Notification;
-use Illuminate\Http\Request;
-use App\Models\PasswordReset;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\ApiClientManager;
-use App\Http\Resources\User as ResourcesUser;
-use App\Http\Resources\PasswordReset as ResourcesPasswordReset;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PasswordReset as ResourcesPasswordReset;
+use App\Http\Resources\User as ResourcesUser;
+use App\Models\Notification;
+use App\Models\PasswordReset;
+use App\Models\Status;
+use App\Models\User;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Nette\Utils\Random;
+use stdClass;
+
 /**
  * @author Xanders
  * @see https://www.linkedin.com/in/xanders-samoth-b2770737/
@@ -40,7 +41,19 @@ class UserController extends Controller
 
         //  dd(count($membres->data));
 
-         return view('pages.home', compact('membres'));
+        return view('pages.home', compact('membres'));
+    }
+    public function indexAgent()
+    {
+        $membres = User::get();
+        //  dd(count($membres->data));
+
+        return view('pages.users', compact('membres'));
+    }
+    public function createAgent(Request $request)
+    {
+
+        return view('pages.home', compact('membres'));
     }
 
     /**
@@ -72,7 +85,7 @@ class UserController extends Controller
             'parental_code' => $request->parental_code,
             'api_token' => $request->api_token,
             'country_id' => $request->country_id,
-            'status_id' => is_null($status_intermediate) ? null : $status_intermediate->id
+            'status_id' => is_null($status_intermediate) ? null : $status_intermediate->id,
         ];
         $users = User::all();
         $password_resets = PasswordReset::all();
@@ -137,13 +150,13 @@ class UserController extends Controller
             if ($parent->parental_code == null) {
                 $parent->update([
                     'parental_code' => $random_string,
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             }
         }
 
         if ($inputs['password'] != null) {
-            if ($request->confirm_password != $request->password OR $request->confirm_password == null) {
+            if ($request->confirm_password != $request->password or $request->confirm_password == null) {
                 return $this->handleError($request->confirm_password, __('notifications.confirm_password_error'), 400);
             }
 
@@ -153,12 +166,12 @@ class UserController extends Controller
 
             $random_string = (string) random_int(1000000, 9999999);
 
-            if ($inputs['email'] != null AND $inputs['phone'] != null) {
+            if ($inputs['email'] != null and $inputs['phone'] != null) {
                 $password_reset = PasswordReset::create([
                     'email' => $inputs['email'],
                     'phone' => $inputs['phone'],
                     'token' => $random_string,
-                    'former_password' => $request->password
+                    'former_password' => $request->password,
                 ]);
 
                 // try {
@@ -173,7 +186,7 @@ class UserController extends Controller
                     PasswordReset::create([
                         'email' => $inputs['email'],
                         'token' => $random_string,
-                        'former_password' => $request->password
+                        'former_password' => $request->password,
                     ]);
                 }
 
@@ -181,7 +194,7 @@ class UserController extends Controller
                     $password_reset = PasswordReset::create([
                         'phone' => $inputs['phone'],
                         'token' => $random_string,
-                        'former_password' => $request->password
+                        'former_password' => $request->password,
                     ]);
 
                     // try {
@@ -197,7 +210,7 @@ class UserController extends Controller
         if ($inputs['password'] == null) {
             $random_string = (string) random_int(1000000, 9999999);
 
-            if ($inputs['email'] != null AND $inputs['phone'] != null) {
+            if ($inputs['email'] != null and $inputs['phone'] != null) {
                 $password_reset = PasswordReset::create([
                     'email' => $inputs['email'],
                     'phone' => $inputs['phone'],
@@ -249,7 +262,7 @@ class UserController extends Controller
 
         $user->update([
             'api_token' => $token,
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         if ($request->role_id != null) {
@@ -257,8 +270,8 @@ class UserController extends Controller
         }
 
         /*
-            HISTORY AND/OR NOTIFICATION MANAGEMENT
-        */
+        HISTORY AND/OR NOTIFICATION MANAGEMENT
+         */
         Notification::create([
             'notification_url' => 'about/terms_of_use',
             'notification_content' => [
@@ -269,7 +282,7 @@ class UserController extends Controller
             'icon' => 'bi bi-person-check',
             'color' => 'text-success',
             'status_id' => is_null($status_unread) ? null : $status_unread->id,
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
 
         $object = new stdClass();
@@ -294,6 +307,17 @@ class UserController extends Controller
         }
 
         return $this->handleResponse(new ResourcesUser($user), __('notifications.find_user_success'));
+    }
+    public function show_Agent($id)
+    {
+        $user = User::find($id);
+
+        if ($user) {
+            return response()->json(['reponse' => true, 'msg' => "User trouvé, vous pouvez modifier", 'data' => $user]);
+        } else {
+            return response()->json(['reponse' => false, 'msg' => "Erreur."]);
+
+        }
     }
 
     /**
@@ -326,7 +350,7 @@ class UserController extends Controller
             'parental_code' => $request->parental_code,
             'api_token' => $request->api_token,
             'country_id' => $request->country_id,
-            'status_id' => $request->status
+            'status_id' => $request->status,
         ];
         $users = User::all();
         $current_user = User::find($inputs['id']);
@@ -491,7 +515,7 @@ class UserController extends Controller
             if ($parent->parental_code == null) {
                 $parent->update([
                     'parental_code' => $random_string,
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             }
 
@@ -502,7 +526,7 @@ class UserController extends Controller
         }
 
         if ($inputs['password'] != null) {
-            if ($inputs['confirm_password'] != $inputs['password'] OR $inputs['confirm_password'] == null) {
+            if ($inputs['confirm_password'] != $inputs['password'] or $inputs['confirm_password'] == null) {
                 return $this->handleError($inputs['confirm_password'], __('notifications.confirm_password_error'), 400);
             }
 
@@ -515,8 +539,8 @@ class UserController extends Controller
             $random_string = (string) random_int(1000000, 9999999);
 
             // If password_reset doesn't exist, create it.
-            if ($password_reset_by_email == null AND $password_reset_by_phone == null) {
-                if ($inputs['email'] != null AND $inputs['phone'] != null) {
+            if ($password_reset_by_email == null and $password_reset_by_phone == null) {
+                if ($inputs['email'] != null and $inputs['phone'] != null) {
                     PasswordReset::create([
                         'email' => $inputs['email'],
                         'phone' => $inputs['phone'],
@@ -529,7 +553,7 @@ class UserController extends Controller
                         PasswordReset::create([
                             'email' => $inputs['email'],
                             'token' => $random_string,
-                            'former_password' => $inputs['password']
+                            'former_password' => $inputs['password'],
                         ]);
                     }
 
@@ -537,12 +561,12 @@ class UserController extends Controller
                         PasswordReset::create([
                             'phone' => $inputs['phone'],
                             'token' => $random_string,
-                            'former_password' => $inputs['password']
+                            'former_password' => $inputs['password'],
                         ]);
                     }
                 }
 
-            // Otherwise, update it.
+                // Otherwise, update it.
             } else {
                 if ($password_reset_by_email != null) {
                     // Update password reset
@@ -631,8 +655,8 @@ class UserController extends Controller
     public function findByRole($locale, $role_name)
     {
         $users = User::whereHas('roles', function ($query) use ($locale, $role_name) {
-                                    $query->where('role_name->' . $locale, $role_name);
-                                })->orderByDesc('users.created_at')->get();
+            $query->where('role_name->' . $locale, $role_name);
+        })->orderByDesc('users.created_at')->get();
 
         return $this->handleResponse(ResourcesUser::collection($users), __('notifications.find_all_users_success'));
     }
@@ -647,8 +671,8 @@ class UserController extends Controller
     public function findByNotRole($locale, $role_name)
     {
         $users = User::whereDoesntHave('roles', function ($query) use ($locale, $role_name) {
-                                    $query->where('role_name->' . $locale, $role_name);
-                                })->orderByDesc('users.created_at')->get();
+            $query->where('role_name->' . $locale, $role_name);
+        })->orderByDesc('users.created_at')->get();
 
         return $this->handleResponse(ResourcesUser::collection($users), __('notifications.find_all_users_success'));
     }
@@ -677,10 +701,10 @@ class UserController extends Controller
         // Get inputs
         $inputs = [
             'username' => $request->username,
-            'password' => $request->password
+            'password' => $request->password,
         ];
 
-        if ($inputs['username'] == null OR $inputs['username'] == ' ') {
+        if ($inputs['username'] == null or $inputs['username'] == ' ') {
             return $this->handleError($inputs['username'], __('validation.required'), 400);
         }
 
@@ -746,15 +770,15 @@ class UserController extends Controller
         }
 
         /*
-            HISTORY AND/OR NOTIFICATION MANAGEMENT
-        */
+        HISTORY AND/OR NOTIFICATION MANAGEMENT
+         */
         $status_activated = Status::where('status_name->fr', 'Activé')->first();
         $status_intermediate = Status::where('status_name->fr', 'Intermédiaire')->first();
         $status_blocked = Status::where('status_name->fr', 'Bloqué')->first();
         $status_unread = Status::where('status_name->fr', 'Non lue')->first();
 
         // If it's a member whose accessing is accepted, send notification
-        if ($status_id == $status_activated->id OR $status_id == $status_intermediate->id) {
+        if ($status_id == $status_activated->id or $status_id == $status_intermediate->id) {
             Notification::create([
                 'notification_url' => 'about/terms_of_use',
                 'notification_content' => [
@@ -762,24 +786,24 @@ class UserController extends Controller
                     'fr' => 'Votre compte a été activé. Veuillez lire nos conditions avant de commencer.',
                     'ln' => 'Compte na yo esili ko activer. Tosɛngi yo otánga mibeko na biso liboso ya kobanda.',
                 ],
-                    'icon' => 'bi bi-unlock-fill',
+                'icon' => 'bi bi-unlock-fill',
                 'color' => 'text-info',
                 'status_id' => $status_unread->id,
                 'user_id' => $user->id,
             ]);
 
-            if ($user->id_card_recto == null AND $user->id_card_verso == null) {
+            if ($user->id_card_recto == null and $user->id_card_verso == null) {
                 // update "status_id" column
                 $user->update([
                     'status_id' => $status_intermediate->id,
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
 
             } else {
                 // update "status_id" column
                 $user->update([
                     'status_id' => $status_activated->id,
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
             }
         }
@@ -802,7 +826,7 @@ class UserController extends Controller
             // update "status_id" column
             $user->update([
                 'status_id' => $status_blocked->id,
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
         }
 
@@ -838,7 +862,7 @@ class UserController extends Controller
         $inputs = [
             'former_password' => $request->former_password,
             'new_password' => $request->new_password,
-            'confirm_new_password' => $request->confirm_new_password
+            'confirm_new_password' => $request->confirm_new_password,
         ];
         $user = User::find($id);
 
@@ -891,7 +915,7 @@ class UserController extends Controller
         // update "password" and "password_visible" column
         $user->update([
             'password' => Hash::make($inputs['new_password']),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         return $this->handleResponse(new ResourcesUser($user), __('notifications.update_password_success'));
@@ -908,7 +932,7 @@ class UserController extends Controller
     {
         $inputs = [
             'user_id' => $request->user_id,
-            'image_64' => $request->image_64
+            'image_64' => $request->image_64,
         ];
         // $extension = explode('/', explode(':', substr($inputs['image_64'], 0, strpos($inputs['image_64'], ';')))[1])[1];
         $replace = substr($inputs['image_64'], 0, strpos($inputs['image_64'], ',') + 1);
@@ -920,16 +944,16 @@ class UserController extends Controller
         $file = new Filesystem;
         $file->cleanDirectory($_SERVER['DOCUMENT_ROOT'] . '/public/storage/images/users/' . $inputs['user_id'] . '/avatar');
         // Create image URL
-		$image_url = 'images/users/' . $id . '/avatar/' . Str::random(50) . '.png';
+        $image_url = 'images/users/' . $id . '/avatar/' . Str::random(50) . '.png';
 
-		// Upload image
-		Storage::url(Storage::disk('public')->put($image_url, base64_decode($image)));
+        // Upload image
+        Storage::url(Storage::disk('public')->put($image_url, base64_decode($image)));
 
-		$user = User::find($id);
+        $user = User::find($id);
 
         $user->update([
             'avatar_url' => $image_url,
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         return $this->handleResponse(new ResourcesUser($user), __('notifications.update_user_success'));
@@ -948,10 +972,10 @@ class UserController extends Controller
             'user_id' => $request->user_id,
             'image_name' => $request->image_name,
             'image_64_recto' => $request->image_64_recto,
-            'image_64_verso' => $request->image_64_verso
+            'image_64_verso' => $request->image_64_verso,
         ];
 
-        if ($inputs['image_64_recto'] != null AND $inputs['image_64_verso'] != null) {
+        if ($inputs['image_64_recto'] != null and $inputs['image_64_verso'] != null) {
             // $extension = explode('/', explode(':', substr($inputs['image_64_recto'], 0, strpos($inputs['image_64_recto'], ';')))[1])[1];
             $replace_recto = substr($inputs['image_64_recto'], 0, strpos($inputs['image_64_recto'], ',') + 1);
             $replace_verso = substr($inputs['image_64_verso'], 0, strpos($inputs['image_64_verso'], ',') + 1);
@@ -984,7 +1008,7 @@ class UserController extends Controller
             return $this->handleResponse(new ResourcesUser($user), __('notifications.update_user_success'));
 
         } else {
-            if ($inputs['image_64_recto'] != null AND $inputs['image_64_verso'] == null) {
+            if ($inputs['image_64_recto'] != null and $inputs['image_64_verso'] == null) {
                 // $extension = explode('/', explode(':', substr($inputs['image_64_recto'], 0, strpos($inputs['image_64_recto'], ';')))[1])[1];
                 $replace_recto = substr($inputs['image_64_recto'], 0, strpos($inputs['image_64_recto'], ',') + 1);
                 // Find substring from replace here eg: data:image/png;base64,
@@ -1011,7 +1035,7 @@ class UserController extends Controller
                 return $this->handleResponse(new ResourcesUser($user), __('notifications.update_user_success'));
             }
 
-            if ($inputs['image_64_recto'] == null AND $inputs['image_64_verso'] != null) {
+            if ($inputs['image_64_recto'] == null and $inputs['image_64_verso'] != null) {
                 // $extension = explode('/', explode(':', substr($inputs['image_64_verso'], 0, strpos($inputs['image_64_verso'], ';')))[1])[1];
                 $replace_verso = substr($inputs['image_64_verso'], 0, strpos($inputs['image_64_verso'], ',') + 1);
                 // Find substring from replace here eg: data:image/png;base64,
