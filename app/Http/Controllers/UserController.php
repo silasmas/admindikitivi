@@ -45,8 +45,7 @@ class UserController extends Controller
     }
     public function indexAgent()
     {
-        $membres = User::get();
-        //  dd(count($membres->data));
+        $membres = $this::$api_client_manager::call('GET', getApiURL() . '/user/find_by_not_role/en/Membre', session()->get("tokenUserActive"));
 
         return view('pages.users', compact('membres'));
     }
