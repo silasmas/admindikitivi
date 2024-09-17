@@ -105,9 +105,9 @@
                                     <div class="figure-img">
                                         <img class="img-fluid" src="{{$m->cover_url?$m->cover_url:asset('assets/blank-media-cover.webp') }}" alt="Pas des couverture">
                                         <div class="figure-description">
-                                            <h6 class="figure-title"> Figure description </h6>
+                                            <h6 class="figure-title">{{Str::limit($m->media_title, 50, '...')}}</h6>
                                             <p class="text-muted mb-0">
-                                                <small>{{Str::limit($m->media_title, 50, '...')}}</small>
+                                                <small>{{Str::limit($m->description, 50, '...')}}</small>
                                             </p>
                                         </div>
                                         <div class="figure-tools">
