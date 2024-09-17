@@ -359,7 +359,10 @@
                                             isset($media)?"Modifier":"Enregistrer" }}</button><br>
                                         <div class="d-flex justify-content-center mt-5 text-center request-message">
                                         </div>
-
+                                        <div id="progress" style="display:none;">
+                                            <progress id="progressBar" value="0" max="100"></progress>
+                                            <span id="status"></span>
+                                        </div>
                                     </fieldset>
                                     <!-- /.fieldset -->
                                 </form>
@@ -403,7 +406,17 @@
             }
 
             $.ajax({
-                // headers: { 'Authorization': 'Bearer 23|fEmzaqAOGb6ld8Cej6NMU0VdXl3UISFkMDhoMLPp1754add6', 'Accept': 'multipart/form-data', 'X-localization': navigator.language },
+                xhr: function() {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener("progress", function(evt) {
+                        if (evt.lengthComputable) {
+                            var percentComplete = (evt.loaded / evt.total) * 100;
+                            $('#progressBar').val(percentComplete);
+                            $('#status').text(Math.round(percentComplete) + '% uploaded');
+                        }
+                    }, false);
+                    return xhr;
+                },
                 type: 'POST',
                 contentType: 'multipart/form-data',
                 url:'registerMedia',
