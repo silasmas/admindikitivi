@@ -107,7 +107,7 @@
                                         <div class="figure-description">
                                             <h6 class="figure-title">{{Str::limit($m->media_title, 50, '...')}}</h6>
                                             <p class="text-muted mb-0">
-                                                <small>{{Str::limit($m->description, 50, '...')}}</small>
+                                                <small>{{Str::limit($m->media_description, 50, '...')}}</small>
                                             </p>
                                         </div>
                                         <div class="figure-tools">
@@ -177,8 +177,7 @@
                                         <img class="img-fluid" src="{{$m->cover_url?$m->cover_url:asset('assets/blank-media-cover.webp') }}" alt="Pas des couverture">
                                         <a href="{{ asset($m->cover_url) }}" class="img-link" data-size="600x450">
                                             <span class="tile tile-circle bg-danger"><span class="oi oi-eye"></span>
-                                            </span> <span class="img-caption d-none">Image caption goes
-                                                here</span></a>
+                                            </span> <span class="img-caption d-none"></span></a>
                                         <div class="figure-action">
                                             <a href="#" class="btn btn-block btn-sm btn-primary">Voir en detail</a>
                                         </div>
