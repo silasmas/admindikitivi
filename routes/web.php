@@ -22,16 +22,18 @@ use Illuminate\Support\Facades\Route;
 |
  */
 
-Route::get('/', [BaseController::class, 'dashbord'])->middleware(['auth', 'verified']);
+Route::get('/', [BaseController::class, 'dashbord'])->middleware(['auth']);
 
-Route::get('/dashboard', [BaseController::class, 'dashbord'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [BaseController::class, 'dashbord'])->middleware(['auth'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-Route::get('/symlink', function () {return view('symlink');})->name('generate_symlink');
+Route::get('/symlink', function () {
+    return view('symlink');
+})->name('generate_symlink');
 
 Route::middleware('auth')->group(function () {
     Route::get('media', [BaseController::class, 'index'])->name('media');
@@ -81,7 +83,6 @@ Route::middleware('auth')->group(function () {
     Route::post('updatePays', [CountryController::class, 'update'])->name('updatePays');
     Route::post('updateRole', [RoleController::class, 'update'])->name('updateRole');
     Route::post('updateUser', [UserController::class, 'updateAgent'])->name('updateUser');
-
 });
 
 require __DIR__ . '/auth.php';
