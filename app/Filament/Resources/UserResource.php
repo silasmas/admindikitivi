@@ -21,6 +21,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -45,7 +46,7 @@ class UserResource extends Resource
                         TextInput::make('firstname')->required()
                             ->columnSpan(4)
                             ->label("Prenom"),
-                        TextInput::make('name')->required()
+                        TextInput::make('lastname')->required()
                             ->columnSpan(4)
                             ->label("Nom"),
                         TextInput::make('surname')
@@ -53,21 +54,23 @@ class UserResource extends Resource
                             ->label("Postnom"),
                         Select::make('gender')
                             ->options([
-                                'Homme' => 'Homme',
-                                'Femme' => 'Femme',
+                                'H' => 'Homme',
+                                'F' => 'Femme',
                             ])
                             ->label("Sexe")
-                            ->searchable()->columnSpan(6),
-                        DatePicker::make('birth_day')->label("Date d'anniversair")->columnSpan(6),
+                            ->searchable()->columnSpan(4),
+                        TextInput::make('phone')
+                            ->columnSpan(4)
+                            ->label("Telephone")
+                            ->unique(User::class, 'phone', ignoreRecord: true),
+                        DatePicker::make('birth_date')->label("Date d'anniversair")->columnSpan(4),
                         Select::make('country_id')
-                            ->required()
                             ->searchable()
                             ->preload()
                             ->columnSpan(6)
                             ->relationship('country', 'country_name'),
                         Select::make('status_id')
-                            ->required()
-                            ->label('Marque')
+                            ->label('Status')
                             ->searchable()
                             ->preload()
                             ->columnSpan(6)
@@ -82,9 +85,10 @@ class UserResource extends Resource
 
                     ]),
                     Section::make('Information securité')->schema([
-                        TextInput::make('email')->label("Addresse mail")
+                        TextInput::make('email')->label("Email")
                             ->email()->maxLength(255)->unique(ignoreRecord: true)
-                            ->required()->columnSpan(4),
+                            ->required()->columnSpan(4)
+                            ->unique(User::class, 'email', ignoreRecord: true),
 
                         TextInput::make('password')->password()->label("Mot de passe")
                             ->dehydrated(fn($state) => filled($state))
@@ -107,7 +111,7 @@ class UserResource extends Resource
                     ->label('Nom')->searchable(),
                 TextColumn::make('gender')->badge()
                     ->label('Sexe')->searchable(),
-                TextColumn::make('birth_day')
+                TextColumn::make('birth_date')
                     ->label('Date de naissance')->dateTime()->sortable(),
                 TextColumn::make('phone')
                     ->label('Telephone')->searchable(),
@@ -116,10 +120,12 @@ class UserResource extends Resource
                     ->label('Pays')->searchable(),
                 TextColumn::make('status.status_name')
                     ->label('Status')->searchable()->badge(),
-                TextColumn::make('created_at')->dateTime()->sortable(),
+                TextColumn::make('created_at')->dateTime()->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('status')->relationship('status', 'status_name'),
+                SelectFilter::make('country')->relationship('country', 'country_name'),
             ])
             ->actions([
                 ActionGroup::make([
