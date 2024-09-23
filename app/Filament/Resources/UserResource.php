@@ -18,6 +18,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\SelectColumn;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,15 +41,15 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Group::make([
-                    Section::make('Info sur les commandes')->schema([
+                    Section::make('Information générale')->schema([
                         TextInput::make('firstname')->required()
-                            ->columnSpan(3)
+                            ->columnSpan(4)
                             ->label("Prenom"),
                         TextInput::make('name')->required()
-                            ->columnSpan(3)
+                            ->columnSpan(4)
                             ->label("Nom"),
                         TextInput::make('surname')
-                            ->columnSpan(3)
+                            ->columnSpan(4)
                             ->label("Postnom"),
                         Select::make('gender')
                             ->options([
@@ -56,14 +57,41 @@ class UserResource extends Resource
                                 'Femme' => 'Femme',
                             ])
                             ->label("Sexe")
-                            ->searchable()->columnSpan(3),
-                        DatePicker::make('birth_day')->label("Date d'anniversair")->columnSpan(3),
+                            ->searchable()->columnSpan(6),
+                        DatePicker::make('birth_day')->label("Date d'anniversair")->columnSpan(6),
+                        Select::make('country_id')
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->columnSpan(6)
+                            ->relationship('country', 'country_name'),
+                        Select::make('status_id')
+                            ->required()
+                            ->label('Marque')
+                            ->searchable()
+                            ->preload()
+                            ->columnSpan(6)
+                            ->relationship('status', 'status_name'),
+
+                    ])->columns(12),
+                    Section::make('image')->schema([
+                        FileUpload::make('avatar_url')
+                            ->label('Proto profil')
+                            ->directory('profil')
+                            ->reorderable(),
+
+                    ]),
+                    Section::make('Information securité')->schema([
                         TextInput::make('email')->label("Addresse mail")
                             ->email()->maxLength(255)->unique(ignoreRecord: true)
-                            ->required()->columnSpan(3),
+                            ->required()->columnSpan(4),
+
                         TextInput::make('password')->password()->label("Mot de passe")
                             ->dehydrated(fn($state) => filled($state))
-                            ->required(fn(Page $livewire) => $livewire instanceof CreateRecord)->columnSpan(3),
+                            ->required(fn(Page $livewire) => $livewire instanceof CreateRecord)->columnSpan(4),
+                        TextInput::make('password_confirmation')->password()->label("Repeter Mot de passe")
+                            ->dehydrated(fn($state) => filled($state))
+                            ->required(fn(Page $livewire) => $livewire instanceof CreateRecord)->columnSpan(4),
                     ])->columns(12),
                 ])->columnSpanFull()
             ]);
