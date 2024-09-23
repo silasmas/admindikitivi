@@ -73,9 +73,21 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->searchable(),
+                TextColumn::make('firstname')
+                    ->label('Prenom')->searchable(),
+                TextColumn::make('lastname')
+                    ->label('Nom')->searchable(),
+                TextColumn::make('gender')->badge()
+                    ->label('Sexe')->searchable(),
+                TextColumn::make('birth_day')
+                    ->label('Date de naissance')->dateTime()->sortable(),
+                TextColumn::make('phone')
+                    ->label('Telephone')->searchable(),
                 TextColumn::make('email')->searchable(),
-                TextColumn::make('email_verified_at')->dateTime()->sortable(),
+                TextColumn::make('country.country_name')
+                    ->label('Pays')->searchable(),
+                TextColumn::make('status.status_name')
+                    ->label('Status')->searchable()->badge(),
                 TextColumn::make('created_at')->dateTime()->sortable(),
             ])
             ->filters([
