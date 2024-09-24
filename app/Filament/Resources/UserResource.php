@@ -22,6 +22,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Resources\Pages\CreateRecord;
@@ -155,6 +156,7 @@ class UserResource extends Resource
                 TextColumn::make('gender')->badge()
                     ->label('Sexe')->searchable(),
                 TextColumn::make('birth_date')
+                ->toggleable(isToggledHiddenByDefault: true)
                     ->label('Date de naissance')->dateTime()->sortable(),
                 TextColumn::make('phone')
                     ->icon('heroicon-m-phone')
@@ -167,10 +169,16 @@ class UserResource extends Resource
                     ->copyMessage('addresse Email copié')
                     ->copyMessageDuration(1500)
                     ->icon('heroicon-m-envelope'),
+                    TextColumn::make('roles') // Utilisez TextColumn
+                    ->label('Roles')
+                    ->badge()->color('success')
+                    ->formatStateUsing(fn ($record) => $record->roles->pluck('role_name')->join(', ')),
                 TextColumn::make('country.country_name')
+                ->toggleable(isToggledHiddenByDefault: true)
                     ->label('Pays')->searchable(),
                 TextColumn::make('status.status_name')
-                    ->label('Status')->searchable()->badge(),
+                    ->label('Status')->searchable()
+                    ->badge(),
                 TextColumn::make('created_at')->dateTime()->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
