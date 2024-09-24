@@ -46,7 +46,7 @@ class ClientResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->query(User::whereHas('roles', function ($query) {
-            $query->where('name', 'Membre'); // Assurez-vous que 'name' correspond à votre colonne de rôle
+            $query->where('role_name', 'Membre'); // Assurez-vous que 'name' correspond à votre colonne de rôle
         }))->columns([
             ImageColumn::make('avatar_url')
             ->circular()

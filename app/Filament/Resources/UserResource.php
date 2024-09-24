@@ -119,7 +119,7 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->query(User::whereHas('roles', function ($query) {
-            $query->where('name', 'Administrateur'); // Assurez-vous que 'name' correspond à votre colonne de rôle
+            $query->where('role_name', 'Administrateur'); // Assurez-vous que 'name' correspond à votre colonne de rôle
         }))
             ->columns([
                 ImageColumn::make('avatar_url')
