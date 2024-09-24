@@ -31,8 +31,16 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationIcon = 'heroicon-o-user';
+    public static function getLabel(): string
+    {
+        return 'Agent';
+    }
 
+    public static function getPluralLabel(): string
+    {
+        return 'Agents';
+    }
     public static function form(Form $form): Form
     {
         return $form
@@ -70,7 +78,7 @@ class UserResource extends Resource
                             ->searchable()
                             ->preload()
                             ->columnSpan(6)
-                            ->relationship('status', 'status_name'),
+                            ->relationship('status', 'status_name.fr'),
 
                     ])->columns(12),
                     Section::make('image')->schema([
@@ -110,7 +118,9 @@ class UserResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table
+        return $table->query(User::whereHas('roles', function ($query) {
+            $query->where('name', 'Administrateur'); // Assurez-vous que 'name' correspond à votre colonne de rôle
+        }))
             ->columns([
                 ImageColumn::make('avatar_url')
                     ->circular()

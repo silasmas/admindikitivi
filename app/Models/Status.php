@@ -20,13 +20,17 @@ class Status extends Model
      * @var array<int, string>
      */
     protected $guarded = [];
-    protected $casts = ["status_name" => 'array'];
 
     /**
      * Translatable properties.
      */
     protected $translatable = ['status_name'];
 
+    protected $casts = ["status_name" => 'array'];
+    public function getStatus_name($lang = 'fr')
+    {
+        return $this->status_name[$lang] ?? null; // Retourne la description dans la langue demandée
+    }
     /**
      * ONE-TO-MANY
      * One group for several statuses
