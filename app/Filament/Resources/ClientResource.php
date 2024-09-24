@@ -104,7 +104,17 @@ class ClientResource extends Resource
                                     ->downloadable()
                                     ->image()
                                     ->maxSize(1024)
-                                    ->previewable(true)
+                                    ->columnSpan(6)
+                                    ->previewable(true),
+
+                                    Select::make('roles')
+                                    ->label('Roles')
+                                    ->columnSpan(6)
+                                    ->searchable()
+                                    ->preload()
+                                    ->multiple() // Permet de sélectionner plusieurs rôles
+                                    ->required()
+                                    ->relationship('roles', 'role_name'), // 'roles' est la méthode du modèle User, 'name' est l'attribut à afficher
                             ])->columns(12)
                         ]),
                     Step::make('Étape 3')
