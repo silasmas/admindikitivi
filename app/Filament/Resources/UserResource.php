@@ -78,7 +78,7 @@ class UserResource extends Resource
                             ->searchable()
                             ->preload()
                             ->columnSpan(6)
-                            ->relationship('status', 'status_name.fr'),
+                            ->relationship('status', 'status_name'),
 
                     ])->columns(12),
                     Section::make('image')->schema([
