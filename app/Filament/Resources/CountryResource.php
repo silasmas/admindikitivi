@@ -2,34 +2,41 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CountryResource\Pages;
-use App\Filament\Resources\CountryResource\RelationManagers;
-use App\Models\Country;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Country;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\CountryResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\CountryResource\RelationManagers;
 
 class CountryResource extends Resource
 {
     protected static ?string $model = Country::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('country_name')
+                TextInput::make('country_name')
+                    ->label('Nom du pays')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('country_phone_code')
-                    ->tel()
+                TextInput::make('country_phone_code')
+                    ->label('Code numérique du pays')
                     ->maxLength(45),
-                Forms\Components\TextInput::make('country_lang_code')
+                TextInput::make('country_lang_code')
+                    ->label('Code de la langue')
                     ->maxLength(45),
             ]);
     }
@@ -57,7 +64,9 @@ class CountryResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -77,8 +86,8 @@ class CountryResource extends Resource
     {
         return [
             'index' => Pages\ListCountries::route('/'),
-            'create' => Pages\CreateCountry::route('/create'),
-            'edit' => Pages\EditCountry::route('/{record}/edit'),
+            // 'create' => Pages\CreateCountry::route('/create'),
+            // 'edit' => Pages\EditCountry::route('/{record}/edit'),
         ];
     }
 }

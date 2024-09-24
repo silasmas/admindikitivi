@@ -2,40 +2,51 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TypeResource\Pages;
-use App\Filament\Resources\TypeResource\RelationManagers;
-use App\Models\Type;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\Type;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\TypeResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\TypeResource\RelationManagers;
 
 class TypeResource extends Resource
 {
     protected static ?string $model = Type::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('group_id')
-                    ->numeric(),
-                Forms\Components\Textarea::make('type_name')
+
+                TextInput::make('type_name')
                     ->required()
                     ->maxLength(65535)
                     ->columnSpanFull(),
-                Forms\Components\Textarea::make('type_description')
+                Textarea::make('type_description')
                     ->maxLength(65535)
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('icon')
-                    ->maxLength(45),
-                Forms\Components\TextInput::make('color')
-                    ->maxLength(45),
+                Select::make('group_id')
+                    ->relationship('group', 'group_name')
+                    ->searchable()
+                    ->preload()
+                    ->getOptionLabelUsing(function ($record) {
+                        // Déterminez la langue actuelle (par exemple, en utilisant la locale de l'application)
+                        $locale = app()->getLocale(); //ou utilisez une autre méthode pour obtenir la langue souhaitée
+                        return $record->group_name[$locale] ?? 'Nom non disponible'; // Retourne le nom dans la langue spécifiée
+                    }),
             ]);
     }
 
@@ -43,18 +54,21 @@ class TypeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('group_id')
-                    ->numeric()
+                TextColumn::make('type_name')
+                    ->searchable()
+                    ->label('Nom')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('icon')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('color')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('type_description')
+                    ->label('Description')
+                    ->sortable(),
+                TextColumn::make('group.group_name')
+                    ->label('Nom du groupe')
+                    ->sortable(),
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -63,7 +77,9 @@ class TypeResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -83,8 +99,8 @@ class TypeResource extends Resource
     {
         return [
             'index' => Pages\ListTypes::route('/'),
-            'create' => Pages\CreateType::route('/create'),
-            'edit' => Pages\EditType::route('/{record}/edit'),
+            // 'create' => Pages\CreateType::route('/create'),
+            // 'edit' => Pages\EditType::route('/{record}/edit'),
         ];
     }
 }

@@ -17,19 +17,15 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Tables\Actions\DeleteBulkAction;
 use App\Filament\Resources\UserResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\UserResource\RelationManagers;
 
 class UserResource extends Resource
 {
@@ -81,21 +77,32 @@ class UserResource extends Resource
                         FileUpload::make('avatar_url')
                             ->label('Proto profil')
                             ->directory('profil')
-                            ->reorderable(),
+                            ->avatar()
+                            ->imageEditor()
+                            ->imageEditorMode(2)
+                            ->circleCropper()
+                            ->downloadable()
+                            ->image()
+                            ->maxSize(1024)
+                            ->previewable(true)
+                            ->imageEditorAspectRatios([
+                                null,
+                                '16:9',
+                                '4:3',
+                                '1:1',
+                            ]),
 
                     ]),
                     Section::make('Information securité')->schema([
                         TextInput::make('email')->label("Email")
                             ->email()->maxLength(255)->unique(ignoreRecord: true)
-                            ->required()->columnSpan(4)
+                            ->required()->columnSpan(6)
                             ->unique(User::class, 'email', ignoreRecord: true),
 
                         TextInput::make('password')->password()->label("Mot de passe")
                             ->dehydrated(fn($state) => filled($state))
                             ->required(fn(Page $livewire) => $livewire instanceof CreateRecord)->columnSpan(4),
-                        TextInput::make('password_confirmation')->password()->label("Repeter Mot de passe")
-                            ->dehydrated(fn($state) => filled($state))
-                            ->required(fn(Page $livewire) => $livewire instanceof CreateRecord)->columnSpan(4),
+
                     ])->columns(12),
                 ])->columnSpanFull()
             ]);
@@ -105,6 +112,9 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                ImageColumn::make('avatar_url')
+                    ->circular()
+                    ->defaultImageUrl(url('assets/images/avatars/default.jpg')),
                 TextColumn::make('firstname')
                     ->label('Prenom')->searchable(),
                 TextColumn::make('lastname')
@@ -114,8 +124,16 @@ class UserResource extends Resource
                 TextColumn::make('birth_date')
                     ->label('Date de naissance')->dateTime()->sortable(),
                 TextColumn::make('phone')
+                    ->icon('heroicon-m-phone')
+                    ->copyable()
+                    ->copyMessage('Phone copié')
+                    ->copyMessageDuration(1500)
                     ->label('Telephone')->searchable(),
-                TextColumn::make('email')->searchable(),
+                TextColumn::make('email')->searchable()
+                    ->copyable()
+                    ->copyMessage('addresse Email copié')
+                    ->copyMessageDuration(1500)
+                    ->icon('heroicon-m-envelope'),
                 TextColumn::make('country.country_name')
                     ->label('Pays')->searchable(),
                 TextColumn::make('status.status_name')

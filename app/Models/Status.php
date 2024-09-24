@@ -20,6 +20,7 @@ class Status extends Model
      * @var array<int, string>
      */
     protected $guarded = [];
+    protected $casts = ["status_name" => 'array'];
 
     /**
      * Translatable properties.

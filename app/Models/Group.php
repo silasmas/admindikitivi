@@ -25,6 +25,7 @@ class Group extends Model
      * Translatable properties.
      */
     protected $translatable = ['group_name'];
+    protected $casts = ['group_name' => 'array'];
 
     /**
      * MANY-TO-ONE

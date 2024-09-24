@@ -38,7 +38,8 @@ class User extends Authenticatable
     protected $casts = [
         'last_connection' => 'datetime:Y-m-d H:i:s',
         'created_at' => 'datetime:Y-m-d H:i:s',
-        'updated_at' => 'datetime:Y-m-d H:i:s'
+        'updated_at' => 'datetime:Y-m-d H:i:s',
+        "avatar_url" => 'array'
     ];
 
     /**
