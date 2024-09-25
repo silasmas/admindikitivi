@@ -3,8 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+// use Spatie\Translatable\HasTranslations;
+use Filament\Resources\Concerns\Translatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\Translatable\HasTranslations;
 
 /**
  * @author Xanders
@@ -12,7 +13,7 @@ use Spatie\Translatable\HasTranslations;
  */
 class Group extends Model
 {
-    use HasFactory, HasTranslations;
+    use HasFactory,Translatable;
 
     /**
      * The attributes that are mass assignable.

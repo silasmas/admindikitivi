@@ -3,8 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Translatable\HasTranslations;
+use Filament\Resources\Concerns\Translatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @author Xanders
@@ -12,7 +13,7 @@ use Spatie\Translatable\HasTranslations;
  */
 class Pricing extends Model
 {
-    use HasFactory, HasTranslations;
+    use HasFactory, HasTranslations,Translatable;
 
     /**
      * The attributes that are mass assignable.

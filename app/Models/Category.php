@@ -25,14 +25,25 @@ class Category extends Model
      * Translatable properties.
      */
     protected $translatable = ['category_name'];
-    protected $casts = ['category_name' => 'array'];
-    public function getCategory_name($lang = 'fr')
+    
+    protected $casts = [
+        'category_name' => 'array', // S'assure que category_name est traité comme un tableau
+    ];
+
+    /**
+     * Retourne la catégorie dans la langue demandée.
+     *
+     * @param string $lang
+     * @return string|null
+     */
+    public function getCategoryName($lang = 'fr')
     {
-        return $this->category_name[$lang] ?? null; // Retourne la description dans la langue demandée
+        return $this->category_name[$lang] ?? null; // Retourne le nom dans la langue demandée
     }
+
     /**
      * MANY-TO-ONE
-     * Several medias for several categories
+     * Several medias for several categories.
      */
     public function medias()
     {
