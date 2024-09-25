@@ -209,7 +209,7 @@
                                     <span>Type :</span>
                                     <a href="{{ route('types') }}">{{ $m->type->type_name??"" }}</a> /
                                     <span>Groupe :</span>
-                                    <a href="{{ route('groupes') }}">{{ $m->type->group->group_name }}</a> /
+                                    <a href="{{ route('groupes') }}">{{ $m->type->group->group_name??"" }}</a> /
 
                                     <span>Catégories :</span>
                                     @forelse ($m->categories as $cat)
