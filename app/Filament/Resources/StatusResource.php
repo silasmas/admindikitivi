@@ -2,59 +2,90 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\StatusResource\Pages;
-use App\Filament\Resources\StatusResource\RelationManagers;
-use App\Models\Status;
+
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Group;
+use App\Models\Status;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Resources\Concerns\Translatable;
+use App\Filament\Resources\StatusResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\StatusResource\RelationManagers;
 
 class StatusResource extends Resource
 {
+    use  Translatable;
     protected static ?string $model = Status::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-check-circle';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('group_id')
-                    ->numeric(),
-                Forms\Components\Textarea::make('status_name')
+                Select::make('group_id')
+                    ->relationship('group', 'group_name')
+                    ->searchable()
+                    ->options(Group::all()->pluck('group_name.ln', 'id'))
+                    ->preload()
                     ->required()
-                    ->maxLength(65535)
                     ->columnSpanFull(),
-                Forms\Components\Textarea::make('status_description')
+                TextInput::make('status_name.fr')
                     ->maxLength(65535)
+                    ->columnSpan(4)
+                    ->label('Nom (Français)'),
+                TextInput::make('status_name.en')
+                    ->columnSpan(4)
+                    ->label('Nom (Anglais)'),
+                TextInput::make('status_name.ln')
+                    ->columnSpan(4)
+                    ->label('Nom (Lingala)'),
+                TextInput::make('icon')
+                    ->columnSpan(6)
+                    ->maxLength(45),
+                TextInput::make('color')
+                    ->columnSpan(6)
+                    ->maxLength(45),
+
+                Textarea::make('status_description')
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('icon')
-                    ->maxLength(45),
-                Forms\Components\TextInput::make('color')
-                    ->maxLength(45),
-            ]);
+            ])->columnS(12);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('group_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('icon')
+                TextColumn::make('status_name')
+                    ->label('Nom')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('color')
+                TextColumn::make('group.group_name')
+                    ->label('Groupe')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('status_description')
+                    ->label('Description')
+                    ->searchable(),
+                TextColumn::make('icon')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(),
+                TextColumn::make('color')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(),
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -63,7 +94,8 @@ class StatusResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -83,8 +115,8 @@ class StatusResource extends Resource
     {
         return [
             'index' => Pages\ListStatuses::route('/'),
-            'create' => Pages\CreateStatus::route('/create'),
-            'edit' => Pages\EditStatus::route('/{record}/edit'),
+            // 'create' => Pages\CreateStatus::route('/create'),
+            // 'edit' => Pages\EditStatus::route('/{record}/edit'),
         ];
     }
 }

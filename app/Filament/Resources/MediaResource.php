@@ -2,16 +2,23 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\MediaResource\Pages;
-use App\Filament\Resources\MediaResource\RelationManagers;
-use App\Models\Media;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\Type;
 use Filament\Tables;
+use App\Models\Media;
+use App\Models\Category;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Wizard;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TimePicker;
+use Filament\Forms\Components\Wizard\Step;
+use Filament\Forms\Components\CheckboxList;
+use App\Filament\Resources\MediaResource\Pages;
 
 class MediaResource extends Resource
 {
@@ -23,50 +30,122 @@ class MediaResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('type_id')
-                    ->numeric(),
-                Forms\Components\TextInput::make('user_id')
-                    ->numeric(),
-                Forms\Components\TextInput::make('media_title')
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('media_description')
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('source')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('belonging_count')
-                    ->numeric(),
-                Forms\Components\TextInput::make('time_length'),
-                Forms\Components\Textarea::make('media_url')
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('teaser_url')
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('author_names')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('artist_names')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('writer')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('director')
-                    ->maxLength(255),
-                Forms\Components\DatePicker::make('published_date'),
-                Forms\Components\Textarea::make('cover_url')
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('thumbnail_url')
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('price')
-                    ->numeric()
-                    ->prefix('$'),
-                Forms\Components\Toggle::make('for_youth')
-                    ->required(),
-                Forms\Components\Toggle::make('is_live')
-                    ->required(),
-                Forms\Components\TextInput::make('belongs_to')
-                    ->numeric(),
+                Wizard::make([
+                    Step::make('Étape 1')
+                        ->schema([
+                            Section::make('Information générale')->schema([
+                                TextInput::make('media_title')
+                                    ->label('Titre du media')
+                                    ->columnSpan(4)
+                                    ->required()
+                                    ->maxLength(255),
+                                TextInput::make('belonging_count')
+                                    ->label('Nombre des contenants')
+                                    ->columnSpan(4)
+                                    ->required()
+                                    ->maxLength(255),
+                                TextInput::make('source')
+                                    ->label('Source')
+                                    ->columnSpan(4)
+                                    ->required()
+                                    ->maxLength(255),
+                                TimePicker::make('time_length')
+                                    ->label('Temps du media')
+                                    ->columnSpan(4),
+                                TextInput::make('author_names')
+                                    ->label('Auteur')
+                                    ->columnSpan(4)
+                                    ->maxLength(255),
+                                TextInput::make(name: 'director')
+                                    ->label('Réalisateur')
+                                    ->columnSpan(4)
+                                    ->maxLength(255),
+                                TextInput::make('writer')
+                                    ->label('Ecrit par :')
+                                    ->columnSpan(6)
+                                    ->maxLength(255),
+                                TextInput::make('artist_names')
+                                    ->label('Nom de l\'artiste')
+                                    ->columnSpan(6)
+                                    ->maxLength(255),
+                                TextInput::make('media_url')
+                                    ->label('Media URL')
+                                    ->prefix('https://')
+                                    ->columnSpan(6),
+                                TextInput::make('teaser_url')
+                                    ->label('Teaser URL')
+                                    ->prefix('https://')
+                                    ->columnSpan(6),
+                                Textarea::make('media_description')
+                                    ->maxLength(65535)
+                                    ->columnSpanFull(),
+                            ])->columns(12)
+                        ]),
+                    Step::make('Étape 2')->schema([
+                        Section::make('Information générale')->schema([
+                            Select::make('for_youth')
+                                ->options([
+                                    'OUI' => 'OUI',
+                                    'NON' => 'NON',
+                                ])
+                                ->label("Pour enfant ?")
+                                ->searchable()->columnSpan(6),
+                            Select::make('is_live')
+                                ->options([
+                                    'OUI' => 'OUI',
+                                    'NON' => 'NON',
+                                ])
+                                ->label("Est un live?")
+                                ->searchable()->columnSpan(6),
+                            Select::make('belongs_to')
+                                ->label('Appartien à :')
+                                ->searchable()
+                                ->preload()
+                                ->options(Media::all()->pluck('media_title', 'id'))
+                                ->columnSpan(6),
+                            Select::make('category_id')
+                                ->label('Choisissez des éléments')
+                                ->searchable()
+                                ->preload()
+                                ->columnSpan(6)
+                                ->options(Category::all()->pluck('category_name.fr', 'id'))
+                                ->relationship('categories', 'category_name')
+                                ->required(),
+                            FileUpload::make('cover_url')
+                                ->label('Couverture')
+                                ->directory('cover')
+                                ->imageEditor()
+                                ->imageEditorMode(2)
+                                ->downloadable()
+                                ->image()
+                                ->maxSize(1024)
+                                ->columnSpan(6)
+                                ->previewable(true),
+                            FileUpload::make('thumbnail_url')
+                                ->label('Couverture en miniature')
+                                ->directory('thumbnail')
+                                ->imageEditor()
+                                ->imageEditorMode(2)
+                                ->downloadable()
+                                ->image()
+                                ->maxSize(1024)
+                                ->columnSpan(6)
+                                ->previewable(true),
+                        ])->columns(12)
+                    ]),
+                    Step::make('Étape 3')->schema([
+                        Section::make('Vidéo')->schema([
+                            FileUpload::make('thumbnail_url')
+                                ->label('Couverture en miniature')
+                                ->disk('s3')
+                                ->directory('form-attachments')
+                                ->visibility('private')
+                                ->columnSpan(12)
+                                ->previewable(true),
+                        ])->columns(12)
+                    ]),
+
+                ])->columnSpanFull(),
             ]);
     }
 

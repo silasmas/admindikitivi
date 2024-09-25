@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
+
 use App\Models\User;
 use Filament\Tables;
-use App\Models\Client;
+use App\Models\Status;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Tables\Table;
@@ -23,18 +23,15 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\ClientResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\ClientResource\RelationManagers;
 
 class ClientResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user';
     public static function getLabel(): string
     {
         return 'Client';
@@ -85,6 +82,7 @@ class ClientResource extends Resource
                                 Select::make('status_id')
                                     ->label('Status')
                                     ->searchable()
+                                    ->options(Status::all()->pluck('status_name.ln', 'id'))
                                     ->preload()
                                     ->columnSpan(6)
                                     ->relationship('status', 'status_name'),
@@ -130,14 +128,6 @@ class ClientResource extends Resource
                                     ->dehydrated(fn($state) => filled($state))
                                     ->required(fn(Page $livewire) => $livewire instanceof CreateRecord)->columnSpan(4),
 
-                                // FileUpload::make('image')
-                                //     ->label('Télécharger une image')
-                                //     ->acceptedFileTypes(['image/*'])
-                                //     ->required(),
-                                // FileUpload::make('video')
-                                //     ->label('Télécharger une vidéo')
-                                //     ->acceptedFileTypes(['video/*'])
-                                //     ->required(),
                             ])->columns(12)
                         ]),
                 ])->columnSpanFull(),
@@ -210,5 +200,15 @@ class ClientResource extends Resource
             'create' => Pages\CreateClient::route('/create'),
             'edit' => Pages\EditClient::route('/{record}/edit'),
         ];
+    }
+    public static function beforeSave($record, array $data): void
+    {
+        if (!empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']); // Ne pas mettre à jour le mot de passe s'il est vide
+        }
+
+        $record->fill($data);
     }
 }
