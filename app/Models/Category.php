@@ -26,7 +26,7 @@ class Category extends Model
      */
     protected $translatable = ['category_name'];
     protected $casts = ['category_name' => 'array'];
-    public function getCategory_name($lang = 'en')
+    public function getCategory_name($lang = 'fr')
     {
         return $this->category_name[$lang] ?? null; // Retourne la description dans la langue demandée
     }

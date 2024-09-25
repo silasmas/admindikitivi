@@ -41,6 +41,15 @@ class User extends Authenticatable
         'updated_at' => 'datetime:Y-m-d H:i:s',
         "avatar_url" => 'array'
     ];
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = bcrypt($value);
+    }
+    public function getUserName(): string
+    {
+        return $this->firstname; // ou $this->email, selon votre logique
+    }
+
 
     /**
      * MANY-TO-MANY
