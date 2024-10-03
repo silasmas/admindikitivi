@@ -146,7 +146,7 @@ class MediaResource extends Resource
                                 ->downloadable()
                                 ->visibility('private')
                                 ->image()
-                                ->maxSize(1024)
+                                ->maxSize(3024)
                                 ->columnSpan(6)
                                 ->previewable(true),
                             FileUpload::make('thumbnail_url')
@@ -157,7 +157,7 @@ class MediaResource extends Resource
                                 ->downloadable()
                                 ->visibility('private')
                                 ->image()
-                                ->maxSize(1024)
+                                ->maxSize(3024)
                                 ->columnSpan(6)
                                 ->previewable(true),
                         ])
