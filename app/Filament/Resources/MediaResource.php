@@ -28,6 +28,13 @@ class MediaResource extends Resource
 
     public static function form(Form $form): Form
     {
+        // Récupérer les catégories
+        $categories = Category::all();
+
+        // Vérifier si des catégories existent
+        if ($categories->isEmpty()) {
+            dd('Aucune catégorie trouvée.');
+        }
         return $form
             ->schema([
                 Wizard::make([
@@ -42,7 +49,7 @@ class MediaResource extends Resource
                                 TextInput::make('belonging_count')
                                     ->label('Nombre des contenants')
                                     ->columnSpan(4)
-                                    ->required()
+                                    ->numeric()
                                     ->maxLength(255),
                                 TextInput::make('source')
                                     ->label('Source')
@@ -85,15 +92,15 @@ class MediaResource extends Resource
                         Section::make('Information générale')->schema([
                             Select::make('for_youth')
                                 ->options([
-                                    'OUI' => 'OUI',
-                                    'NON' => 'NON',
+                                    '1' => 'OUI',
+                                    '0' => 'NON',
                                 ])
                                 ->label("Pour enfant ?")
                                 ->searchable()->columnSpan(6),
                             Select::make('is_live')
                                 ->options([
-                                    'OUI' => 'OUI',
-                                    'NON' => 'NON',
+                                    '1' => 'OUI',
+                                    '0' => 'NON',
                                 ])
                                 ->label("Est un live?")
                                 ->searchable()->columnSpan(6),
@@ -101,22 +108,43 @@ class MediaResource extends Resource
                                 ->label('Appartien à :')
                                 ->searchable()
                                 ->preload()
-                                ->options(Media::all()->pluck('media_title', 'id'))
-                                ->columnSpan(6),
-                            Select::make('category_id')
-                                ->label('Choisissez des éléments')
+                                ->relationship('type', 'type_name')
+                                ->options(function (callable $get) {
+                                    $locale = app()->getLocale(); // Obtenir la locale actuelle
+                                    $group_name = 'Type de média'; // Remplacez par votre nom de groupe
+
+                                    return Type::whereHas('group', function ($query) use ($locale, $group_name) {
+                                        $query->where('group_name->' . $locale, $group_name);
+                                    })->get()->mapWithKeys(function ($type) use ($locale) {
+                                        // Décodez le champ type_name
+                                        $typeNames = json_decode($type->type_name, true);
+                                        return [$type->id => $typeNames[$locale] ?? '']; // Utiliser une valeur par défaut si la langue n'existe pas
+                                    }); // 'name' est le champ à afficher, 'id' est la valeur
+                                })
+                                ->columnSpan(12),
+                            CheckboxList::make('category_id') // Utilisation de CheckboxList
+                                ->label('Choisissez au moins une catégorie')
                                 ->searchable()
-                                ->preload()
-                                ->columnSpan(6)
-                                ->options(Category::all()->pluck('category_name.fr', 'id'))
+                                ->columns(6)
                                 ->relationship('categories', 'category_name')
+                                ->options($categories->mapWithKeys(function ($category) {
+                                    if (is_null($category)) {
+                                        dd('La catégorie est nulle.');
+                                    }
+                                    return [$category->id => $category->category_name];
+                                }))
                                 ->required(),
+                        ])->columns(12)
+                    ]),
+                    Step::make('Étape 3')->schema([
+                        Section::make('Upload des couvertures')->schema([
                             FileUpload::make('cover_url')
                                 ->label('Couverture')
                                 ->directory('cover')
                                 ->imageEditor()
                                 ->imageEditorMode(2)
                                 ->downloadable()
+                                ->visibility('private')
                                 ->image()
                                 ->maxSize(1024)
                                 ->columnSpan(6)
@@ -127,13 +155,14 @@ class MediaResource extends Resource
                                 ->imageEditor()
                                 ->imageEditorMode(2)
                                 ->downloadable()
+                                ->visibility('private')
                                 ->image()
                                 ->maxSize(1024)
                                 ->columnSpan(6)
                                 ->previewable(true),
-                        ])->columns(12)
+                        ])
                     ]),
-                    Step::make('Étape 3')->schema([
+                    Step::make('Étape 4')->schema([
                         Section::make('Vidéo')->schema([
                             FileUpload::make('thumbnail_url')
                                 ->label('Couverture en miniature')
@@ -224,5 +253,13 @@ class MediaResource extends Resource
             'create' => Pages\CreateMedia::route('/create'),
             'edit' => Pages\EditMedia::route('/{record}/edit'),
         ];
+    }
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return static::getModel()::count() > 10 ? "danger" : "success";
     }
 }

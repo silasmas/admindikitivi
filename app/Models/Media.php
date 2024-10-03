@@ -21,6 +21,7 @@ class Media extends Model
      * @var array<int, string>
      */
     protected $guarded = [];
+    protected $casts = ['category_id' => 'array'];
 
     /**
      * MANY-TO-MANY

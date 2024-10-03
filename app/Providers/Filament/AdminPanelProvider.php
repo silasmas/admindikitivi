@@ -24,10 +24,15 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-        ->default()
-        ->id('admin')
+            ->default()
+            ->id('admin')
             ->path('admin')
             ->login()
+            ->brandName('Dashboard DIKITIVI')
+            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->brandLogo(asset('assets/images/logo/logo-text.png'))
+            ->brandLogoHeight(fn() => auth()->check() ? '3rem' : '5rem')
+            ->favicon(asset('assets/images/logo/logo.png'))
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -54,7 +59,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                ])
-                ->plugin(SpatieLaravelTranslatablePlugin::make()->defaultLocales(['fr', 'en','ln']),);
+            ])
+            ->plugin(SpatieLaravelTranslatablePlugin::make()->defaultLocales(['fr', 'en', 'ln']),);
     }
 }
