@@ -167,7 +167,8 @@ class MediaResource extends Resource
                             FileUpload::make('thumbnail_url')
                                 ->label('Couverture en miniature')
                                 ->disk('s3')
-                                ->directory('form-attachments')
+                                ->directory('images/medias/{id}') // Spécifiez le répertoire
+                                ->preserveFilenames() // Pour garder le nom original
                                 ->visibility('private')
                                 ->columnSpan(12)
                                 ->previewable(true),
@@ -261,5 +262,22 @@ class MediaResource extends Resource
     public static function getNavigationBadgeColor(): string|array|null
     {
         return static::getModel()::count() > 10 ? "danger" : "success";
+    }
+    public function save(array $data)
+    {
+        // Supposons que vous ayez déjà récupéré l'instance de $media
+        $media = Media::find($data['id']); // ou toute autre méthode pour récupérer l'enregistrement
+
+        // Si un nouveau fichier a été téléchargé, mettez à jour l'URL
+        if (isset($data['media_file_url'])) {
+            $pathUrl = $data['media_file_url']->store('videos', 's3'); // Spécifiez le répertoire
+            $media->media_url = config('filesystems.disks.s3.url') . '/' . ltrim($pathUrl, '/');
+        }
+
+        // Mettez à jour d'autres champs si nécessaire
+        $media->updated_at = now();
+
+        // Sauvegardez les changements
+        $media->save();
     }
 }
