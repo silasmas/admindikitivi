@@ -404,19 +404,20 @@
             for (let i = 0; i < categories.length; i++) {
                 formData.append('categories_ids[' + i + ']', categories[i]);
             }
-
+            console.log(formData)
             $.ajax({
-                xhr: function() {
-                    var xhr = new window.XMLHttpRequest();
-                    xhr.upload.addEventListener("progress", function(evt) {
-                        if (evt.lengthComputable) {
-                            var percentComplete = (evt.loaded / evt.total) * 100;
-                            $('#progressBar').val(percentComplete);
-                            $('#status').text(Math.round(percentComplete) + '% uploaded');
-                        }
-                    }, false);
-                    return xhr;
-                },
+                // xhr: function() {
+                //     var xhr = new window.XMLHttpRequest();
+                //     xhr.upload.addEventListener("progress", function(evt) {
+                //         if (evt.lengthComputable) {
+                //             var percentComplete = (evt.loaded / evt.total) * 100;
+                //             $('#progressBar').val(percentComplete);
+                //             $('#status').text(Math.round(percentComplete) + '% uploaded');
+                //         }
+                //     }, false);
+                //     return xhr;
+                // },
+
                 type: 'POST',
                 contentType: 'multipart/form-data',
                 url:'registerMedia',
