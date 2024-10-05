@@ -10,8 +10,10 @@ use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Group;
+use App\Filament\Columns\VideoColumn;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Support\Facades\Storage;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\FileUpload;
@@ -19,7 +21,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Validator;
 use Filament\Forms\Components\Wizard\Step;
 use App\Filament\Resources\AwsResource\Pages;
-use App\Filament\Columns\VideoColumn;
 
 
 
@@ -57,7 +58,7 @@ class AwsResource extends Resource
                         ->directory(fn($record) => 'images/medias/' . $record->id) // Spécifiez le répertoire
                         ->preserveFilenames() // Pour garder le nom original
                         ->visibility('public')
-                        ->maxSize(51200) // Max 50 Mo
+                        ->maxSize(102400) // Taille maximale en Ko (100 Mo)
                         ->columnSpan(12)
                         ->previewable(true),
                 ])
@@ -76,9 +77,10 @@ class AwsResource extends Resource
                     ->searchable(),
                 ImageColumn::make('video')
                     ->searchable(),
-                // VideoColumn::make('video')
-                //     ->label('Video')
-                //     ->videoUrl(fn($record) => $record->video), // Remplacez par le champ approprié
+                TextColumn::make('video')
+                    ->label('Video')
+                    ->formatStateUsing(fn($state) => '<video width="320" height="240" controls><source src="' . Storage::disk('s3')->url($state) . '" type="video/mp4">Your browser does not support the video tag.</video>')
+                    ->html(), // Permet d'afficher du HTML
             ])
             ->filters([
                 //

@@ -164,13 +164,14 @@ class MediaResource extends Resource
                     ]),
                     Step::make('Étape 4')->schema([
                         Section::make('Vidéo')->schema([
-                            FileUpload::make('thumbnail_url')
+                            FileUpload::make('media_url')
                                 ->label('Couverture en miniature')
                                 ->disk('s3')
                                 ->directory((fn($record) => 'images/medias/' . $record->id)) // Spécifiez le répertoire
                                 ->preserveFilenames() // Pour garder le nom original
                                 ->visibility('private')
                                 ->columnSpan(12)
+                                ->maxSize(102400) // Taille maximale en Ko (100 Mo)
                                 ->previewable(true),
                         ])->columns(12)
                     ]),
