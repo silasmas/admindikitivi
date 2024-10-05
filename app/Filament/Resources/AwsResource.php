@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\Aws;
+use App\Models\aws;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
