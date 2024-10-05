@@ -19,7 +19,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Validator;
 use Filament\Forms\Components\Wizard\Step;
 use App\Filament\Resources\AwsResource\Pages;
-use Filament\Tables\Columns\VideoColumn;
+use App\Filament\Columns\VideoColumn;
+
+
 
 class AwsResource extends Resource
 {
@@ -73,6 +75,9 @@ class AwsResource extends Resource
                     ->searchable(),
                 ImageColumn::make('video')
                     ->searchable(),
+                VideoColumn::make('video')
+                    ->label('Video')
+                    ->videoUrl(fn($record) => $record->video), // Remplacez par le champ approprié
             ])
             ->filters([
                 //
