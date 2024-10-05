@@ -67,7 +67,7 @@ class AwsResource extends Resource
                         ->disk('s3')
                         ->acceptedFileTypes(['video/mp4', 'video/x-msvideo', 'video/x-matroska']) // Types de fichiers acceptés
                         ->directory('images/medias/TestAwsSilas/'.$id ) // Spécifiez le répertoire
-                        ->preserveFilenames() // Pour garder le nom original
+                        // ->preserveFilenames() // Pour garder le nom original
                         ->visibility('public')
                         ->maxSize(102400) // Taille maximale en Ko (100 Mo)
                         ->columnSpan(12)
