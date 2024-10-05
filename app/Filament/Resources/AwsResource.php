@@ -68,6 +68,7 @@ class AwsResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(query: aws::query()) // Remplacez YourModel par votre modèle
             ->columns([
                 TextColumn::make('nom')
                     ->searchable(),

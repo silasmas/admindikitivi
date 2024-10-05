@@ -8,8 +8,20 @@ class VideoColumn extends Column
 {
     protected string $view = 'filament.columns.video-column';
 
-    public function videoUrl(string $url): static
+    protected mixed $videoUrl = null;
+
+    public function videoUrl(string|callable $url): static
     {
-        return $this->setAttribute('videoUrl', $url);
+        $this->videoUrl = $url;
+        return $this;
+    }
+
+    public function getVideoUrl($record): ?string
+    {
+        if (is_callable($this->videoUrl)) {
+            return ($this->videoUrl)($record);
+        }
+
+        return $this->videoUrl;
     }
 }

@@ -1,7 +1,7 @@
 <div>
     @if ($getVideoUrl())
         <video width="320" height="240" controls>
-            <source src="{{ $getVideoUrl() }}" type="video/mp4">
+            <source src="{{ $getVideoUrl($record) }}" type="video/mp4">
                 Votre navigateur ne prend pas en charge la balise vidéo.
         </video>
     @else
