@@ -32,8 +32,17 @@ class AwsResource extends Resource
 
     public static function form(Form $form): Form
     {
-        $lastMedia = aws::latest()->first();
-         $id=$lastMedia ? $lastMedia->id + 1 : 1;
+        $id='1';
+       // Récupérer le nom de la route actuelle
+    $currentRoute = request()->route()->getName();
+
+    // Exemple d'utilisation pour vérifier si c'est une route d'édition
+    if ($currentRoute === 'filament.admin.resources.aws.edit') {
+            $id=request()->route('record');
+        }else{
+            $lastMedia =aws::latest()->first();
+             $id=$lastMedia ? $lastMedia->id + 1 : 1;
+        }
         return $form->schema([
             Group::make([
                 Section::make('Info sur les commandes')->schema([
@@ -54,14 +63,10 @@ class AwsResource extends Resource
                         ->columnSpan(12)
                         ->previewable(true),
                     FileUpload::make('video')
-                        ->label('Video')
+                        ->label('Video'.$id)
                         ->disk('s3')
                         ->acceptedFileTypes(['video/mp4', 'video/x-msvideo', 'video/x-matroska']) // Types de fichiers acceptés
-                        ->default(function () {
-                            $lastMedia = aws::latest()->first();
-                            return $lastMedia ? $lastMedia->id + 1 : 1;
-                        })
-                        ->directory('images/medias/'.$id ) // Spécifiez le répertoire
+                        ->directory('images/medias/TestAwsSilas/'.$id ) // Spécifiez le répertoire
                         ->preserveFilenames() // Pour garder le nom original
                         ->visibility('public')
                         ->maxSize(102400) // Taille maximale en Ko (100 Mo)
@@ -116,71 +121,5 @@ class AwsResource extends Resource
             'edit' => Pages\EditAws::route('/{record}/edit'),
         ];
     }
-    public static function create(array $data): aws
-    {
-        dd($data);
-        // Enregistrez le modèle avec le chemin du fichier S3
-        $model = aws::create([
-            'file_path' => $data['file']->store('uploads', 's3'), // Enregistrez le fichier dans S3
-            // Autres champs à enregistrer...
-        ]);
 
-        return $model;
-    }
-    public function save(array $data, ?aws $record = null): aws
-    {
-        dd($data);
-        // Validation des données
-        $validator = Validator::make($data, [
-            'image' => 'required|image|max:3024', // Validation de l'image
-            'video' => 'nullable|file|mimes:mp4,mov,avi|max:10240', // Limite de taille pour la vidéo
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        // Récupération de l'instance
-        $media = Aws::find($data['id']);
-
-        if (!$media) {
-            return response()->json(['error' => 'Media not found'], 404);
-        }
-
-        // Traitement de l'image
-        if (isset($data['image'])) {
-            $media->image = $data['image']->store('aws_cover', 's3'); // Stockage sur S3
-        }
-
-        // Traitement de la vidéo
-        if (isset($data['video'])) {
-            $media->video = $data['video']->store('images/medias/', 's3');
-        }
-
-        // Enregistrement des modifications
-        $media->save();
-
-        return response()->json(['success' => 'Media updated successfully'], 200);
-    }
-    protected static function afterCreate($record)
-    {
-        // Logique à exécuter après la création de l'enregistrement
-
-        // Exemple : Déplacer le fichier téléchargé vers un répertoire spécifique
-        if ($record->video) {
-            // Définir le chemin de destination
-            $destinationPath = 'uploads/media/' . $record->id;
-
-            // Déplacer le fichier vers le nouveau répertoire
-            $filePath = storage_path('app/public/' . $record->video);
-            if (file_exists($filePath)) {
-                // Créer le répertoire s'il n'existe pas
-                if (!file_exists($destinationPath)) {
-                    mkdir($destinationPath, 0755, true);
-                }
-
-                // Déplacer le fichier
-                rename($filePath, $destinationPath . '/' . basename($record->video));
-            }
-        }
-    }
 }
