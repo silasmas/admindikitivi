@@ -73,10 +73,6 @@ class AwsResource extends Resource
                     ->searchable(),
                 ImageColumn::make('video')
                     ->searchable(),
-                VideoColumn::make('video')
-                    ->label('Video')
-                    ->url(fn($record) => $record->video) // Assurez-vous que 'video_url' correspond à votre attribut
-                    ->size('small'), // Vous pouvez ajuster la taille selon vos besoins
             ])
             ->filters([
                 //
