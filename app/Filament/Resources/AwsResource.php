@@ -32,6 +32,8 @@ class AwsResource extends Resource
 
     public static function form(Form $form): Form
     {
+        $lastMedia = aws::latest()->first();
+         $id=$lastMedia ? $lastMedia->id + 1 : 1;
         return $form->schema([
             Group::make([
                 Section::make('Info sur les commandes')->schema([
@@ -52,10 +54,14 @@ class AwsResource extends Resource
                         ->columnSpan(12)
                         ->previewable(true),
                     FileUpload::make('video')
-                        ->label('video')
+                        ->label('Video')
                         ->disk('s3')
                         ->acceptedFileTypes(['video/mp4', 'video/x-msvideo', 'video/x-matroska']) // Types de fichiers acceptés
-                        ->directory(fn($record) => 'images/medias/') // Spécifiez le répertoire
+                        ->default(function () {
+                            $lastMedia = aws::latest()->first();
+                            return $lastMedia ? $lastMedia->id + 1 : 1;
+                        })
+                        ->directory('images/medias/'.$id ) // Spécifiez le répertoire
                         ->preserveFilenames() // Pour garder le nom original
                         ->visibility('public')
                         ->maxSize(102400) // Taille maximale en Ko (100 Mo)
