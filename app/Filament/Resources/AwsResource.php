@@ -76,9 +76,9 @@ class AwsResource extends Resource
                     ->searchable(),
                 ImageColumn::make('video')
                     ->searchable(),
-                VideoColumn::make('video')
-                    ->label('Video')
-                    ->videoUrl(fn($record) => $record->video), // Remplacez par le champ approprié
+                // VideoColumn::make('video')
+                //     ->label('Video')
+                //     ->videoUrl(fn($record) => $record->video), // Remplacez par le champ approprié
             ])
             ->filters([
                 //
