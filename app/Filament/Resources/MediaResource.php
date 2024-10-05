@@ -167,7 +167,7 @@ class MediaResource extends Resource
                             FileUpload::make('thumbnail_url')
                                 ->label('Couverture en miniature')
                                 ->disk('s3')
-                                ->directory('images/medias/{id}') // Spécifiez le répertoire
+                                ->directory((fn($record) => 'images/medias/' . $record->id)) // Spécifiez le répertoire
                                 ->preserveFilenames() // Pour garder le nom original
                                 ->visibility('private')
                                 ->columnSpan(12)
