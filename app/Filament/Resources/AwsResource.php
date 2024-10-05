@@ -55,7 +55,7 @@ class AwsResource extends Resource
                         ->label('video')
                         ->disk('s3')
                         ->acceptedFileTypes(['video/mp4', 'video/x-msvideo', 'video/x-matroska']) // Types de fichiers acceptés
-                        ->directory(fn($record) => 'images/medias/' . $record->id) // Spécifiez le répertoire
+                        ->directory(fn($record) => 'images/medias/') // Spécifiez le répertoire
                         ->preserveFilenames() // Pour garder le nom original
                         ->visibility('public')
                         ->maxSize(102400) // Taille maximale en Ko (100 Mo)
@@ -147,12 +147,34 @@ class AwsResource extends Resource
 
         // Traitement de la vidéo
         if (isset($data['video'])) {
-            $media->video = $data['video']->store('images/medias/' . $media->id, 's3');
+            $media->video = $data['video']->store('images/medias/', 's3');
         }
 
         // Enregistrement des modifications
         $media->save();
 
         return response()->json(['success' => 'Media updated successfully'], 200);
+    }
+    protected static function afterCreate($record)
+    {
+        // Logique à exécuter après la création de l'enregistrement
+
+        // Exemple : Déplacer le fichier téléchargé vers un répertoire spécifique
+        if ($record->video) {
+            // Définir le chemin de destination
+            $destinationPath = 'uploads/media/' . $record->id;
+
+            // Déplacer le fichier vers le nouveau répertoire
+            $filePath = storage_path('app/public/' . $record->video);
+            if (file_exists($filePath)) {
+                // Créer le répertoire s'il n'existe pas
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0755, true);
+                }
+
+                // Déplacer le fichier
+                rename($filePath, $destinationPath . '/' . basename($record->video));
+            }
+        }
     }
 }

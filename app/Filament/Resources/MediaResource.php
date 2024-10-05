@@ -281,4 +281,26 @@ class MediaResource extends Resource
         // Sauvegardez les changements
         $media->save();
     }
+    protected static function afterCreate($record)
+    {
+        // Logique à exécuter après la création de l'enregistrement
+
+        // Exemple : Déplacer le fichier téléchargé vers un répertoire spécifique
+        if ($record->media_url) {
+            // Définir le chemin de destination
+            $destinationPath = 'uploads/media/' . $record->id;
+
+            // Déplacer le fichier vers le nouveau répertoire
+            $filePath = storage_path('app/public/' . $record->media_url);
+            if (file_exists($filePath)) {
+                // Créer le répertoire s'il n'existe pas
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0755, true);
+                }
+
+                // Déplacer le fichier
+                rename($filePath, $destinationPath . '/' . basename($record->media_url));
+            }
+        }
+    }
 }
