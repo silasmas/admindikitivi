@@ -22,7 +22,7 @@ use App\Filament\Resources\AwsResource\Pages;
 
 class AwsResource extends Resource
 {
-    protected static ?string $model = Aws::class;
+    protected static ?string $model = aws::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
