@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Validator;
 use Filament\Forms\Components\Wizard\Step;
 use App\Filament\Resources\AwsResource\Pages;
+use Filament\Tables\Columns\VideoColumn;
 
 class AwsResource extends Resource
 {
@@ -51,7 +52,7 @@ class AwsResource extends Resource
                         ->label('video')
                         ->disk('s3')
                         ->acceptedFileTypes(['video/mp4', 'video/x-msvideo', 'video/x-matroska']) // Types de fichiers acceptés
-                        ->directory('images/medias/{id}') // Spécifiez le répertoire
+                        ->directory(fn($record) => 'images/medias/' . $record->id) // Spécifiez le répertoire
                         ->preserveFilenames() // Pour garder le nom original
                         ->visibility('public')
                         ->maxSize(51200) // Max 50 Mo
@@ -72,6 +73,10 @@ class AwsResource extends Resource
                     ->searchable(),
                 ImageColumn::make('video')
                     ->searchable(),
+                VideoColumn::make('video')
+                    ->label('Video')
+                    ->url(fn($record) => $record->video) // Assurez-vous que 'video_url' correspond à votre attribut
+                    ->size('small'), // Vous pouvez ajuster la taille selon vos besoins
             ])
             ->filters([
                 //
