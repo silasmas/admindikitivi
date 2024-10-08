@@ -18,6 +18,8 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\Item;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -61,5 +63,26 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->plugin(SpatieLaravelTranslatablePlugin::make()->defaultLocales(['fr', 'en', 'ln']),);
+
+    }
+    public static function getNavigationItems(): array
+    {
+        return [
+            Item::make('Élément Principal')
+                ->label('Libellé Principal')
+                ->subItems([
+                    Item::make('Sous-élément 1')->label('Libellé Sous-élément 1'),
+                    Item::make('Sous-élément 2')->label('Libellé Sous-élément 2'),
+                ]),
+            // Ajoutez d'autres éléments ici
+        ];
+    }
+    public static function getNavigationGroups(): array
+    {
+        return [
+            NavigationGroup::make('Mon Groupe')
+                ->label('Nouveau Libellé')
+                ->icon('heroicon-o-home'),
+        ];
     }
 }

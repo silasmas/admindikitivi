@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class LegalInfoTitle extends Model
 {
-    use HasFactory, HasTranslations,Translatable;
+    use HasFactory, Translatable;
 
     /**
      * The attributes that are mass assignable.
@@ -26,7 +26,13 @@ class LegalInfoTitle extends Model
      * Translatable properties.
      */
     protected $translatable = ['title'];
-
+    protected $casts = [
+        'title' => 'array', // Cast le champ translations en tableau
+    ];
+    public function getLegalInfoTitle_title($lang = 'fr')
+    {
+        return $this->title[$lang] ?? null; // Retourne la description dans la langue demandée
+    }
     /**
      * ONE-TO-MANY
      * One legal info subject for several legal infos titles
