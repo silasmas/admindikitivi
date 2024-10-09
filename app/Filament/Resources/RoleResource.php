@@ -29,7 +29,7 @@ class RoleResource extends Resource
     protected static ?string $model = Role::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
-
+    protected static ?string $navigationGroup = 'Configuration';
     public static function form(Form $form): Form
     {
         return $form
@@ -88,5 +88,9 @@ class RoleResource extends Resource
             // 'create' => Pages\CreateRole::route('/create'),
             // 'edit' => Pages\EditRole::route('/{record}/edit'),
         ];
+    }
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['role_name', 'role_description'];
     }
 }

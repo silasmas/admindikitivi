@@ -35,6 +35,8 @@ class LegalInfoSubjectResource extends Resource
     protected static ?string $modelLabel = 'Apropos Sujet';
 
 
+    protected static ?string $navigationGroup = 'Confidentialités';
+
     public static function form(Form $form): Form
     {
         return $form

@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Hash;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Section;
@@ -32,6 +33,8 @@ class ClientResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static ?string $recordTitleAttribute = 'firstname';
+    protected static ?int $navigationSort = 2;
     public static function getLabel(): string
     {
         return 'Client';
@@ -105,7 +108,7 @@ class ClientResource extends Resource
                                     ->columnSpan(6)
                                     ->previewable(true),
 
-                                    Select::make('roles')
+                                Select::make('roles')
                                     ->label('Roles')
                                     ->columnSpan(6)
                                     ->searchable()
@@ -118,17 +121,17 @@ class ClientResource extends Resource
                     Step::make('Étape 3')
                         ->schema([
                             Section::make('Information générale')
-                            ->schema([
-                                TextInput::make('email')->label("Email")
-                                    ->email()->maxLength(255)->unique(ignoreRecord: true)
-                                    ->required()->columnSpan(6)
-                                    ->unique(User::class, 'email', ignoreRecord: true),
+                                ->schema([
+                                    TextInput::make('email')->label("Email")
+                                        ->email()->maxLength(255)->unique(ignoreRecord: true)
+                                        ->required()->columnSpan(6)
+                                        ->unique(User::class, 'email', ignoreRecord: true),
 
-                                TextInput::make('password')->password()->label("Mot de passe")
-                                    ->dehydrated(fn($state) => filled($state))
-                                    ->required(fn(Page $livewire) => $livewire instanceof CreateRecord)->columnSpan(4),
+                                    TextInput::make('password')->password()->label("Mot de passe")
+                                        ->dehydrated(fn($state) => filled($state))
+                                        ->required(fn(Page $livewire) => $livewire instanceof CreateRecord)->columnSpan(4),
 
-                            ])->columns(12)
+                                ])->columns(12)
                         ]),
                 ])->columnSpanFull(),
             ]);
@@ -210,5 +213,13 @@ class ClientResource extends Resource
         }
 
         $record->fill($data);
+    }
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return "success";
     }
 }

@@ -34,7 +34,7 @@ class LegalInfoContentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-information-circle';
     protected static ?string $modelLabel = 'Apropos contenu';
-
+    protected static ?string $navigationGroup = 'Confidentialités';
     public static function form(Form $form): Form
     {
         return $form

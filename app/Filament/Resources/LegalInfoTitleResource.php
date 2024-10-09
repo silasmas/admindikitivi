@@ -33,7 +33,7 @@ class LegalInfoTitleResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-information-circle';
     protected static ?string $modelLabel = 'Apropos Titre';
 
-
+    protected static ?string $navigationGroup = 'Confidentialités';
     public static function form(Form $form): Form
     {
         return $form

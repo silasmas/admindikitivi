@@ -9,23 +9,39 @@ use App\Models\Category;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TimePicker;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
 use App\Filament\Resources\MediaResource\Pages;
+use Illuminate\Contracts\Database\Query\Builder;
+use App\Filament\Resources\MediaResource\Pages\EditMedia;
+use App\Filament\Resources\MediaResource\Pages\ListMedia;
+use App\Filament\Resources\MediaResource\Pages\CreateMedia;
 
 class MediaResource extends Resource
 {
     protected static ?string $model = Media::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-film';
-
+    protected static ?string $recordTitleAttribute = 'media_title';
+    protected static ?int $navigationSort = 1;
     public static function form(Form $form): Form
     {
         // Récupérer les catégories
@@ -184,55 +200,81 @@ class MediaResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('type_id')
+                TextColumn::make('media_title')
+                    ->label('Titre')
+                    ->limit(20)
+                    ->searchable(),
+                TextColumn::make('source')
+                    ->label('Source')
+                    ->searchable(),
+                TextColumn::make('belonging_count')
+                    ->label('Nombre des contenants')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('media_title')
+                TextColumn::make('time_length')
+                    ->label('Temps du media')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('author_names')
+                    ->label('Auteur')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('source')
+                TextColumn::make('artist_names')
+                    ->label('Artiste')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('belonging_count')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('time_length'),
-                Tables\Columns\TextColumn::make('author_names')
+                TextColumn::make('writer')
+                    ->label('Ecrit par ')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('artist_names')
+                TextColumn::make('director')
+                    ->label('Réalisateur')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('writer')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('director')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('published_date')
+                TextColumn::make('published_date')
                     ->date()
+                    ->label('Date de publication')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('price')
-                    ->money()
-                    ->sortable(),
-                Tables\Columns\IconColumn::make('for_youth')
+                IconColumn::make('for_youth')
+                    ->label('Pour enfant?')
                     ->boolean(),
-                Tables\Columns\IconColumn::make('is_live')
+                IconColumn::make('is_live')
+                    ->label('Est un live?')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('belongs_to')
+                TextColumn::make('belongs_to')
+                    ->label('Type')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
+                    ->label('Date de création')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
+                    ->label('Date de mis à jour')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filter::make('Est un live')
+                    ->query(fn(Builder $query) => $query->where('is_live', true)),
+                Filter::make('Pour enfant')
+                    ->query(fn(Builder $query) => $query->where('for_youth', true)),
+                // DatePicker::make('Date decut')
+                //     ->placeholder(fn($state) => now()->format('M d,Y')),
+                SelectFilter::make('Catégories')
+                    ->relationship('categories', 'category_name'),
+                // Dans votre classe de ressource
+
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -262,7 +304,7 @@ class MediaResource extends Resource
     }
     public static function getNavigationBadgeColor(): string|array|null
     {
-        return static::getModel()::count() > 10 ? "danger" : "success";
+        return "info";
     }
     public function save(array $data)
     {
@@ -302,5 +344,9 @@ class MediaResource extends Resource
                 rename($filePath, $destinationPath . '/' . basename($record->media_url));
             }
         }
+    }
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['media_title', 'source', 'writer'];
     }
 }

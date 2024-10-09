@@ -21,8 +21,15 @@ class Media extends Model
      * @var array<int, string>
      */
     protected $guarded = [];
-    protected $casts = ['category_id' => 'array'];
+    protected $casts = [
+        'category_id' => 'array',
+        'category_name' => 'array',
+    ];
 
+    public function getCategoryNameFrAttribute($lang = 'fr')
+    {
+        return $this->category_name[$lang] ?? null; // Retourne la description dans la langue demandée
+    }
     /**
      * MANY-TO-MANY
      * Several sessions for several medias

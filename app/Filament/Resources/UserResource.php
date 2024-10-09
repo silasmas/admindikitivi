@@ -36,6 +36,8 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static ?string $recordTitleAttribute = 'firstname';
+    protected static ?int $navigationSort = 2;
     public static function getLabel(): string
     {
         return 'Agent';
@@ -217,5 +219,18 @@ class UserResource extends Resource
         }
 
         $record->fill($data);
+    }
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['firstname', 'lastname', 'email', 'phone'];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return "warning";
     }
 }

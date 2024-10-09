@@ -29,19 +29,19 @@ class AwsResource extends Resource
     protected static ?string $model = aws::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationGroup = 'Aws Test';
     public static function form(Form $form): Form
     {
-        $id='1';
-       // Récupérer le nom de la route actuelle
-    $currentRoute = request()->route()->getName();
+        $id = '1';
+        // Récupérer le nom de la route actuelle
+        $currentRoute = request()->route()->getName();
 
-    // Exemple d'utilisation pour vérifier si c'est une route d'édition
-    if ($currentRoute === 'filament.admin.resources.aws.edit') {
-            $id=request()->route('record');
-        }else{
-            $lastMedia =aws::latest()->first();
-             $id=$lastMedia ? $lastMedia->id + 1 : 1;
+        // Exemple d'utilisation pour vérifier si c'est une route d'édition
+        if ($currentRoute === 'filament.admin.resources.aws.edit') {
+            $id = request()->route('record');
+        } else {
+            $lastMedia = aws::latest()->first();
+            $id = $lastMedia ? $lastMedia->id + 1 : 1;
         }
         return $form->schema([
             Group::make([
@@ -63,10 +63,10 @@ class AwsResource extends Resource
                         ->columnSpan(12)
                         ->previewable(true),
                     FileUpload::make('video')
-                        ->label('Video'.$id)
+                        ->label('Video' . $id)
                         ->disk('s3')
                         ->acceptedFileTypes(['video/mp4', 'video/x-msvideo', 'video/x-matroska']) // Types de fichiers acceptés
-                        ->directory('images/medias/TestAwsSilas/'.$id ) // Spécifiez le répertoire
+                        ->directory('images/medias/TestAwsSilas/' . $id) // Spécifiez le répertoire
                         // ->preserveFilenames() // Pour garder le nom original
                         ->visibility('public')
                         ->maxSize(102400) // Taille maximale en Ko (100 Mo)
@@ -121,5 +121,4 @@ class AwsResource extends Resource
             'edit' => Pages\EditAws::route('/{record}/edit'),
         ];
     }
-
 }

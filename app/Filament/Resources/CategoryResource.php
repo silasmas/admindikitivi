@@ -26,7 +26,9 @@ class CategoryResource extends Resource
     protected static ?string $model = Category::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
-
+    protected static ?string $recordTitleAttribute = 'category_name';
+    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationGroup = 'Configuration';
     public static function form(Form $form): Form
     {
         return $form

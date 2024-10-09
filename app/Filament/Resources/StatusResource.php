@@ -26,7 +26,7 @@ class StatusResource extends Resource
 {
     use  Translatable;
     protected static ?string $model = Status::class;
-
+    protected static ?string $navigationGroup = 'Configuration';
     protected static ?string $navigationIcon = 'heroicon-o-check-circle';
 
     public static function form(Form $form): Form
