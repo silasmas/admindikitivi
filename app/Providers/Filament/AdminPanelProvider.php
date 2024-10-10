@@ -6,7 +6,9 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
 use Filament\PanelProvider;
+use Filament\Navigation\Item;
 use Filament\Support\Colors\Color;
+use Filament\Navigation\NavigationGroup;
 use Filament\Http\Middleware\Authenticate;
 use Filament\SpatieLaravelTranslatablePlugin;
 use Illuminate\Session\Middleware\StartSession;
@@ -15,11 +17,10 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
+use Joaopaulolndev\FilamentEditEnv\FilamentEditEnvPlugin;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Filament\Navigation\NavigationGroup;
-use Filament\Navigation\Item;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -62,27 +63,31 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->plugins(
+                [FilamentEditEnvPlugin::make()
+                    ->showButton(fn() => auth()->user()->id === 1)
+                    ->setIcon('heroicon-o-cog'),]
+            )
             ->plugin(SpatieLaravelTranslatablePlugin::make()->defaultLocales(['fr', 'en', 'ln']),);
-
     }
-    public static function getNavigationItems(): array
-    {
-        return [
-            Item::make('Élément Principal')
-                ->label('Libellé Principal')
-                ->subItems([
-                    Item::make('Sous-élément 1')->label('Libellé Sous-élément 1'),
-                    Item::make('Sous-élément 2')->label('Libellé Sous-élément 2'),
-                ]),
-            // Ajoutez d'autres éléments ici
-        ];
-    }
-    public static function getNavigationGroups(): array
-    {
-        return [
-            NavigationGroup::make('Mon Groupe')
-                ->label('Nouveau Libellé')
-                ->icon('heroicon-o-home'),
-        ];
-    }
+    // public static function getNavigationItems(): array
+    // {
+    //     return [
+    //         Item::make('Élément Principal')
+    //             ->label('Libellé Principal')
+    //             ->subItems([
+    //                 Item::make('Sous-élément 1')->label('Libellé Sous-élément 1'),
+    //                 Item::make('Sous-élément 2')->label('Libellé Sous-élément 2'),
+    //             ]),
+    //         // Ajoutez d'autres éléments ici
+    //     ];
+    // }
+    // public static function getNavigationGroups(): array
+    // {
+    //     return [
+    //         NavigationGroup::make('Mon Groupe')
+    //             ->label('Nouveau Libellé')
+    //             ->icon('heroicon-o-home'),
+    //     ];
+    // }
 }
