@@ -68,7 +68,25 @@ class AdminPanelProvider extends PanelProvider
                     ->showButton(fn() => auth()->user()->id === 1)
                     ->setIcon('heroicon-o-cog'),]
             )
-            ->plugin(SpatieLaravelTranslatablePlugin::make()->defaultLocales(['fr', 'en', 'ln']),);
+            ->plugin(SpatieLaravelTranslatablePlugin::make()->defaultLocales(['fr', 'en', 'ln']),)
+            ->plugins([
+                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
+                ->gridColumns([
+                    'default' => 1,
+                    'sm' => 2,
+                    'lg' => 3
+                ])
+                ->sectionColumnSpan(1)
+                ->checkboxListColumns([
+                    'default' => 1,
+                    'sm' => 2,
+                    'lg' => 4,
+                ])
+                ->resourceCheckboxListColumns([
+                    'default' => 1,
+                    'sm' => 2,
+                ]),
+            ]);
     }
     // public static function getNavigationItems(): array
     // {
