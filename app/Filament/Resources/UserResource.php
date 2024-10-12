@@ -164,8 +164,8 @@ class UserResource extends Resource
                     ->copyMessage('addresse Email copié')
                     ->copyMessageDuration(1500)
                     ->icon('heroicon-m-envelope'),
-                TextColumn::make('roles')
-                    ->label('Roles.role_name')
+                TextColumn::make('roles.role_name')
+                    ->label('Roles')
                     ->badge()->color('success'),
                 // ->formatStateUsing(fn($record) => $record->roles->pluck('role_name')->unique()->join(', ')),
                 TextColumn::make('country.country_name')
