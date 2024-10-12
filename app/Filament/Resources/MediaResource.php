@@ -20,6 +20,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TimePicker;
@@ -200,6 +201,12 @@ class MediaResource extends Resource
     {
         return $table
             ->columns([
+                ImageColumn::make('cover_url')
+                ->label("Couverture")
+                ->defaultImageUrl(url('assets/images/avatars/default.jpg')),
+                ImageColumn::make('thumbnail_url')
+                ->label("Miniature")
+                ->defaultImageUrl(url('assets/images/avatars/default.jpg')),
                 TextColumn::make('media_title')
                     ->label('Titre')
                     ->limit(20)
@@ -232,6 +239,7 @@ class MediaResource extends Resource
                     ->searchable(),
                 TextColumn::make('published_date')
                     ->date()
+                    ->since()
                     ->label('Date de publication')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
@@ -262,10 +270,28 @@ class MediaResource extends Resource
                     ->query(fn(Builder $query) => $query->where('is_live', true)),
                 Filter::make('Pour enfant')
                     ->query(fn(Builder $query) => $query->where('for_youth', true)),
+                Filter::make('Source')
+                    ->query(fn(Builder $query) => $query->where('source', true)),
                 // DatePicker::make('Date decut')
                 //     ->placeholder(fn($state) => now()->format('M d,Y')),
-                SelectFilter::make('Catégories')
-                    ->relationship('categories', 'category_name'),
+                SelectFilter::make('category_id')
+                    ->label('Catégorie')
+                    ->options(Category::select( 'category_name')->get()->map(function ($category) {
+                        // return [$category->id => $category->category_name?? ''];
+                        // Assurez-vous que category_name est bien une chaîne
+                        $name = is_array($category->category_name) ? ($category->category_name['fr'] ?? '') : $category->category_name;
+                        // dd([$category->id => $name]);
+
+                        return [$category->id => $name];
+                    })->toArray()),
+
+                    // SelectFilter::make('source')
+                    // ->label('Source')
+                    // ->options(
+                    //     Media::select('source')
+                    //         ->distinct() // Récupère uniquement les valeurs distinctes
+                    //         ->pluck('source', 'source') // Crée un tableau associatif avec 'source' comme clé et valeur
+                    // ),
                 // Dans votre classe de ressource
 
             ])
