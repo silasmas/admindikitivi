@@ -178,8 +178,9 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('status')->relationship('status', 'status_name'),
-                SelectFilter::make('country')->relationship('country', 'country_name'),
+                SelectFilter::make('status.status_name')->relationship('status', 'status_name'),
+                SelectFilter::make('country.country_name')->relationship('country', 'country_name'),
+                SelectFilter::make('roles.role_name')->relationship('roles', 'role_name'),
             ])
             ->actions([
                 ActionGroup::make([
