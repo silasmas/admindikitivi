@@ -165,9 +165,9 @@ class UserResource extends Resource
                     ->copyMessageDuration(1500)
                     ->icon('heroicon-m-envelope'),
                 TextColumn::make('roles')
-                    ->label('Roles')
-                    ->badge()->color('success')
-                    ->formatStateUsing(fn($record) => $record->roles->pluck('role_name')->unique()->join(', ')),
+                    ->label('Roles.role_name')
+                    ->badge()->color('success'),
+                // ->formatStateUsing(fn($record) => $record->roles->pluck('role_name')->unique()->join(', ')),
                 TextColumn::make('country.country_name')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->label('Pays')->searchable(),
