@@ -184,7 +184,9 @@ class ClientResource extends Resource
                 SelectFilter::make('status_id')
                     ->label('Status')
                     ->options(Status::all()->pluck('status_name.fr', 'id')->toArray()),
-                SelectFilter::make('country')->relationship('country', 'country_name'),
+                SelectFilter::make('country')
+                    ->label(label: 'Pays')
+                    ->relationship('country', 'country_name'),
                 SelectFilter::make('roles')
                     ->label(label: 'Role')
                     ->relationship('roles', 'role_name'),
