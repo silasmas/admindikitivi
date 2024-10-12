@@ -39,7 +39,8 @@ class User extends Authenticatable
         'last_connection' => 'datetime:Y-m-d H:i:s',
         'created_at' => 'datetime:Y-m-d H:i:s',
         'updated_at' => 'datetime:Y-m-d H:i:s',
-        "avatar_url" => 'array'
+        "avatar_url" => 'array',
+        "status_name" => 'json'
     ];
     public function setPasswordAttribute($value)
     {
@@ -49,7 +50,11 @@ class User extends Authenticatable
     {
         return $this->firstname; // ou $this->email, selon votre logique
     }
-
+    public function getStatus_name($lang = 'fr')
+    {
+        return $this->status_name[$lang] ?? null;
+        // return $this->status_name[$lang] ?? null; // Retourne la description dans la langue demandée
+    }
 
     /**
      * MANY-TO-MANY

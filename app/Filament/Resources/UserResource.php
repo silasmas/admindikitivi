@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use Filament\Forms;
 use App\Models\User;
 use Filament\Tables;
+use App\Models\Status;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Tables\Table;
@@ -30,9 +31,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use App\Filament\Resources\UserResource\Pages;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class UserResource extends Resource
 {
+
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
@@ -137,6 +140,7 @@ class UserResource extends Resource
 
     public static function table(Table $table): Table
     {
+        // dd(Status::all()->pluck('status_name.fr', 'id')->toArray());
         return $table->query(User::whereHas('roles', function ($query) {
             $query->where('role_name', 'Administrateur'); // Assurez-vous que 'name' correspond à votre colonne de rôle
         }))
@@ -171,16 +175,30 @@ class UserResource extends Resource
                 TextColumn::make('country.country_name')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->label('Pays')->searchable(),
-                TextColumn::make('status.status_name')
+                TextColumn::make('status.status_name.fr')
                     ->label('Status')->searchable()
                     ->badge(),
-                TextColumn::make('created_at')->dateTime()->sortable()
+                TextColumn::make('updated_at')
+                    ->label(label: 'Modifier')
+                    ->since()->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('created_at')
+                    ->label('Création')
+                    ->since()
+                    ->dateTime()->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('status.status_name')->relationship('status', 'status_name'),
-                SelectFilter::make('country.country_name')->relationship('country', 'country_name'),
-                SelectFilter::make('roles.role_name')->relationship('roles', 'role_name'),
+
+                SelectFilter::make('status_id')
+                    ->label('Status')
+                    ->options(Status::all()->pluck('status_name.fr', 'id')->toArray()),
+                SelectFilter::make('country')
+                    ->label(label: 'Pays')
+                    ->relationship('country', 'country_name'),
+                SelectFilter::make('roles')
+                    ->label(label: 'Role')
+                    ->relationship('roles', 'role_name'),
             ])
             ->actions([
                 ActionGroup::make([

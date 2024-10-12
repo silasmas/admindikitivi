@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Status extends Model
 {
-    use HasFactory,Translatable;
+    use HasFactory, Translatable;
 
     /**
      * The attributes that are mass assignable.
@@ -30,8 +30,10 @@ class Status extends Model
     protected $casts = ["status_name" => 'array'];
     public function getStatus_name($lang = 'fr')
     {
-        return $this->status_name[$lang] ?? null; // Retourne la description dans la langue demandée
+        return $this->status_name[$lang] ?? null;
+        // return $this->status_name[$lang] ?? null; // Retourne la description dans la langue demandée
     }
+
     /**
      * ONE-TO-MANY
      * One group for several statuses

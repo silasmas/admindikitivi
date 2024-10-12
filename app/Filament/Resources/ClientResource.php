@@ -152,7 +152,7 @@ class ClientResource extends Resource
             TextColumn::make('gender')->badge()
                 ->label('Sexe')->searchable(),
             TextColumn::make('birth_date')
-                ->label('Date de naissance')->dateTime()->sortable(),
+                ->label('Date de naissance')->sortable(),
             TextColumn::make('phone')
                 ->icon('heroicon-m-phone')
                 ->copyable()
@@ -166,14 +166,28 @@ class ClientResource extends Resource
                 ->icon('heroicon-m-envelope'),
             TextColumn::make('country.country_name')
                 ->label('Pays')->searchable(),
-            TextColumn::make('status.status_name')
+            TextColumn::make('status.status_name.fr')
                 ->label('Status')->searchable()->badge(),
-            TextColumn::make('created_at')->dateTime()->sortable()
+            TextColumn::make('roles.role_name')
+                ->label('Roles')
+                ->badge()->color('success'),
+            TextColumn::make('updated_at')
+                ->label(label: 'Modifier')
+                ->since()->sortable()
+                ->toggleable(isToggledHiddenByDefault: true),
+            TextColumn::make('created_at')
+                ->label('Création')
+                ->since()->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
         ])
             ->filters([
-                SelectFilter::make('status')->relationship('status', 'status_name'),
+                SelectFilter::make('status_id')
+                    ->label('Status')
+                    ->options(Status::all()->pluck('status_name.fr', 'id')->toArray()),
                 SelectFilter::make('country')->relationship('country', 'country_name'),
+                SelectFilter::make('roles')
+                    ->label(label: 'Role')
+                    ->relationship('roles', 'role_name'),
             ])
             ->actions([
                 ActionGroup::make([
