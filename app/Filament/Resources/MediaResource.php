@@ -120,7 +120,7 @@ class MediaResource extends Resource
                                 Textarea::make('media_description')
                                     ->maxLength(65535)
                                     ->columnSpanFull(),
-                                Toggle::make('is_active')
+                                Toggle::make('is_public')
                                     ->label('Active (pour le rendre visible ou pas)')
                                     ->columnSpanFull()
                                     ->onColor('success')
