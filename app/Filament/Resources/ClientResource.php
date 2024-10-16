@@ -232,7 +232,9 @@ class ClientResource extends Resource
     }
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        return static::getModel()::whereHas('roles', function ($query) {
+            $query->where('role_name', 'Membre'); // Assurez-vous que 'name' correspond à votre colonne de rôle
+        })->count();
     }
     public static function getNavigationBadgeColor(): string|array|null
     {

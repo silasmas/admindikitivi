@@ -11,6 +11,7 @@ use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
@@ -35,6 +36,7 @@ use Illuminate\Contracts\Database\Query\Builder;
 use App\Filament\Resources\MediaResource\Pages\EditMedia;
 use App\Filament\Resources\MediaResource\Pages\ListMedia;
 use App\Filament\Resources\MediaResource\Pages\CreateMedia;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class MediaResource extends Resource
 {
@@ -43,8 +45,21 @@ class MediaResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-film';
     protected static ?string $recordTitleAttribute = 'media_title';
     protected static ?int $navigationSort = 1;
+
+
     public static function form(Form $form): Form
     {
+        $id = '1';
+        // Récupérer le nom de la route actuelle
+        $currentRoute = request()->route()->getName();
+
+        // Exemple d'utilisation pour vérifier si c'est une route d'édition
+        if ($currentRoute === 'filament.admin.resources.aws.edit') {
+            $id = request()->route('record');
+        } else {
+            $lastMedia = Media::latest()->first();
+            $id = $lastMedia ? $lastMedia->id + 1 : 1;
+        }
         // Récupérer les catégories
         $categories = Category::all();
 
@@ -75,6 +90,8 @@ class MediaResource extends Resource
                                     ->maxLength(255),
                                 TimePicker::make('time_length')
                                     ->label('Temps du media')
+                                    ->seconds(false)
+                                    ->prefixIcon('heroicon-m-play')
                                     ->columnSpan(4),
                                 TextInput::make('author_names')
                                     ->label('Auteur')
@@ -103,6 +120,12 @@ class MediaResource extends Resource
                                 Textarea::make('media_description')
                                     ->maxLength(65535)
                                     ->columnSpanFull(),
+                                Toggle::make('is_active')
+                                    ->label('Active (pour le rendre visible ou pas)')
+                                    ->columnSpanFull()
+                                    ->onColor('success')
+                                    ->offColor('danger')
+                                    ->required(),
                             ])->columns(12)
                         ]),
                     Step::make('Étape 2')->schema([
@@ -158,6 +181,8 @@ class MediaResource extends Resource
                             FileUpload::make('cover_url')
                                 ->label('Couverture')
                                 ->directory('cover')
+                                // ->disk('s3')
+                                // ->directory((fn($record) => 'images/medias/' . $id)) // Spécifiez le répertoire
                                 ->imageEditor()
                                 ->imageEditorMode(2)
                                 ->downloadable()
@@ -169,7 +194,13 @@ class MediaResource extends Resource
                             FileUpload::make('thumbnail_url')
                                 ->label('Couverture en miniature')
                                 ->directory('thumbnail')
+                                // ->disk('s3')
+                                // ->directory((fn($record) => 'images/medias/' . $id)) // Spécifiez le répertoire
                                 ->imageEditor()
+                                ->getUploadedFileNameForStorageUsing(
+                                    fn(TemporaryUploadedFile $file): string => (string) str($file->getClientOriginalName())
+                                        ->prepend('custom-prefix-'),
+                                )
                                 ->imageEditorMode(2)
                                 ->downloadable()
                                 ->visibility('private')
@@ -181,15 +212,19 @@ class MediaResource extends Resource
                     ]),
                     Step::make('Étape 4')->schema([
                         Section::make('Vidéo')->schema([
-                            FileUpload::make('media_url')
-                                ->label('Couverture en miniature')
-                                ->disk('s3')
-                                ->directory((fn($record) => 'images/medias/' . $record->id)) // Spécifiez le répertoire
-                                ->preserveFilenames() // Pour garder le nom original
-                                ->visibility('private')
-                                ->columnSpan(12)
-                                ->maxSize(102400) // Taille maximale en Ko (100 Mo)
-                                ->previewable(true),
+                            TextInput::make('media_url')
+                                ->label('Lien de la vidéo')
+                                ->prefix('https://')
+                                ->columnSpan(12),
+                            // FileUpload::make('media_url')
+                            //     ->label('Couverture en miniature')
+                            //     ->disk('s3')
+                            //     ->directory((fn($record) => 'images/medias/' . $id)) // Spécifiez le répertoire
+                            //     ->preserveFilenames() // Pour garder le nom original
+                            //     ->visibility('private')
+                            //     ->columnSpan(12)
+                            //     ->maxSize(102400) // Taille maximale en Ko (100 Mo)
+                            //     ->previewable(true),
                         ])->columns(12)
                     ]),
 
@@ -201,12 +236,13 @@ class MediaResource extends Resource
     {
         return $table
             ->columns([
+
                 ImageColumn::make('cover_url')
-                ->label("Couverture")
-                ->defaultImageUrl(url('assets/images/avatars/default.jpg')),
+                    ->label("Couverture")
+                    ->defaultImageUrl(url('assets/images/avatars/default.jpg')),
                 ImageColumn::make('thumbnail_url')
-                ->label("Miniature")
-                ->defaultImageUrl(url('assets/images/avatars/default.jpg')),
+                    ->label("Miniature")
+                    ->defaultImageUrl(url('assets/images/avatars/default.jpg')),
                 TextColumn::make('media_title')
                     ->label('Titre')
                     ->limit(20)
@@ -214,10 +250,9 @@ class MediaResource extends Resource
                 TextColumn::make('source')
                     ->label('Source')
                     ->searchable(),
-                TextColumn::make('belonging_count')
-                    ->label('Nombre des contenants')
-                    ->numeric()
-                    ->sortable(),
+                IconColumn::make('is_active')
+                    ->label('Est active')
+                    ->boolean(),
                 TextColumn::make('time_length')
                     ->label('Temps du media')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -276,7 +311,7 @@ class MediaResource extends Resource
                 //     ->placeholder(fn($state) => now()->format('M d,Y')),
                 SelectFilter::make('category_id')
                     ->label('Catégorie')
-                    ->options(Category::select( 'category_name')->get()->map(function ($category) {
+                    ->options(Category::select('category_name')->get()->map(function ($category) {
                         // return [$category->id => $category->category_name?? ''];
                         // Assurez-vous que category_name est bien une chaîne
                         $name = is_array($category->category_name) ? ($category->category_name['fr'] ?? '') : $category->category_name;
@@ -285,13 +320,13 @@ class MediaResource extends Resource
                         return [$category->id => $name];
                     })->toArray()),
 
-                    // SelectFilter::make('source')
-                    // ->label('Source')
-                    // ->options(
-                    //     Media::select('source')
-                    //         ->distinct() // Récupère uniquement les valeurs distinctes
-                    //         ->pluck('source', 'source') // Crée un tableau associatif avec 'source' comme clé et valeur
-                    // ),
+                // SelectFilter::make('source')
+                // ->label('Source')
+                // ->options(
+                //     Media::select('source')
+                //         ->distinct() // Récupère uniquement les valeurs distinctes
+                //         ->pluck('source', 'source') // Crée un tableau associatif avec 'source' comme clé et valeur
+                // ),
                 // Dans votre classe de ressource
 
             ])

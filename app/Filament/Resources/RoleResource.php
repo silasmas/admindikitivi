@@ -35,11 +35,24 @@ class RoleResource extends Resource
         return $form
             ->schema([
                 TextInput::make('role_name')
+                    ->label('Nom')
+                    ->required()
+                    ->unique(role::class, 'role_name', ignoreRecord: true)
+                    ->maxLength(255),
+                TextInput::make('name')
+                    ->label(label: 'Fonction')
+                    ->unique(role::class, 'name', ignoreRecord: true)
                     ->required()
                     ->maxLength(255),
-                Textarea::make('role_description')
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
+                TextInput::make(name: 'guard_name')
+                    ->label(label: 'Partie')
+                    ->disabled()
+                    ->dehydrated()
+                    ->default('web')
+                    ->required()
+                    ->maxLength(255),
+
+                Textarea::make('role_description'),
             ]);
     }
 
@@ -48,6 +61,13 @@ class RoleResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('role_name')
+                    ->label('Nom')
+                    ->searchable(),
+                TextColumn::make('name')
+                    ->label(label: 'Fonction')
+                    ->searchable(),
+                TextColumn::make('guard_name')
+                    ->label(label: 'Partie')
                     ->searchable(),
                 TextColumn::make('role_description')
                     ->searchable(),

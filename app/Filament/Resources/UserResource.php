@@ -78,7 +78,14 @@ class UserResource extends Resource
                                     ->columnSpan(4)
                                     ->label("Telephone")
                                     ->unique(User::class, 'phone', ignoreRecord: true),
-                                DatePicker::make('birth_date')->label("Date d'anniversair")->columnSpan(4),
+                                DatePicker::make('birth_date')
+                                    ->label("Date d'anniversair")
+                                    ->native(false)
+                                    ->displayFormat('d/M/Y')
+                                    ->closeOnDateSelection()
+                                    ->minDate(now()->subYears(50))
+                                    ->maxDate(now()->subYears(10))
+                                    ->columnSpan(4),
                                 Select::make('country_id')
                                     ->searchable()
                                     ->preload()
@@ -246,7 +253,9 @@ class UserResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        return static::getModel()::whereHas('roles', function ($query) {
+            $query->where('role_name', 'Administrateur'); // Assurez-vous que 'name' correspond à votre colonne de rôle
+        })->count();
     }
     public static function getNavigationBadgeColor(): string|array|null
     {

@@ -69,7 +69,8 @@ class AwsResource extends Resource
                         ->directory('images/medias/TestAwsSilas/' . $id) // Spécifiez le répertoire
                         // ->preserveFilenames() // Pour garder le nom original
                         ->visibility('public')
-                        ->maxSize(102400) // Taille maximale en Ko (100 Mo)
+                        // ->maxSize(102400) // Taille maximale en Ko (100 Mo)
+                        ->rules('file|max:1024000') // Taille maximale en Ko (1 Go)
                         ->columnSpan(12)
                         ->previewable(true),
                 ])
