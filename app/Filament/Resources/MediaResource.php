@@ -250,7 +250,7 @@ class MediaResource extends Resource
                 TextColumn::make('source')
                     ->label('Source')
                     ->searchable(),
-                IconColumn::make('is_active')
+                IconColumn::make('is_public')
                     ->label('Est active')
                     ->boolean(),
                 TextColumn::make('time_length')
