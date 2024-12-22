@@ -53,17 +53,14 @@ class LegalInfoContentResource extends Resource
                         TextInput::make(name: 'subtitle.fr')
                             ->label('Sous titre  (Français)')
                             ->columnSpan(4)
-                            ->required()
                             ->maxLength(255),
                         TextInput::make('subtitle.en')
                             ->label('Sous titre (Anglais)')
                             ->columnSpan(4)
-                            ->required()
                             ->maxLength(255),
                         TextInput::make('subtitle.ln')
                             ->label('Sous titre (Lingala)')
                             ->columnSpan(4)
-                            ->required()
                             ->maxLength(255),
                         MarkdownEditor::make(name: 'content.fr')
                             ->label('Description  (Français)')
