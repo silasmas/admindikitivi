@@ -11,7 +11,7 @@
         "php": "^8.1",
         "althinect/filament-spatie-roles-permissions": "^2.2",
         "bezhansalleh/filament-shield": "^3.2",
-        "filament/filament": "3.2",
+        "filament/filament": "^3.2",
         "filament/spatie-laravel-translatable-plugin": "3.2",
         "guzzlehttp/guzzle": "^7.2",
         "joaopaulolndev/filament-edit-env": "^1.0",
@@ -26,6 +26,7 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
+        "filament/upgrade": "3.2",
         "laravel/breeze": "^1.28",
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.18",
