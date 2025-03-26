@@ -32,5 +32,38 @@
                 {{ $slot }}
             </main>
         </div>
+        <script>
+            function openVideo(source, url) {
+                let video;
+                if (source === 'youtube') {
+                    const id = url.split('v=')[1] || '';
+                    video = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe>`;
+                } else {
+                    video = `<video width="560" height="315" controls><source src="${url}" type="video/mp4"></video>`;
+                }
+        
+                const modal = document.createElement('div');
+                modal.style.position = 'fixed';
+                modal.style.top = 0;
+                modal.style.left = 0;
+                modal.style.width = '100%';
+                modal.style.height = '100%';
+                modal.style.background = 'rgba(0,0,0,0.8)';
+                modal.style.display = 'flex';
+                modal.style.justifyContent = 'center';
+                modal.style.alignItems = 'center';
+                modal.style.zIndex = 9999;
+                modal.innerHTML = `
+                    <div style="background: white; padding: 20px; border-radius: 10px;">
+                        ${video}
+                        <div style="text-align: right; margin-top: 10px;">
+                            <button onclick="this.closest('div').remove()" style="padding: 5px 10px; background: red; color: white; border: none; border-radius: 5px;">Fermer</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+        </script>
+        
     </body>
 </html>

@@ -9,6 +9,7 @@ use App\Models\Category;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Filament\Pages\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -289,6 +290,16 @@ class MediaResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->numeric()
                     ->sortable(),
+                    TextColumn::make('video_preview')
+    ->label('Aperçu')
+    ->formatStateUsing(function ($record) {
+        $thumbnail = $record->thumbnail_url ?? url('assets/images/avatars/default.jpg');
+        $videoUrl = $record->media_url ?? '';
+        $source = $record->source;
+
+        return view('components.video-preview', compact('thumbnail', 'videoUrl', 'source'))->render();
+    })
+    ->html(),
                 TextColumn::make('created_at')
                     ->label('Date de création')
                     ->dateTime()
@@ -350,6 +361,23 @@ class MediaResource extends Resource
             //
         ];
     }
+    public static function getActions(): array
+    {
+        return [
+            Action::make('Vue en Grille')
+                ->url(route('filament.admin.resources.media.gallery'))
+                ->icon('heroicon-o-view-columns'),
+        ];
+    }
+    public static function getLabel(): string
+{
+    return 'Galerie';
+}
+
+public static function getNavigationLabel(): string
+{
+    return 'Vue en Grille';
+}
 
     public static function getPages(): array
     {
