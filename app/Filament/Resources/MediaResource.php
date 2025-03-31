@@ -290,16 +290,17 @@ class MediaResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->numeric()
                     ->sortable(),
-                    TextColumn::make('video_preview')
-    ->label('Aperçu')
-    ->formatStateUsing(function ($record) {
-        $thumbnail = $record->thumbnail_url ?? url('assets/images/avatars/default.jpg');
-        $videoUrl = $record->media_url ?? '';
-        $source = $record->source;
+                    TextColumn::make('media_url')
+                    ->label('Aperçu')
+                    ->formatStateUsing(function ($state, $record) {
+                        $thumbnail = $record->thumbnail_url ?? url('assets/images/avatars/default.jpg');
+                        $videoUrl = $record->media_url ?? '';
+                        $source = strtolower($record->source ?? '');
 
-        return view('components.video-preview', compact('thumbnail', 'videoUrl', 'source'))->render();
-    })
-    ->html(),
+                        return view('components.video-preview', compact('thumbnail', 'videoUrl', 'source'))->render();
+                    })
+                    ->html()->disableClick(), // 🔥 empêche le redirect sur clic,
+
                 TextColumn::make('created_at')
                     ->label('Date de création')
                     ->dateTime()
@@ -376,7 +377,7 @@ class MediaResource extends Resource
 
 public static function getNavigationLabel(): string
 {
-    return 'Vue en Grille';
+    return 'Media';
 }
 
     public static function getPages(): array
