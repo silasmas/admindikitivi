@@ -4,12 +4,13 @@
  * @see https://www.linkedin.com/in/xanders-samoth-b2770737/
  */
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
-if (!function_exists("getRandomNumber")) {
+if (! function_exists("getRandomNumber")) {
     function getRandomNumber($n)
     {
-        $characters = '0123456789';
+        $characters   = '0123456789';
         $randomString = '';
 
         for ($i = 0; $i < $n; $i++) {
@@ -20,8 +21,18 @@ if (!function_exists("getRandomNumber")) {
         return $randomString;
     }
 }
+if (! function_exists("countUsersByRole")) {
+    function countUsersByRole(string $roleName): int
+    {
+        return DB::table('users')
+            ->join('role_user', 'users.id', '=', 'role_user.user_id')
+            ->join('roles', 'roles.id', '=', 'role_user.role_id')
+            ->where('roles.name', $roleName)
+            ->count();
+    }
+}
 
-if (!function_exists("formatIntegerNumber")) {
+if (! function_exists("formatIntegerNumber")) {
     function formatIntegerNumber($number)
     {
         if (Session::has('locale')) {
@@ -46,7 +57,7 @@ if (!function_exists("formatIntegerNumber")) {
     }
 }
 
-if (!function_exists("formatDecimalNumber")) {
+if (! function_exists("formatDecimalNumber")) {
     function formatDecimalNumber($number)
     {
         if (Session::has('locale')) {
@@ -71,11 +82,11 @@ if (!function_exists("formatDecimalNumber")) {
     }
 }
 
-if (!function_exists("timeAgo")) {
+if (! function_exists("timeAgo")) {
     function timeAgo($datetime, $full = false)
     {
-        $now = new DateTime;
-        $ago = new DateTime($datetime);
+        $now  = new DateTime;
+        $ago  = new DateTime($datetime);
         $diff = $now->diff($ago);
 
         $diff->w = floor($diff->d / 7);
@@ -86,7 +97,7 @@ if (!function_exists("timeAgo")) {
 
             switch ($sessionLocale) {
                 case 'en':
-                    $string = array(
+                    $string = [
                         'y' => 'year',
                         'm' => 'month',
                         'w' => 'week',
@@ -94,7 +105,7 @@ if (!function_exists("timeAgo")) {
                         'h' => 'hour',
                         'i' => 'minute',
                         's' => 'second',
-                    );
+                    ];
 
                     foreach ($string as $k => &$v) {
                         if ($diff->$k) {
@@ -105,13 +116,15 @@ if (!function_exists("timeAgo")) {
                         }
                     }
 
-                    if (!$full) $string = array_slice($string, 0, 1);
+                    if (! $full) {
+                        $string = array_slice($string, 0, 1);
+                    }
 
                     return $string ? implode(', ', $string) . ' ago' : 'just now';
                     break;
 
                 default:
-                    $string = array(
+                    $string = [
                         'y' => 'an',
                         'm' => 'mois',
                         'w' => 'semaine',
@@ -119,7 +132,7 @@ if (!function_exists("timeAgo")) {
                         'h' => 'heure',
                         'i' => 'minute',
                         's' => 'seconde',
-                    );
+                    ];
 
                     foreach ($string as $k => &$v) {
                         if ($diff->$k) {
@@ -130,7 +143,9 @@ if (!function_exists("timeAgo")) {
                         }
                     }
 
-                    if (!$full) $string = array_slice($string, 0, 1);
+                    if (! $full) {
+                        $string = array_slice($string, 0, 1);
+                    }
 
                     return $string ? 'Il y a ' . implode(', ', $string) : 'en ce moment';
                     break;
@@ -141,7 +156,7 @@ if (!function_exists("timeAgo")) {
 
             switch ($appLocale) {
                 case 'en':
-                    $string = array(
+                    $string = [
                         'y' => 'year',
                         'm' => 'month',
                         'w' => 'week',
@@ -149,24 +164,26 @@ if (!function_exists("timeAgo")) {
                         'h' => 'hour',
                         'i' => 'minute',
                         's' => 'second',
-                    );
-    
+                    ];
+
                     foreach ($string as $k => &$v) {
                         if ($diff->$k) {
                             $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
-    
+
                         } else {
                             unset($string[$k]);
                         }
                     }
-    
-                    if (!$full) $string = array_slice($string, 0, 1);
-    
+
+                    if (! $full) {
+                        $string = array_slice($string, 0, 1);
+                    }
+
                     return $string ? implode(', ', $string) . ' ago' : 'just now';
                     break;
-                
+
                 default:
-                    $string = array(
+                    $string = [
                         'y' => 'an',
                         'm' => 'mois',
                         'w' => 'semaine',
@@ -174,7 +191,7 @@ if (!function_exists("timeAgo")) {
                         'h' => 'heure',
                         'i' => 'minute',
                         's' => 'seconde',
-                    );
+                    ];
 
                     foreach ($string as $k => &$v) {
                         if ($diff->$k) {
@@ -185,7 +202,9 @@ if (!function_exists("timeAgo")) {
                         }
                     }
 
-                    if (!$full) $string = array_slice($string, 0, 1);
+                    if (! $full) {
+                        $string = array_slice($string, 0, 1);
+                    }
 
                     return $string ? 'Il y a ' . implode(', ', $string) : 'en ce moment';
                     break;
