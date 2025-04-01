@@ -28,14 +28,17 @@ protected ?string $description = 'Statistiques des événements';
         return [
             Stat::make('Hommes', $hommes)
                 ->icon('heroicon-o-user')
+                ->description('Client par sexe masculin')
                 ->color('blue'),
 
             Stat::make('Femmes', $femmes)
                 ->icon('heroicon-o-user')
+                ->description('Client par sexe féminin')
                 ->color('pink'),
 
             Stat::make('Non spécifié', $autres)
                 ->icon('heroicon-o-question-mark-circle')
+                ->description('Client par sexe non spécifié')
                 ->color('gray'),
         ];
     }

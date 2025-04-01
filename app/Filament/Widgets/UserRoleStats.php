@@ -12,8 +12,12 @@ class UserRoleStats extends StatsOverviewWidget
         $agents = countUsersByRole('Administrateur');
 
         return [
-            Stat::make('Clients', $clients)->color('success')->icon('heroicon-o-user-group'),
-            Stat::make('Agents', $agents)->color('warning')->icon('heroicon-o-shield-check'),
+            Stat::make('Clients', $clients)->color('success')
+            ->icon('heroicon-o-user-group')
+            ->description('Client par role (Client)'),
+            Stat::make('Agents', $agents)->color('warning')
+            ->icon('heroicon-o-shield-check')
+            ->description('Client par role (Agent)'),
         ];
     }
 
