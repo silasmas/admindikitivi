@@ -12,7 +12,7 @@ class ClientsPerMonthChart extends BarChartWidget
         $rows = DB::table('users')
             ->join('role_user', 'users.id', '=', 'role_user.user_id')
             ->join('roles', 'roles.id', '=', 'role_user.role_id')
-            ->where('roles.name', 'Membre')
+            ->where('roles.role_name', 'Membre')
             ->selectRaw('MONTH(users.created_at) as month, COUNT(*) as total')
             ->groupBy('month')
             ->orderBy('month')
