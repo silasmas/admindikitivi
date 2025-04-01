@@ -8,7 +8,9 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 class ClientTotalOverview extends StatsOverviewWidget
 {
     protected static ?string $heading = 'Statistiques générales des clients';
+    protected static ?string $maxWidth = 'full';
 
+    protected static ?int $sort = -1;
     protected function getStats(): array
     {
         $base = DB::table('users')

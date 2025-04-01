@@ -10,7 +10,7 @@ class GenderStatsWidget extends TableWidget
 {
     protected static ?string $heading = 'Répartition par sexe (clients)';
     protected static ?string $maxWidth = 'full';
-
+    protected static ?int $sort = 1;
     public function query(): Collection
     {
         $rows = DB::table('users')

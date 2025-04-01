@@ -5,6 +5,7 @@ use Filament\Widgets\StatsOverviewWidget;
 
 class UserRoleStats extends StatsOverviewWidget
 {
+    protected static ?int $sort = -1;
     protected function getStats(): array
     {
         $clients = countUsersByRole('Membre');

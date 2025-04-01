@@ -6,7 +6,7 @@ use Filament\Widgets\BarChartWidget;
 class ClientsPerMonthChart extends BarChartWidget
 {
     protected static ?string $heading = 'Inscriptions clients par mois';
-
+    protected static ?int $sort = 1;
     protected function getData(): array
     {
         $rows = DB::table('users')
