@@ -25,6 +25,7 @@ class CityStatsOverview extends StatsOverviewWidget
         return $rows->map(function ($row) {
             return Stat::make($row->city ?? 'Inconnu', $row->total)
                 ->icon('heroicon-o-map-pin')
+                ->description('Client par ville')
                 ->color('success');
         })->toArray();
     }
