@@ -25,7 +25,7 @@ class CountryStatsOverview extends StatsOverviewWidget
 
         return $rows->map(function ($row) {
             $country = Country::find($row->country_id);
-            return Stat::make($country?->name ?? 'Inconnu', $row->total)
+            return Stat::make($country?->country_name ?? 'Inconnu', $row->total)
                 ->icon('heroicon-o-globe-alt')
                 ->color('primary');
         })->toArray();
