@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\ApiClientManager;
@@ -24,11 +23,11 @@ class MediaController extends BaseController
     }
     public function create()
     {
-        $series = $this::$api_client_manager::call('GET', getApiURL() . '/media/find_all_by_type/fr/Série TV');
-        $albums = $this::$api_client_manager::call('GET', getApiURL() . '/media/find_all_by_type/fr/Album musique');
-        $type = $this::$api_client_manager::call('GET', getApiURL() . '/type/find_by_group/fr/Type de média');
+        $series     = $this::$api_client_manager::call('GET', getApiURL() . '/media/find_all_by_type/fr/Série TV');
+        $albums     = $this::$api_client_manager::call('GET', getApiURL() . '/media/find_all_by_type/fr/Album musique');
+        $type       = $this::$api_client_manager::call('GET', getApiURL() . '/type/find_by_group/fr/Type de média');
         $categories = $this::$api_client_manager::call('GET', getApiURL() . '/category');
-        $medias = (collect($series->data))->merge(collect($albums->data));
+        $medias     = (collect($series->data))->merge(collect($albums->data));
 
         return view("pages.addMedia", compact("medias", "type", "categories"));
     }
@@ -192,147 +191,160 @@ class MediaController extends BaseController
     }
     public function store(Request $request)
     {
-        $maxSize = 2048; // Par exemple, 2MB
-        // Validate incoming request
-        $request->validate([
-            'media_title' => ['required', 'unique:' . Media::class],
-            'type_id' => ['required'],
-            'categories_ids' => 'required|array',
-            'thumbnail_url' => 'required|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
-            'cover_url' => 'required|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
-        ], [
-            'thumbnail_url.max' => "La taille du thumbnail ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
-            'cover_url.max' => "La taille de la couverture ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
-        ]);
-        // Vérifier si le champ source contient le mot "media_fil"
-        if (strpos($request->input('source'), 'Youtube') !== false) {
-            $request->validate([
-                'media_url' => ['required'], // Rendre media_fil obligatoire si condition remplie
-            ]);
-        }
-
-        // Prepare input data for media creation
-        $inputs = $request->only([
-            'media_title',
-            'media_description',
-            'source',
-            'belonging_count',
-            'time_length',
-            'media_url',
-            'teaser_url',
-            'author_names',
-            'artist_names',
-            'writer',
-            'director',
-            'published_date',
-            'price',
-            'for_youth',
-            'is_live',
-            'belongs_to',
-            'type_id',
-            'user_id',
+        $validated = $request->validate([
+            'media_title' => 'required|string|max:255',
+            'media_url'   => 'required|string|max:2048',
+            // autres champs...
         ]);
 
-        // Create the media record
-        $media = Media::create($inputs);
+        Media::create($validated);
 
-        // Update belonging count if applicable
-        if ($inputs['belongs_to'] != null) {
-            $media_parent = Media::find($inputs['belongs_to']);
-
-            if (is_null($media_parent)) {
-                return response()->json(['response' => false, 'msg' => 'Les parents n\'existe pas']);
-            }
-
-            // Increment belonging count
-            $media_parent->increment('belonging_count', 1);
-        }
-
-        // Handle cover URL upload
-        if ($request->hasFile('cover_url')) {
-            try {
-                uploadFile($request, $media, 'cover_url', 'images/medias/' . $media->id . '/cover/');
-
-            } catch (\Exception $e) {
-                // Gérer l'exception (journaliser l'erreur, retourner une réponse appropriée, etc.)
-                return response()->json(['response' => false, 'msg' => 'Erreur lors du téléchargement de la couverture.'], 500);
-
-            }
-        }
-
-        // Handle thumbnail URL upload
-        if ($request->hasFile('thumbnail_url')) {
-            try {
-                uploadFile($request, $media, 'thumbnail_url', 'images/medias/' . $media->id . '/thumbnail_url/');
-
-            } catch (\Exception $e) {
-                // Gérer l'exception (journaliser l'erreur, retourner une réponse appropriée, etc.)
-                return response()->json(['response' => false, 'msg' => 'Erreur lors du téléchargement de la miniature.'], 500);
-
-            }
-        }
-        if ($request->categories_ids != null and count($request->categories_ids) > 0) {
-            $media->categories()->attach($request->categories_ids);
-        }
-        // // Handle file upload if source is AWS
-        // if ($request->source == "AWS" && $request->hasFile('media_file_url')) {
-        //     $file = $request->file('media_file_url');
-        //     $filename = $file->getClientOriginalName();
-        //     $path_url = 'images/medias/' . $media->id . '/' . $filename;
-
-        //     try {
-        //         $file->storeAs('images/medias/' . $media->id, $filename, 's3');
-        //         $media->update([
-        //             'media_url' => config('filesystems.disks.s3.url') . $path_url,
-        //             'updated_at' => now(),
-        //         ]);
-        //     } catch (\Throwable $th) {
-        //         return response()->json(['response' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
-        //     }
-        // }
-        // Handle file upload if source is AWS
-        if ($request->source === "AWS" && $request->hasFile('media_file_url')) {
-            $file = $request->file('media_file_url');
-
-            // Vérifier si le fichier est valide
-            if (!$file->isValid()) {
-                return response()->json(['response' => false, 'msg' => "Le fichier téléchargé n'est pas valide."], 400);
-            }
-
-            $filename = $file->getClientOriginalName();
-            $directoryPath = 'images/medias/' . $media->id;
-            $pathUrl = $directoryPath . '/' . $filename;
-
-            try {
-                // Construire l'URL avec la région
-                // $region = config('filesystems.disks.s3.region');
-                // $bucket = config('filesystems.disks.s3.bucket');
-                // $baseUrl = "https://s3.{$region}.amazonaws.com/{$bucket}";
-                $file->storeAs($directoryPath, $filename, 's3');
-                // Mettre à jour l'URL du média
-                $media->update([
-                    // 'media_url' => $baseUrl . '/' . ltrim($pathUrl, '/'),
-                    'media_url' => config('filesystems.disks.s3.url') . $pathUrl,
-                    'updated_at' => now(),
-                ]);
-
-                // return response()->json(['response' => true, 'msg' => "Fichier téléchargé avec succès."]);
-            } catch (\Throwable $th) {
-                return response()->json(['response' => false, 'data' => $th->getMessage(), 'msg' => "Erreur d'enregistrement de la vidéo"], 500);
-            }
-        }
-
-        return response()->json(['response' => true, 'msg' => 'Media created successfully', 'data' => $media]);
+        return redirect()->back()->with('success', 'Vidéo enregistrée avec succès ✅');
     }
+
+    // public function store(Request $request)
+    // {
+    //     $maxSize = 2048; // Par exemple, 2MB
+    //     // Validate incoming request
+    //     $request->validate([
+    //         'media_title' => ['required', 'unique:' . Media::class],
+    //         'type_id' => ['required'],
+    //         'categories_ids' => 'required|array',
+    //         'thumbnail_url' => 'required|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
+    //         'cover_url' => 'required|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
+    //     ], [
+    //         'thumbnail_url.max' => "La taille du thumbnail ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
+    //         'cover_url.max' => "La taille de la couverture ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
+    //     ]);
+    //     // Vérifier si le champ source contient le mot "media_fil"
+    //     if (strpos($request->input('source'), 'Youtube') !== false) {
+    //         $request->validate([
+    //             'media_url' => ['required'], // Rendre media_fil obligatoire si condition remplie
+    //         ]);
+    //     }
+
+    //     // Prepare input data for media creation
+    //     $inputs = $request->only([
+    //         'media_title',
+    //         'media_description',
+    //         'source',
+    //         'belonging_count',
+    //         'time_length',
+    //         'media_url',
+    //         'teaser_url',
+    //         'author_names',
+    //         'artist_names',
+    //         'writer',
+    //         'director',
+    //         'published_date',
+    //         'price',
+    //         'for_youth',
+    //         'is_live',
+    //         'belongs_to',
+    //         'type_id',
+    //         'user_id',
+    //     ]);
+
+    //     // Create the media record
+    //     $media = Media::create($inputs);
+
+    //     // Update belonging count if applicable
+    //     if ($inputs['belongs_to'] != null) {
+    //         $media_parent = Media::find($inputs['belongs_to']);
+
+    //         if (is_null($media_parent)) {
+    //             return response()->json(['response' => false, 'msg' => 'Les parents n\'existe pas']);
+    //         }
+
+    //         // Increment belonging count
+    //         $media_parent->increment('belonging_count', 1);
+    //     }
+
+    //     // Handle cover URL upload
+    //     if ($request->hasFile('cover_url')) {
+    //         try {
+    //             uploadFile($request, $media, 'cover_url', 'images/medias/' . $media->id . '/cover/');
+
+    //         } catch (\Exception $e) {
+    //             // Gérer l'exception (journaliser l'erreur, retourner une réponse appropriée, etc.)
+    //             return response()->json(['response' => false, 'msg' => 'Erreur lors du téléchargement de la couverture.'], 500);
+
+    //         }
+    //     }
+
+    //     // Handle thumbnail URL upload
+    //     if ($request->hasFile('thumbnail_url')) {
+    //         try {
+    //             uploadFile($request, $media, 'thumbnail_url', 'images/medias/' . $media->id . '/thumbnail_url/');
+
+    //         } catch (\Exception $e) {
+    //             // Gérer l'exception (journaliser l'erreur, retourner une réponse appropriée, etc.)
+    //             return response()->json(['response' => false, 'msg' => 'Erreur lors du téléchargement de la miniature.'], 500);
+
+    //         }
+    //     }
+    //     if ($request->categories_ids != null and count($request->categories_ids) > 0) {
+    //         $media->categories()->attach($request->categories_ids);
+    //     }
+    //     // // Handle file upload if source is AWS
+    //     // if ($request->source == "AWS" && $request->hasFile('media_file_url')) {
+    //     //     $file = $request->file('media_file_url');
+    //     //     $filename = $file->getClientOriginalName();
+    //     //     $path_url = 'images/medias/' . $media->id . '/' . $filename;
+
+    //     //     try {
+    //     //         $file->storeAs('images/medias/' . $media->id, $filename, 's3');
+    //     //         $media->update([
+    //     //             'media_url' => config('filesystems.disks.s3.url') . $path_url,
+    //     //             'updated_at' => now(),
+    //     //         ]);
+    //     //     } catch (\Throwable $th) {
+    //     //         return response()->json(['response' => false, 'data' => $th, 'msg' => "Erreur d'enregistrement de la vidéo"]);
+    //     //     }
+    //     // }
+    //     // Handle file upload if source is AWS
+    //     if ($request->source === "AWS" && $request->hasFile('media_file_url')) {
+    //         $file = $request->file('media_file_url');
+
+    //         // Vérifier si le fichier est valide
+    //         if (!$file->isValid()) {
+    //             return response()->json(['response' => false, 'msg' => "Le fichier téléchargé n'est pas valide."], 400);
+    //         }
+
+    //         $filename = $file->getClientOriginalName();
+    //         $directoryPath = 'images/medias/' . $media->id;
+    //         $pathUrl = $directoryPath . '/' . $filename;
+
+    //         try {
+    //             // Construire l'URL avec la région
+    //             // $region = config('filesystems.disks.s3.region');
+    //             // $bucket = config('filesystems.disks.s3.bucket');
+    //             // $baseUrl = "https://s3.{$region}.amazonaws.com/{$bucket}";
+    //             $file->storeAs($directoryPath, $filename, 's3');
+    //             // Mettre à jour l'URL du média
+    //             $media->update([
+    //                 // 'media_url' => $baseUrl . '/' . ltrim($pathUrl, '/'),
+    //                 'media_url' => config('filesystems.disks.s3.url') . $pathUrl,
+    //                 'updated_at' => now(),
+    //             ]);
+
+    //             // return response()->json(['response' => true, 'msg' => "Fichier téléchargé avec succès."]);
+    //         } catch (\Throwable $th) {
+    //             return response()->json(['response' => false, 'data' => $th->getMessage(), 'msg' => "Erreur d'enregistrement de la vidéo"], 500);
+    //         }
+    //     }
+
+    //     return response()->json(['response' => true, 'msg' => 'Media created successfully', 'data' => $media]);
+    // }
 
     public function store_cat(Request $request)
     {
         // dd($request->category_name_fr);
         // Get inputs
         $inputs = [
-            'category_name_fr' => $request->category_name_fr,
-            'category_name_en' => $request->category_name_en,
-            'category_name_ln' => $request->category_name_ln,
+            'category_name_fr'     => $request->category_name_fr,
+            'category_name_en'     => $request->category_name_en,
+            'category_name_ln'     => $request->category_name_ln,
             'category_description' => $request->category_description,
         ];
         // dd($inputs);
@@ -354,9 +366,9 @@ class MediaController extends BaseController
      */
     public function show($id)
     {
-        $m = $this::$api_client_manager::call('GET', getApiURL() . '/media/' . $id);
-        $media = $m->data;
-        $type = $this::$api_client_manager::call('GET', getApiURL() . '/type/find_by_group/fr/Type de média');
+        $m          = $this::$api_client_manager::call('GET', getApiURL() . '/media/' . $id);
+        $media      = $m->data;
+        $type       = $this::$api_client_manager::call('GET', getApiURL() . '/type/find_by_group/fr/Type de média');
         $categories = $this::$api_client_manager::call('GET', getApiURL() . '/category');
 
         $series = $this::$api_client_manager::call('GET', getApiURL() . '/media/find_all_by_type/fr/Série TV');
@@ -387,32 +399,32 @@ class MediaController extends BaseController
     public function update(Request $request, Media $media)
     {
         $maxSize = 2048; // Par exemple, 2MB
-        // Get inputs
+                         // Get inputs
         $request->validate([
-            'media_title' => 'required|string|max:255',
+            'media_title'       => 'required|string|max:255',
             'media_description' => 'nullable|string',
-            'source' => 'nullable|string|max:255',
-            'belonging_count' => 'nullable|integer',
-            'time_length' => 'nullable|string|max:255',
-            'media_url' => 'nullable|string|max:255',
-            'author_names' => 'nullable|string|max:255',
-            'artist_names' => 'nullable|string|max:255',
-            'writer' => 'nullable|string|max:255',
-            'director' => 'nullable|string|max:255',
-            'published_date' => 'nullable|date',
-            'price' => 'nullable|numeric',
-            'for_youth' => 'nullable|boolean',
-            'is_live' => 'nullable|boolean',
-            'belongs_to' => 'nullable|string|max:255',
-            'type_id' => 'nullable|integer|exists:types,id',
-            'user_id' => 'nullable|integer|exists:users,id',
-            'categories_ids' => 'nullable|array',
-            'categories_ids.*' => 'integer|exists:categories,id',
-            'thumbnail_url' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
-            'cover_url' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
+            'source'            => 'nullable|string|max:255',
+            'belonging_count'   => 'nullable|integer',
+            'time_length'       => 'nullable|string|max:255',
+            'media_url'         => 'nullable|string|max:255',
+            'author_names'      => 'nullable|string|max:255',
+            'artist_names'      => 'nullable|string|max:255',
+            'writer'            => 'nullable|string|max:255',
+            'director'          => 'nullable|string|max:255',
+            'published_date'    => 'nullable|date',
+            'price'             => 'nullable|numeric',
+            'for_youth'         => 'nullable|boolean',
+            'is_live'           => 'nullable|boolean',
+            'belongs_to'        => 'nullable|string|max:255',
+            'type_id'           => 'nullable|integer|exists:types,id',
+            'user_id'           => 'nullable|integer|exists:users,id',
+            'categories_ids'    => 'nullable|array',
+            'categories_ids.*'  => 'integer|exists:categories,id',
+            'thumbnail_url'     => 'nullable|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
+            'cover_url'         => 'nullable|file|mimes:jpeg,png,jpg,gif|max:' . $maxSize,
         ], [
             'thumbnail_url.max' => "La taille du fichier ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
-            'cover_url.max' => "La taille du fichier ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
+            'cover_url.max'     => "La taille du fichier ne doit pas dépasser 2 Megabites.", // Message d'erreur personnalisé
         ]);
         $media_id = Media::find($request->id);
         $media_id->update($request->only([
@@ -461,13 +473,13 @@ class MediaController extends BaseController
             $file = $request->file('media_file_url');
 
             // Vérifier si le fichier est valide
-            if (!$file->isValid()) {
+            if (! $file->isValid()) {
                 return response()->json(['response' => false, 'msg' => "Le fichier téléchargé n'est pas valide."], 400);
             }
 
-            $filename = $file->getClientOriginalName();
+            $filename      = $file->getClientOriginalName();
             $directoryPath = 'images/medias/' . $media->id;
-            $pathUrl = $directoryPath . '/' . $filename;
+            $pathUrl       = $directoryPath . '/' . $filename;
 
             try {
                 // Stocker le fichier dans S3
@@ -479,7 +491,7 @@ class MediaController extends BaseController
                 // Mettre à jour l'URL du média
                 $media->update([
                     // 'media_url' => $baseUrl . '/' . ltrim($pathUrl, '/'),
-                    'media_url' => config('filesystems.disks.s3.url') . $pathUrl,
+                    'media_url'  => config('filesystems.disks.s3.url') . $pathUrl,
                     'updated_at' => now(),
                 ]);
 
@@ -546,10 +558,10 @@ class MediaController extends BaseController
         //  dd($request->id);
         // Get inputs
         $inputs = [
-            'id' => $request->id,
-            'category_name_fr' => $request->category_name_fr,
-            'category_name_en' => $request->category_name_en,
-            'category_name_ln' => $request->category_name_ln,
+            'id'                   => $request->id,
+            'category_name_fr'     => $request->category_name_fr,
+            'category_name_en'     => $request->category_name_en,
+            'category_name_ln'     => $request->category_name_ln,
             'category_description' => $request->category_description,
         ];
         // dd($inputs);
@@ -728,7 +740,7 @@ class MediaController extends BaseController
         $media = Media::find($id);
 
         $media->update([
-            'cover_url' => $image_url,
+            'cover_url'  => $image_url,
             'updated_at' => now(),
         ]);
 

@@ -1,15 +1,19 @@
 <?php
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Filament\Resources\AwsResource;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\BaseController;
-use App\Http\Controllers\CountryController;
-use App\Http\Controllers\DonationController;
-use App\Http\Controllers\GroupController;
-use App\Http\Controllers\MediaController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GroupController;
+use App\Http\Controllers\MediaController;
+use App\Http\Controllers\CountryController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DonationController;
+use App\Http\Controllers\Test;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +38,40 @@ Route::middleware('auth')->group(function () {
 Route::get('/symlink', function () {
     return view('symlink');
 })->name('generate_symlink');
+Route::post('/upload-video', function (Request $request) {
+    if ($request->hasFile('video')) {
+        $file = $request->file('video');
+        $path = $file->store('videos', 'public'); // ou sur S3 selon ta config
+        return response()->json(['path' => $path]);
+    }
+    return response()->json(['error' => 'Fichier manquant'], 400);
+});
+
+
+Route::post('/upload-video-chunk', [Test::class, 'uploadChunk'])->name('video.chunk.upload');
+Route::post('/finalize-video-upload', [Test::class, 'finalizeUpload'])->name('video.chunk.finalize');
+
+// Route::post('/delete-uploaded-video', function (Request $request) {
+//     $path = $request->input('path');
+
+//     // Retirer le /storage/ du chemin public pour récupérer le vrai chemin
+//     $realPath = str_replace('/storage/', 'public/', $path);
+
+//     if (\Storage::exists($realPath)) {
+//         \Storage::delete($realPath);
+//         return response()->json(['deleted' => true]);
+//     }
+
+//     return response()->json(['deleted' => false, 'message' => 'Fichier non trouvé']);
+// })->name('video.chunk.delete');
+Route::post('/delete-uploaded-video', function (Request $request) {
+    $s3Key = $request->input('s3_key');
+    if (Storage::disk('s3')->exists($s3Key)) {
+        Storage::disk('s3')->delete($s3Key);
+        return response()->json(['deleted' => true]);
+    }
+    return response()->json(['deleted' => false, 'message' => 'Fichier non trouvé']);
+})->name('video.chunk.delete');
 
 Route::middleware('auth')->group(function () {
     Route::get('media', [BaseController::class, 'index'])->name('media');

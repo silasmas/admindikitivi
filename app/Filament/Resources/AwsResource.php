@@ -73,7 +73,11 @@ class AwsResource extends Resource
                         ->rules('file|max:1024000') // Taille maximale en Ko (1 Go)
                         ->columnSpan(12)
                         ->previewable(true),
-                ])
+                ])->columns(12),
+                Section::make('Vidéo')->schema([
+                    \Filament\Forms\Components\View::make('livewire.upload-video-chunked')
+                        ->columnSpan(12),
+                        ])->columns(12),
             ])->columnSpanFull(),
         ]);
     }

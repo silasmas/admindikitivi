@@ -16,4 +16,5 @@ class EditMedia extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
 }
