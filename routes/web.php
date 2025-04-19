@@ -72,6 +72,8 @@ Route::post('/delete-uploaded-video', function (Request $request) {
     }
     return response()->json(['deleted' => false, 'message' => 'Fichier non trouvé']);
 })->name('video.chunk.delete');
+// routes/web.php
+Route::get('/upload/progress', [Test::class, 'progress'])->name('video.chunk.progress');
 
 Route::middleware('auth')->group(function () {
     Route::get('media', [BaseController::class, 'index'])->name('media');

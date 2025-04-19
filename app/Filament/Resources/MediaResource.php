@@ -1,35 +1,34 @@
 <?php
 namespace App\Filament\Resources;
 
-use App\Models\Type;
-use Filament\Tables;
-use App\Models\Media;
-use Filament\Forms\Set;
+use App\Filament\Resources\MediaResource\Pages;
 use App\Models\Category;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
+use App\Models\Media;
+use App\Models\Type;
 use Filament\Forms\Components\Actions\Action;
-use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Wizard;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Wizard\Step;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TimePicker;
-use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Forms\Components\Wizard\Step;
-use Filament\Forms\Components\CheckboxList;
-use App\Filament\Resources\MediaResource\Pages;
+use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Query\Builder;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
@@ -219,40 +218,22 @@ class MediaResource extends Resource
                         Section::make('Vidéo')->schema([
                             \Filament\Forms\Components\View::make('livewire.upload-video-chunked')
                                 ->columnSpan(12),
-                                TextInput::make('media_url')
+                            TextInput::make('media_url')
                                 ->id('media_url_filament')
                                 ->label('Lien de la vidéo')
-                                ->disabled()
-                                ->dehydrated(true)
-                                ->afterStateHydrated(fn ($component, $state) => $component->state($state))
+                                ->disabled()       // Lecture seule
+                                ->dehydrated(true) // Important pour l'enregistrement
+                                ->afterStateHydrated(fn($component, $state) => $component->state($state))
+                                ->helperText('Ce lien est généré automatiquement après upload. Cliquez sur 🔗 pour l’ouvrir dans un nouvel onglet.')
                                 ->columnSpan(12)
-                                ->helperText('Cliquez sur 👁️ pour voir la vidéo.')
                                 ->suffixActions([
                                     Action::make('ouvrir')
                                         ->icon('heroicon-o-arrow-top-right-on-square')
-                                        ->url(fn ($state) => $state)
+                                        ->tooltip('Ouvrir la vidéo dans un nouvel onglet')
+                                        ->url(fn($state) => $state)
                                         ->openUrlInNewTab()
-                                        ->visible(fn ($state) => filled($state)),
-
-                                    // Action::make('copier')
-                                    //     ->icon('heroicon-o-clipboard-document')
-                                    //     ->tooltip('Copier le lien')
-                                    //     ->extraAttributes([
-                                    //         'x-on:click' => new \Illuminate\Support\HtmlString(
-                                    //             'navigator.clipboard.writeText(document.querySelector(\'[id^="media_url_filament"]\')?.value ?? "").then(() => window.dispatchEvent(new CustomEvent("media-url-copied")))'
-                                    //         ),
-                                    //     ]),
-
-                                    Action::make('voir')
-                                        ->icon('heroicon-o-eye')
-                                        ->tooltip('Prévisualiser la vidéo')
-                                        ->extraAttributes([
-                                            'x-on:click' => new \Illuminate\Support\HtmlString(
-                                                'window.dispatchEvent(new CustomEvent("preview-media-url"))'
-                                            ),
-                                        ]),
-                                ])
-
+                                        ->visible(fn($state) => filled($state)),
+                                ]),
 
                         ])->columns(12),
                     ]),
