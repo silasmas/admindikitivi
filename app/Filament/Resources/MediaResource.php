@@ -1,34 +1,35 @@
 <?php
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\MediaResource\Pages;
-use App\Models\Category;
-use App\Models\Media;
 use App\Models\Type;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Section;
+use Filament\Tables;
+use App\Models\Media;
+use App\Models\Category;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use Illuminate\Support\Str;
+use Filament\Resources\Resource;
+use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Wizard;
-use Filament\Forms\Components\Wizard\Step;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\DeleteAction;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TimePicker;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
+use Filament\Forms\Components\Wizard\Step;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Actions\Action;
+use App\Filament\Resources\MediaResource\Pages;
 use Illuminate\Contracts\Database\Query\Builder;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
@@ -170,26 +171,29 @@ class MediaResource extends Resource
                             FileUpload::make('cover_url')
                                 ->label('Couverture')
                                 ->directory('cover')
-                            // ->disk('s3')
-                            // ->directory((fn($record) => 'images/medias/' . $id)) // Spécifiez le répertoire
                                 ->imageEditor()
                                 ->imageEditorMode(2)
                                 ->downloadable()
                                 ->visibility('private')
                                 ->image()
+                                ->getUploadedFileNameForStorageUsing(
+                                    fn(TemporaryUploadedFile $file): string => Str::uuid() . '.' . $file->getClientOriginalExtension()
+                                )
                                 ->maxSize(3024)
                                 ->columnSpan(6)
                                 ->previewable(true),
                             FileUpload::make('thumbnail_url')
                                 ->label('Couverture en miniature')
                                 ->directory('thumbnail')
-                            // ->disk('s3')
-                            // ->directory((fn($record) => 'images/medias/' . $id)) // Spécifiez le répertoire
                                 ->imageEditor()
+                                // ->getUploadedFileNameForStorageUsing(
+                                //     fn(TemporaryUploadedFile $file): string => (string) str($file->getClientOriginalName())
+                                //         ->prepend('custom-prefix-'),
+                                // )
                                 ->getUploadedFileNameForStorageUsing(
-                                    fn(TemporaryUploadedFile $file): string => (string) str($file->getClientOriginalName())
-                                        ->prepend('custom-prefix-'),
+                                    fn(TemporaryUploadedFile $file): string => Str::uuid() . '.' . $file->getClientOriginalExtension()
                                 )
+
                                 ->imageEditorMode(2)
                                 ->downloadable()
                                 ->visibility('private')

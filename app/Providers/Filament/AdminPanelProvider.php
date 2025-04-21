@@ -31,6 +31,14 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->brandName('Dashboard DIKITIVI')
+            // ->viteTheme('resources/css/filament/admin/theme.css')
+            ->brandLogo(asset('assets/images/logo.png'))
+            ->brandLogoHeight(fn() => auth()->check() ? '3rem' : '5rem')
+            ->favicon(asset('assets/images/logo/favicon/android-chrome-192x192.png'))
+            ->colors([
+              'primary' => Color::Amber,
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
