@@ -21,6 +21,9 @@ class Type extends Model
      * @var array<int, string>
      */
     protected $guarded = [];
+    protected $casts = [
+        'type_name' => 'array',
+    ];
 
     /**
      * Translatable properties.

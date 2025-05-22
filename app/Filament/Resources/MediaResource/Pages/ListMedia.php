@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\MediaResource\Pages;
 
-use App\Filament\Resources\MediaResource;
 use Filament\Actions;
+use App\Filament\Widgets\MediasStats;
+use App\Filament\Resources\MediaResource;
 use Filament\Resources\Pages\ListRecords;
 
 class ListMedia extends ListRecords
@@ -14,6 +15,14 @@ class ListMedia extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+        ];
+    }
+    public function getHeaderWidgets(): array
+    {
+        return [
+            MediasStats::class,
+
+            // InvitationsByCeremonieStats::class, // ✅ Nouveau widget par cérémonie
         ];
     }
 }

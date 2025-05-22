@@ -1,12 +1,13 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\BaseController;
 use App\Models\aws;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\BaseController;
 
 /**
  * @author Xanders
@@ -214,7 +215,7 @@ class Test extends BaseController
         ]);
     }
 
-    public function finalizeUpload(Request $request)
+    public function finalizeUploadggg(Request $request)
     {
         $uploadId     = $request->input('uploadId');
         $filename     = $request->input('filename');
@@ -269,6 +270,88 @@ class Test extends BaseController
             's3_key' => $s3Path,
         ]);
     }
+    public function finalizeUpload(Request $request)
+{
+    $uploadId = $request->input('uploadId');
+    $filename = $request->input('filename');
+    $total    = (int) $request->input('total');
+
+    if (! $uploadId || ! $filename || ! $total) {
+        return response()->json(['error' => 'Paramètres manquants.'], 422);
+    }
+
+    // 🔐 Nettoyage et préparation du nom de fichier
+    $originalExtension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    $baseName = pathinfo($filename, PATHINFO_FILENAME);
+    $safeBaseName = Str::slug($baseName);
+
+    $baseFinalFilename = $uploadId . '-' . $safeBaseName;
+    $finalFilename = $baseFinalFilename . '.' . $originalExtension;
+    $s3Path = "videos/{$finalFilename}";
+
+    // ✅ Si le fichier existe déjà, on ajoute un suffixe -1, -2, etc.
+    $suffix = 1;
+    while (Storage::disk('s3')->exists($s3Path)) {
+        $finalFilename = $baseFinalFilename . '-' . $suffix . '.' . $originalExtension;
+        $s3Path = "videos/{$finalFilename}";
+        $suffix++;
+    }
+
+    $tempPath = storage_path("app/chunks/{$uploadId}");
+    $destinationPath = storage_path("app/tmp");
+    $finalPath = "{$destinationPath}/{$finalFilename}";
+
+    if (! is_dir($destinationPath)) {
+        mkdir($destinationPath, 0755, true);
+    }
+
+    if (! is_dir($tempPath)) {
+        return response()->json(['error' => 'Dossier des chunks introuvable.'], 404);
+    }
+
+    // 🧩 Fusion des chunks
+    $output = fopen($finalPath, 'ab');
+    for ($i = 0; $i < $total; $i++) {
+        $chunkPath = "{$tempPath}/chunk_{$i}";
+        if (! file_exists($chunkPath)) {
+            return response()->json(['error' => "Chunk #{$i} manquant."], 400);
+        }
+
+        $in = fopen($chunkPath, 'rb');
+        stream_copy_to_stream($in, $output);
+        fclose($in);
+        unlink($chunkPath);
+
+        Cache::put("video_progress_{$uploadId}", (($i + 1) / $total) * 100, now()->addMinutes(10));
+    }
+    fclose($output);
+    @rmdir($tempPath);
+
+    // 📦 Envoi vers S3
+    $contentType = match ($originalExtension) {
+        'mp4'  => 'video/mp4',
+        'mov'  => 'video/quicktime',
+        default => 'application/octet-stream',
+    };
+
+    try {
+        Storage::disk('s3')->put($s3Path, file_get_contents($finalPath), [
+            'visibility'  => 'public',
+            'ContentType' => $contentType,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Erreur lors de l\'upload S3', 'details' => $e->getMessage()], 500);
+    }
+
+    unlink($finalPath);
+    Cache::forget("video_progress_{$uploadId}");
+
+    return response()->json([
+        'path'   => Storage::disk('s3')->url($s3Path),
+        's3_key' => $s3Path,
+    ]);
+}
+
     public function progressoldd(Request $request)
     {
         $uploadId = $request->query('uploadId');

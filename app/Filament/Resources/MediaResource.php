@@ -1,36 +1,35 @@
 <?php
 namespace App\Filament\Resources;
 
-use App\Models\Type;
-use Filament\Tables;
-use App\Models\Media;
+use App\Filament\Resources\MediaResource\Pages;
 use App\Models\Category;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Illuminate\Support\Str;
-use Filament\Resources\Resource;
-use Filament\Tables\Filters\Filter;
+use App\Models\Media;
+use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Wizard;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Wizard\Step;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Actions\Action as tab;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TimePicker;
-use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Forms\Components\Wizard\Step;
-use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Actions\Action;
-use App\Filament\Resources\MediaResource\Pages;
-use Illuminate\Contracts\Database\Query\Builder;
+use Filament\Tables\Table;
+use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class MediaResource extends Resource
@@ -44,17 +43,17 @@ class MediaResource extends Resource
     public static function form(Form $form): Form
     {
         $id = '1';
-        // Récupérer le nom de la route actuelle
+        // // Récupérer le nom de la route actuelle
         $currentRoute = request()->route()->getName();
 
-        // Exemple d'utilisation pour vérifier si c'est une route d'édition
-        if ($currentRoute === 'filament.admin.resources.aws.edit') {
+        // // Exemple d'utilisation pour vérifier si c'est une route d'édition
+        if ($currentRoute === 'filament.admin.resources.media.edit') {
             $id = request()->route('record');
         } else {
             $lastMedia = Media::latest()->first();
             $id        = $lastMedia ? $lastMedia->id + 1 : 1;
         }
-        // Récupérer les catégories
+        // // Récupérer les catégories
         $categories = Category::all();
 
         // Vérifier si des catégories existent
@@ -64,7 +63,7 @@ class MediaResource extends Resource
         return $form
             ->schema([
                 Wizard::make([
-                    Step::make('Étape 1')
+                    Step::make('Étape 1 ' . $currentRoute . " ID" . $id)
                         ->schema([
                             Section::make('Information générale')->schema([
                                 TextInput::make('media_title')
@@ -134,65 +133,103 @@ class MediaResource extends Resource
                                 ])
                                 ->label("Est un live?")
                                 ->searchable()->columnSpan(6),
+                            // Select::make('belongs_to')
+                            //     ->label('Appartien à :')
+                            //     ->searchable()
+                            //     ->preload()
+                            //     ->columnSpan(6),
                             Select::make('belongs_to')
-                                ->label('Appartien à :')
+                            ->label('Appartien à :')
+                            ->searchable()
+                            ->preload()
+                            ->columnSpan(6)
+                            ->options(function () {
+                                $locale = app()->getLocale();
+
+                                return \App\Models\Type::all()
+                                    ->filter(fn ($type) => !empty($type->type_name[$locale])) // ignore les valeurs nulles ou vides
+                                    ->pluck("type_name.$locale", 'id')
+                                    ->toArray();
+                            })
+                            ->required(),
+
+                            Select::make('type_id')
+                                ->label('Type :')
                                 ->searchable()
                                 ->preload()
-                                ->relationship('type', 'type_name')
-                                ->options(function (callable $get) {
-                                    $locale     = app()->getLocale(); // Obtenir la locale actuelle
-                                    $group_name = 'Type de média';   // Remplacez par votre nom de groupe
+                                ->relationship('type', 'id') // on utilise 'id' ici car l’affichage est personnalisé via options()
+                                ->options(function () {
+                                    $locale    = app()->getLocale();
+                                    $groupName = 'Type de média'; // ou ce que tu veux filtrer
 
-                                    return Type::whereHas('group', function ($query) use ($locale, $group_name) {
-                                        $query->where('group_name->' . $locale, $group_name);
-                                    })->get()->mapWithKeys(function ($type) use ($locale) {
-                                        // Décodez le champ type_name
-                                        $typeNames = json_decode($type->type_name, true);
-                                        return [$type->id => $typeNames[$locale] ?? '']; // Utiliser une valeur par défaut si la langue n'existe pas
-                                    });                                              // 'name' est le champ à afficher, 'id' est la valeur
+                                    return \App\Models\Type::whereHas('group', function ($query) use ($locale, $groupName) {
+                                        $query->where("group_name->{$locale}", $groupName);
+                                    })
+                                        ->get()
+                                        ->mapWithKeys(function ($type) use ($locale) {
+                                            return [
+                                                $type->id => $type->type_name ?? '[Nom non défini]',
+                                            ];
+                                        })
+                                        ->toArray();
                                 })
-                                ->columnSpan(12),
-                            CheckboxList::make('category_id') // Utilisation de CheckboxList
+                                ->searchable()
+                                ->preload()
+                                ->placeholder('Sélectionnez un type')
+                                ->helperText('Les types disponibles sont filtrés selon la langue')
+
+                                ->columnSpan(6)
+                                ->required(),
+
+                            CheckboxList::make('category_id')
                                 ->label('Choisissez au moins une catégorie')
                                 ->searchable()
-                                ->columns(6)
+                                ->columns([
+                                    'sm' => 2, // 2 colonnes sur petit écran
+                                    'md' => 3, // 3 colonnes sur medium
+                                    'lg' => 4, // 4 colonnes sur grand écran
+                                ])
                                 ->relationship('categories', 'category_name')
-                                ->options($categories->mapWithKeys(function ($category) {
-                                    if (is_null($category)) {
-                                        dd('La catégorie est nulle.');
-                                    }
-                                    return [$category->id => $category->category_name];
-                                }))
+                                ->options(function () use ($categories) {
+                                    return $categories->mapWithKeys(function ($category) {
+                                        if (is_null($category)) {
+                                            return []; // Ou affiche un message par défaut
+                                        }
+                                        return [$category->id => $category->category_name];
+                                    })->toArray();
+                                })
+                                ->columnSpan('full') // ou ->columnSpan(12)
                                 ->required(),
+
                         ])->columns(12),
                     ]),
                     Step::make('Étape 3')->schema([
                         Section::make('Upload des couvertures')->schema([
                             FileUpload::make('cover_url')
                                 ->label('Couverture')
-                                ->directory('cover')
+                                ->directory('images/medias/' . $id . '/cover')
                                 ->imageEditor()
                                 ->imageEditorMode(2)
                                 ->downloadable()
                                 ->visibility('private')
                                 ->image()
-                                ->getUploadedFileNameForStorageUsing(
-                                    fn(TemporaryUploadedFile $file): string => Str::uuid() . '.' . $file->getClientOriginalExtension()
-                                )
+                                // ->getUploadedFileNameForStorageUsing(
+                                //     fn(TemporaryUploadedFile $file): string => Str::uuid() . '.' . $file->getClientOriginalExtension()
+                                // )
                                 ->maxSize(3024)
                                 ->columnSpan(6)
                                 ->previewable(true),
                             FileUpload::make('thumbnail_url')
                                 ->label('Couverture en miniature')
-                                ->directory('thumbnail')
+                                ->directory('images/medias/' . $id . '/thumbnail')
                                 ->imageEditor()
+                            // ->getUploadedFileNameForStorageUsing(
+                            //     fn(TemporaryUploadedFile $file): string => (string) str($file->getClientOriginalName())
+                            //         ->prepend('custom-prefix-'),
+                            // )
                                 // ->getUploadedFileNameForStorageUsing(
-                                //     fn(TemporaryUploadedFile $file): string => (string) str($file->getClientOriginalName())
-                                //         ->prepend('custom-prefix-'),
+                                //     fn(TemporaryUploadedFile $file): string => Str::uuid() . '.' . $file->getClientOriginalExtension()
                                 // )
-                                ->getUploadedFileNameForStorageUsing(
-                                    fn(TemporaryUploadedFile $file): string => Str::uuid() . '.' . $file->getClientOriginalExtension()
-                                )
 
                                 ->imageEditorMode(2)
                                 ->downloadable()
@@ -204,21 +241,6 @@ class MediaResource extends Resource
                         ]),
                     ]),
                     Step::make('Étape 4')->schema([
-                        // Section::make('Vidéo')->schema([
-                        //     TextInput::make('media_url')
-                        //         ->label('Lien de la vidéo')
-                        //         ->prefix('https://')
-                        //         ->columnSpan(12),
-                        //     // FileUpload::make('media_url')
-                        //     //     ->label('Couverture en miniature')
-                        //     //     ->disk('s3')
-                        //     //     ->directory((fn($record) => 'images/medias/' . $id)) // Spécifiez le répertoire
-                        //     //     ->preserveFilenames() // Pour garder le nom original
-                        //     //     ->visibility('private')
-                        //     //     ->columnSpan(12)
-                        //     //     ->maxSize(102400) // Taille maximale en Ko (100 Mo)
-                        //     //     ->previewable(true),
-                        // ])->columns(12),
                         Section::make('Vidéo')->schema([
                             \Filament\Forms\Components\View::make('livewire.upload-video-chunked')
                                 ->columnSpan(12),
@@ -342,14 +364,34 @@ class MediaResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Filter::make('Est un live')
-                    ->query(fn(Builder $query) => $query->where('is_live', true)),
-                Filter::make('Pour enfant')
-                    ->query(fn(Builder $query) => $query->where('for_youth', true)),
-                Filter::make('Source')
-                    ->query(fn(Builder $query) => $query->where('source', true)),
+                // Filter::make('Est un live')
+                //     ->query(fn(Builder $query) => $query->where('is_live', true)),
+                // Filter::make('Pour enfant')
+                //     ->query(fn(Builder $query) => $query->where('for_youth', true)),
+                // Filter::make('Source')
+                //     ->query(fn(Builder $query) => $query->where('source', true)),
                 // DatePicker::make('Date decut')
                 //     ->placeholder(fn($state) => now()->format('M d,Y')),
+                SelectFilter::make('is_live')
+                    ->label('En live')
+                    ->options([
+                        '1' => 'Oui',
+                        '0' => 'Non',
+                    ]),
+                SelectFilter::make('for_youth')
+                    ->label('Pour enfant ')
+                    ->options([
+                        '1' => 'Oui',
+                        '0' => 'Non',
+                    ]),
+                SelectFilter::make('artist_names')
+                    ->label('Artiste')
+                    ->options(Media::whereNotNull('artist_names')
+                            ->select('artist_names')
+                            ->distinct()
+                            ->pluck('artist_names', 'artist_names')
+                            ->toArray()
+                    ),
                 SelectFilter::make('category_id')
                     ->label('Catégorie')
                     ->options(Category::select('category_name')->get()->map(function ($category) {
@@ -361,22 +403,51 @@ class MediaResource extends Resource
                         return [$category->id => $name];
                     })->toArray()),
 
-                // SelectFilter::make('source')
-                // ->label('Source')
-                // ->options(
-                //     Media::select('source')
-                //         ->distinct() // Récupère uniquement les valeurs distinctes
-                //         ->pluck('source', 'source') // Crée un tableau associatif avec 'source' comme clé et valeur
-                // ),
+                SelectFilter::make('source')
+                    ->label('Source')
+                    ->options(
+                        ['' => 'Toutes les sources'] + Media::whereNotNull('source')
+                            ->select('source')
+                            ->distinct()
+                            ->pluck('source', 'source')
+                            ->toArray()
+                    ),
+
                 // Dans votre classe de ressource
 
-            ])
+            ], layout: FiltersLayout::AboveContent)
+            ->searchable() // ✅ active la recherche globale
             ->actions([
                 ActionGroup::make([
                     ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),
+            ])
+            ->headerActions([
+                tab::make('statistiques')
+                    ->label(fn() => '📊 ' . \App\Models\Media::count() . ' Media au total')
+                    ->disabled() // juste pour l'afficher
+                    ->color('gray'),
+                // actiontab::make('export-filtré')
+                // ->label('Exporter ce qui est affiché')
+                // ->icon('heroicon-o-document-arrow-down')
+                // ->action(function (\Filament\Tables\Table $livewire) {
+                //     return \Maatwebsite\Excel\Facades\Excel::download(
+                //         new \App\Exports\MediasExport($livewire->getFilteredTableQuery()->get()),
+                //         'media-filtrees.xlsx'
+                //     );
+                // }),
+                tab::make('export-tout')
+                    ->label('Exporter tout')
+                    ->icon('heroicon-o-archive-box-arrow-down')
+                    ->action(function () {
+                        return \Maatwebsite\Excel\Facades\Excel::download(
+                            new \App\Exports\MediasExport(\App\Models\Media::all()),
+                            'allMedia-toutes.xlsx'
+                        );
+                    }),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -385,20 +456,14 @@ class MediaResource extends Resource
             ]);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-    public static function getActions(): array
-    {
-        return [
-            Action::make('Vue en Grille')
-                ->url(route('filament.admin.resources.media.gallery'))
-                ->icon('heroicon-o-view-columns'),
-        ];
-    }
+    // public static function getActions(): array
+    // {
+    //     return [
+    //         Action::make('Vue en Grille')
+    //             ->url(route('filament.admin.resources.media.gallery'))
+    //             ->icon('heroicon-o-view-columns'),
+    //     ];
+    // }
     public static function getLabel(): string
     {
         return 'Galerie';
@@ -425,45 +490,7 @@ class MediaResource extends Resource
     {
         return "info";
     }
-    public function save(array $data)
-    {
-                                           // Supposons que vous ayez déjà récupéré l'instance de $media
-        $media = Media::find($data['id']); // ou toute autre méthode pour récupérer l'enregistrement
 
-        // Si un nouveau fichier a été téléchargé, mettez à jour l'URL
-        if (isset($data['media_file_url'])) {
-            $pathUrl          = $data['media_file_url']->store('videos', 's3'); // Spécifiez le répertoire
-            $media->media_url = config('filesystems.disks.s3.url') . '/' . ltrim($pathUrl, '/');
-        }
-
-        // Mettez à jour d'autres champs si nécessaire
-        $media->updated_at = now();
-
-        // Sauvegardez les changements
-        $media->save();
-    }
-    protected static function afterCreate($record)
-    {
-        // Logique à exécuter après la création de l'enregistrement
-
-        // Exemple : Déplacer le fichier téléchargé vers un répertoire spécifique
-        if ($record->media_url) {
-            // Définir le chemin de destination
-            $destinationPath = 'uploads/media/' . $record->id;
-
-            // Déplacer le fichier vers le nouveau répertoire
-            $filePath = storage_path('app/public/' . $record->media_url);
-            if (file_exists($filePath)) {
-                // Créer le répertoire s'il n'existe pas
-                if (! file_exists($destinationPath)) {
-                    mkdir($destinationPath, 0755, true);
-                }
-
-                // Déplacer le fichier
-                rename($filePath, $destinationPath . '/' . basename($record->media_url));
-            }
-        }
-    }
     public static function getGloballySearchableAttributes(): array
     {
         return ['media_title', 'source', 'writer'];

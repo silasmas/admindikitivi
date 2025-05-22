@@ -319,7 +319,7 @@
                                                     @endforelse
                                                 </select> <label for="fls1">Les medias</label>
                                             </div>
-                                        </div>
+                                        </div> 
                                         <div class="form-group">
                                             <i tabindex="0" class="fa fa-info-circle text-gray" data-toggle="tooltip"
                                                 data-container="body" title="Sélectionner le type du media"></i>
