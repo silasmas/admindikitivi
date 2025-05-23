@@ -72,8 +72,7 @@ class UserResource extends Resource
                                         'H' => 'Homme',
                                         'F' => 'Femme',
                                     ])
-                                    ->label("Sexe")
-                                    ->searchable()->columnSpan(4),
+                                    ->label("Sexe")->columnSpan(4),
                                 TextInput::make('phone')
                                     ->columnSpan(4)
                                     ->label("Telephone")
