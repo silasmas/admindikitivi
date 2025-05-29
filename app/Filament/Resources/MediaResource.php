@@ -146,9 +146,9 @@ class MediaResource extends Resource
                             ->options(function () {
                                 $locale = app()->getLocale();
 
-                                return \App\Models\Type::all()
-                                    ->filter(fn ($type) => !empty($type->type_name[$locale])) // ignore les valeurs nulles ou vides
-                                    ->pluck("type_name.$locale", 'id')
+                                return \App\Models\Media::all()
+                                    ->filter(fn ($media) => !empty($media->type->type_name[$locale])) // ignore les valeurs nulles ou vides
+                                    ->pluck("media_title", 'id')
                                     ->toArray();
                             })
                             ->required(),
