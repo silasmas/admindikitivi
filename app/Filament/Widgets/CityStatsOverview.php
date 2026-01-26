@@ -7,7 +7,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class CityStatsOverview extends StatsOverviewWidget
 {
-    protected static ?string $heading = 'Top 3 villes (clients)';
+    protected ?string $heading = 'Top 3 villes (clients)';
     protected static ?int $sort = 0;
     protected function getStats(): array
     {

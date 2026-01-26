@@ -8,7 +8,7 @@ use App\Models\Country;
 
 class CountryStatsOverview extends StatsOverviewWidget
 {
-    protected static ?string $heading = 'Top 3 pays (clients)';
+    protected ?string $heading = 'Top 3 pays (clients)';
 
     protected function getStats(): array
     {

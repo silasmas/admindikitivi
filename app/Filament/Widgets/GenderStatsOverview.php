@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class GenderStatsOverview extends StatsOverviewWidget
 {
-    protected static ?string $heading = 'Répartition des clients par sexe';
+    protected ?string $heading = 'Répartition des clients par sexe';
 
 
 
