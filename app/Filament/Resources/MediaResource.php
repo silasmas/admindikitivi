@@ -7,6 +7,7 @@ use App\Models\Media;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -42,28 +43,24 @@ class MediaResource extends Resource
 
     public static function form(Form $form): Form
     {
-        $id = '1';
-        // // Récupérer le nom de la route actuelle
-        $currentRoute = request()->route()->getName();
-
-        // // Exemple d'utilisation pour vérifier si c'est une route d'édition
-        if ($currentRoute === 'filament.admin.resources.media.edit') {
-            $id = request()->route('record');
-        } else {
-            $lastMedia = Media::latest()->first();
-            $id        = $lastMedia ? $lastMedia->id + 1 : 1;
-        }
-        // // Récupérer les catégories
         $categories = Category::all();
 
-        // Vérifier si des catégories existent
+        $schema = [];
         if ($categories->isEmpty()) {
-            dd('Aucune catégorie trouvée.');
+            $schema[] = Placeholder::make('no_categories')
+                ->label('')
+                ->content(new \Illuminate\Support\HtmlString(
+                    '<div class="rounded-lg bg-amber-50 dark:bg-amber-900/20 p-4 text-amber-800 dark:text-amber-200">' .
+                    '<strong>Attention :</strong> Aucune catégorie n\'a été créée. ' .
+                    'Veuillez d\'abord <a href="' . route('filament.admin.resources.categories.create') . '" class="underline font-medium">créer au moins une catégorie</a> pour pouvoir ajouter des médias.' .
+                    '</div>'
+                ));
         }
+
         return $form
-            ->schema([
+            ->schema(array_merge($schema, [
                 Wizard::make([
-                    Step::make('Étape 1 ' . $currentRoute . " ID" . $id)
+                    Step::make('Informations générales')
                         ->schema([
                             Section::make('Information générale')->schema([
                                 TextInput::make('media_title')
@@ -144,11 +141,10 @@ class MediaResource extends Resource
                             ->preload()
                             ->columnSpan(6)
                             ->options(function () {
-                                $locale = app()->getLocale();
-
-                                return \App\Models\Media::all()
-                                    ->filter(fn ($media) => !empty($media->type->type_name[$locale])) // ignore les valeurs nulles ou vides
-                                    ->pluck("media_title", 'id')
+                                return \App\Models\Media::with('type')
+                                    ->get()
+                                    ->filter(fn ($m) => $m->type && filled($m->media_title))
+                                    ->mapWithKeys(fn ($m) => [$m->id => (string) $m->media_title])
                                     ->toArray();
                             })
                             ->required(),
@@ -157,7 +153,8 @@ class MediaResource extends Resource
                                 ->label('Type :')
                                 ->searchable()
                                 ->preload()
-                                ->relationship('type', 'id') // on utilise 'id' ici car l’affichage est personnalisé via options()
+                                ->relationship('type', 'id')
+                                ->getOptionLabelFromRecordUsing(fn ($record) => $record ? (string) $record->display_name : '') // on utilise 'id' ici car l’affichage est personnalisé via options()
                                 ->options(function () {
                                     $locale    = app()->getLocale();
                                     $groupName = 'Type de média'; // ou ce que tu veux filtrer
@@ -166,11 +163,7 @@ class MediaResource extends Resource
                                         $query->where("group_name->{$locale}", $groupName);
                                     })
                                         ->get()
-                                        ->mapWithKeys(function ($type) use ($locale) {
-                                            return [
-                                                $type->id => $type->type_name ?? '[Nom non défini]',
-                                            ];
-                                        })
+                                        ->mapWithKeys(fn ($type) => [$type->id => (string) $type->display_name])
                                         ->toArray();
                                 })
                                 ->searchable()
@@ -184,61 +177,73 @@ class MediaResource extends Resource
                             CheckboxList::make('category_id')
                                 ->label('Choisissez au moins une catégorie')
                                 ->searchable()
-                                ->columns([
-                                    'sm' => 2, // 2 colonnes sur petit écran
-                                    'md' => 3, // 3 colonnes sur medium
-                                    'lg' => 4, // 4 colonnes sur grand écran
-                                ])
-                                ->relationship('categories', 'category_name')
-                                ->options(function () use ($categories) {
-                                    return $categories->mapWithKeys(function ($category) {
-                                        if (is_null($category)) {
-                                            return []; // Ou affiche un message par défaut
-                                        }
-                                        return [$category->id => $category->category_name];
-                                    })->toArray();
-                                })
-                                ->columnSpan('full') // ou ->columnSpan(12)
+                                ->options(fn () => $categories->mapWithKeys(fn ($c) => [$c->id => (string) $c->display_name])->toArray())
+                                ->relationship('categories', 'id')
+                                ->getOptionLabelFromRecordUsing(fn ($record) => $record ? (string) $record->display_name : '')
+                                ->columns(3)
+                                ->gridDirection('row')
+                                ->columnSpanFull()
                                 ->required(),
 
                         ])->columns(12),
                     ]),
-                    Step::make('Étape 3')->schema([
-                        Section::make('Upload des couvertures')->schema([
-                            FileUpload::make('cover_url')
-                                ->label('Couverture')
-                                ->directory('images/medias/' . $id . '/cover')
-                                ->imageEditor()
-                                ->imageEditorMode(2)
-                                ->downloadable()
-                                ->visibility('private')
-                                ->image()
-                                // ->getUploadedFileNameForStorageUsing(
-                                //     fn(TemporaryUploadedFile $file): string => Str::uuid() . '.' . $file->getClientOriginalExtension()
-                                // )
-                                ->maxSize(3024)
-                                ->columnSpan(6)
-                                ->previewable(true),
-                            FileUpload::make('thumbnail_url')
-                                ->label('Couverture en miniature')
-                                ->directory('images/medias/' . $id . '/thumbnail')
-                                ->imageEditor()
-                            // ->getUploadedFileNameForStorageUsing(
-                            //     fn(TemporaryUploadedFile $file): string => (string) str($file->getClientOriginalName())
-                            //         ->prepend('custom-prefix-'),
-                            // )
-                                // ->getUploadedFileNameForStorageUsing(
-                                //     fn(TemporaryUploadedFile $file): string => Str::uuid() . '.' . $file->getClientOriginalExtension()
-                                // )
-
-                                ->imageEditorMode(2)
-                                ->downloadable()
-                                ->visibility('private')
-                                ->image()
-                                ->maxSize(3024)
-                                ->columnSpan(6)
-                                ->previewable(true),
-                        ]),
+                    Step::make('Couvertures')->schema([
+                        Section::make('Upload des couvertures')
+                            ->description('Images au format JPG, PNG ou WebP. Taille max : 3 Mo.')
+                            ->schema([
+                                FileUpload::make('cover_url')
+                                    ->label('Couverture')
+                                    ->directory('medias/covers')
+                                    ->disk('public')
+                                    ->image()
+                                    ->imageEditor()
+                                    ->imageEditorMode(2)
+                                    ->imageEditorAspectRatios(['16:9', '4:3', '1:1'])
+                                    ->getUploadedFileNameForStorageUsing(
+                                        fn (TemporaryUploadedFile $file): string => Str::uuid() . '.' . $file->getClientOriginalExtension()
+                                    )
+                                    ->maxSize(3024)
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                    ->imagePreviewHeight('250')
+                                    ->imageCropAspectRatio('16:9')
+                                    ->imageResizeTargetWidth('1920')
+                                    ->imageResizeTargetHeight('1080')
+                                    ->panelLayout('grid')
+                                    ->removeUploadedFileButtonPosition('right')
+                                    ->uploadButtonPosition('left')
+                                    ->uploadProgressIndicatorPosition('left')
+                                    ->downloadable()
+                                    ->openable()
+                                    ->deletable()
+                                    ->reorderable()
+                                    ->columnSpan(6),
+                                FileUpload::make('thumbnail_url')
+                                    ->label('Miniature')
+                                    ->directory('medias/thumbnails')
+                                    ->disk('public')
+                                    ->image()
+                                    ->imageEditor()
+                                    ->imageEditorMode(2)
+                                    ->imageEditorAspectRatios(['1:1', '4:3', '16:9'])
+                                    ->getUploadedFileNameForStorageUsing(
+                                        fn (TemporaryUploadedFile $file): string => Str::uuid() . '.' . $file->getClientOriginalExtension()
+                                    )
+                                    ->maxSize(3024)
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                    ->imagePreviewHeight('250')
+                                    ->imageCropAspectRatio('1:1')
+                                    ->imageResizeTargetWidth('500')
+                                    ->imageResizeTargetHeight('500')
+                                    ->panelLayout('grid')
+                                    ->removeUploadedFileButtonPosition('right')
+                                    ->uploadButtonPosition('left')
+                                    ->uploadProgressIndicatorPosition('left')
+                                    ->downloadable()
+                                    ->openable()
+                                    ->deletable()
+                                    ->reorderable()
+                                    ->columnSpan(6),
+                            ]),
                     ]),
                     Step::make('Étape 4')->schema([
                         Section::make('Vidéo')->schema([
@@ -256,16 +261,16 @@ class MediaResource extends Resource
                                     Action::make('ouvrir')
                                         ->icon('heroicon-o-arrow-top-right-on-square')
                                         ->tooltip('Ouvrir la vidéo dans un nouvel onglet')
-                                        ->url(fn($state) => $state)
+                                        ->url(fn ($state) => $state ?? '#')
                                         ->openUrlInNewTab()
-                                        ->visible(fn($state) => filled($state)),
+                                        ->visible(fn ($state) => filled($state) && is_string($state)),
                                 ]),
 
                         ])->columns(12),
                     ]),
 
                 ])->columnSpanFull(),
-            ]);
+            ]));
     }
 
     public static function table(Table $table): Table
@@ -274,10 +279,16 @@ class MediaResource extends Resource
             ->columns([
 
                 ImageColumn::make('cover_url')
-                    ->label("Couverture")
+                    ->label('Couverture')
+                    ->disk('public')
+                    ->size(80)
+                    ->circular()
                     ->defaultImageUrl(url('assets/images/avatars/default.jpg')),
                 ImageColumn::make('thumbnail_url')
-                    ->label("Miniature")
+                    ->label('Miniature')
+                    ->disk('public')
+                    ->size(60)
+                    ->circular()
                     ->defaultImageUrl(url('assets/images/avatars/default.jpg')),
                 TextColumn::make('media_title')
                     ->label('Titre')
@@ -337,7 +348,7 @@ class MediaResource extends Resource
                 // ->html()->disableClick(), // 🔥 empêche le redirect sur clic,
                 TextColumn::make('media_url')
                     ->label('Action')
-                    ->formatStateUsing(fn($state) => '<a href="' . $state . '" target="_blank" class="text-primary underline">🎬 Lire</a>')
+                    ->formatStateUsing(fn ($state) => $state ? '<a href="' . e($state) . '" target="_blank" rel="noopener" class="text-primary-600 underline">🎬 Lire</a>' : '—')
                     ->html(),
 
                 // TextColumn::make('media_url')
@@ -394,14 +405,7 @@ class MediaResource extends Resource
                     ),
                 SelectFilter::make('category_id')
                     ->label('Catégorie')
-                    ->options(Category::select('category_name')->get()->map(function ($category) {
-                        // return [$category->id => $category->category_name?? ''];
-                        // Assurez-vous que category_name est bien une chaîne
-                        $name = is_array($category->category_name) ? ($category->category_name['fr'] ?? '') : $category->category_name;
-                        // dd([$category->id => $name]);
-
-                        return [$category->id => $name];
-                    })->toArray()),
+                    ->options(Category::all()->mapWithKeys(fn ($c) => [$c->id => (string) $c->display_name])->toArray()),
 
                 SelectFilter::make('source')
                     ->label('Source')

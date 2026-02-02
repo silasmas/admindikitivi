@@ -25,20 +25,26 @@ class Category extends Model
      * Translatable properties.
      */
     protected $translatable = ['category_name'];
-    
-    protected $casts = [
-        'category_name' => 'array', // S'assure que category_name est traité comme un tableau
-    ];
+
+    /**
+     * Retourne le nom traduit (chaîne) pour Filament et vues.
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        $name = $this->getTranslation('category_name', app()->getLocale()) ?? $this->getTranslation('category_name', 'fr');
+        if (is_array($name)) {
+            return (string) ($name[app()->getLocale()] ?? $name['fr'] ?? $name['en'] ?? '');
+        }
+        return (string) ($name ?? '');
+    }
 
     /**
      * Retourne la catégorie dans la langue demandée.
-     *
-     * @param string $lang
-     * @return string|null
      */
-    public function getCategoryName($lang = 'fr')
+    public function getCategoryName($lang = 'fr'): ?string
     {
-        return $this->category_name[$lang] ?? null; // Retourne le nom dans la langue demandée
+        $name = $this->getTranslation('category_name', $lang);
+        return is_string($name) ? $name : null;
     }
 
     /**
@@ -47,6 +53,6 @@ class Category extends Model
      */
     public function medias()
     {
-        return $this->belongsToMany(Media::class);
+        return $this->belongsToMany(Media::class, 'category_media');
     }
 }

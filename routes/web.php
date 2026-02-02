@@ -48,8 +48,11 @@ Route::post('/upload-video', function (Request $request) {
 });
 
 
-Route::post('/upload-video-chunk', [Test::class, 'uploadChunk'])->name('video.chunk.upload');
-Route::post('/finalize-video-upload', [Test::class, 'finalizeUpload'])->name('video.chunk.finalize');
+Route::middleware('auth')->group(function () {
+    Route::post('/upload-video-chunk', [Test::class, 'uploadChunk'])->name('video.chunk.upload');
+    Route::post('/finalize-video-upload', [Test::class, 'finalizeUpload'])->name('video.chunk.finalize');
+    Route::get('/upload/progress', [Test::class, 'progress'])->name('video.chunk.progress');
+});
 
 // Route::post('/delete-uploaded-video', function (Request $request) {
 //     $path = $request->input('path');
@@ -72,8 +75,6 @@ Route::post('/delete-uploaded-video', function (Request $request) {
     }
     return response()->json(['deleted' => false, 'message' => 'Fichier non trouvé']);
 })->name('video.chunk.delete');
-// routes/web.php
-Route::get('/upload/progress', [Test::class, 'progress'])->name('video.chunk.progress');
 
 Route::middleware('auth')->group(function () {
     Route::get('media', [BaseController::class, 'index'])->name('media');

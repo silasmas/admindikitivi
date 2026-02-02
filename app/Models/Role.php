@@ -2,30 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Permission\Models\Role as SpatieRole;
 
 /**
+ * Rôle étendu pour compatibilité Spatie/Shield + champs métier (role_name, role_description).
+ *
  * @author Xanders
  * @see https://www.linkedin.com/in/xanders-samoth-b2770737/
  */
-class Role extends Model
+class Role extends SpatieRole
 {
-    use HasFactory;
+    protected $fillable = ['name', 'guard_name', 'role_name', 'role_description'];
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * Alias pour l'affichage : utilise role_name si défini, sinon name.
      */
-    protected $guarded = [];
-
-    /**
-     * MANY-TO-MANY
-     * Several users for several roles
-     */
-    public function users()
+    public function getDisplayNameAttribute(): string
     {
-        return $this->belongsToMany(User::class);
+        return $this->role_name ?? $this->name ?? '';
     }
 }

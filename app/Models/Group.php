@@ -3,8 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-// use Spatie\Translatable\HasTranslations;
-use Filament\Resources\Concerns\Translatable;
+use Spatie\Translatable\HasTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
@@ -13,20 +12,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Group extends Model
 {
-    use HasFactory,Translatable;
+    use HasFactory, HasTranslations;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $guarded = [];
 
-    /**
-     * Translatable properties.
-     */
     protected $translatable = ['group_name'];
-    protected $casts = ['group_name' => 'array'];
+
+    public function getDisplayNameAttribute(): string
+    {
+        $name = $this->getTranslation('group_name', app()->getLocale()) ?? $this->getTranslation('group_name', 'fr');
+        if (is_array($name)) {
+            return (string) ($name[app()->getLocale()] ?? $name['fr'] ?? $name['en'] ?? '');
+        }
+        return (string) ($name ?? '');
+    }
 
     /**
      * MANY-TO-ONE

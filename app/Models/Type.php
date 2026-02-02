@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
-use Filament\Resources\Concerns\Translatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
@@ -21,14 +20,23 @@ class Type extends Model
      * @var array<int, string>
      */
     protected $guarded = [];
-    protected $casts = [
-        'type_name' => 'array',
-    ];
 
     /**
      * Translatable properties.
      */
     protected $translatable = ['type_name'];
+
+    /**
+     * Retourne le nom du type traduit (chaîne) pour Filament et vues.
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        $name = $this->getTranslation('type_name', app()->getLocale()) ?? $this->getTranslation('type_name', 'fr');
+        if (is_array($name)) {
+            return (string) ($name[app()->getLocale()] ?? $name['fr'] ?? $name['en'] ?? '');
+        }
+        return (string) ($name ?? '');
+    }
 
     /**
      * ONE-TO-MANY

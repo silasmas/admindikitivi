@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\aws;
+use App\Models\Aws;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
@@ -26,7 +26,7 @@ use App\Filament\Resources\AwsResource\Pages;
 
 class AwsResource extends Resource
 {
-    protected static ?string $model = aws::class;
+    protected static ?string $model = Aws::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Aws Test';
@@ -40,7 +40,7 @@ class AwsResource extends Resource
         if ($currentRoute === 'filament.admin.resources.aws.edit') {
             $id = request()->route('record');
         } else {
-            $lastMedia = aws::latest()->first();
+            $lastMedia = Aws::latest()->first();
             $id = $lastMedia ? $lastMedia->id + 1 : 1;
         }
         return $form->schema([
@@ -85,7 +85,7 @@ class AwsResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->query(query: aws::query()) // Remplacez YourModel par votre modèle
+            ->query(query: Aws::query()) // Remplacez YourModel par votre modèle
             ->columns([
                 TextColumn::make('nom')
                     ->searchable(),

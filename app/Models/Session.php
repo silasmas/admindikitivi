@@ -13,6 +13,9 @@ class Session extends Model
 {
     use HasFactory;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -26,7 +29,7 @@ class Session extends Model
      */
     public function medias()
     {
-        return $this->belongsToMany(Media::class);
+        return $this->belongsToMany(Media::class, 'media_session')->withPivot('is_viewed');
     }
 
     /**

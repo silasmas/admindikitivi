@@ -22,21 +22,16 @@ class Media extends Model
      */
     protected $guarded = [];
     protected $casts = [
-        'category_id' => 'array',
-        'category_name' => 'array',
+        'published_date' => 'date',
     ];
 
-    public function getCategoryNameFrAttribute($lang = 'fr')
-    {
-        return $this->category_name[$lang] ?? null; // Retourne la description dans la langue demandée
-    }
     /**
      * MANY-TO-MANY
      * Several sessions for several medias
      */
     public function sessions()
     {
-        return $this->belongsToMany(Session::class)->withTimestamps()->withPivot('is_viewed');
+        return $this->belongsToMany(Session::class, 'media_session')->withTimestamps()->withPivot('is_viewed');
     }
 
     /**
@@ -45,7 +40,7 @@ class Media extends Model
      */
     public function users()
     {
-        return $this->belongsToMany(User::class)->withTimestamps()->withPivot(['is_liked', 'status_id']);
+        return $this->belongsToMany(User::class, 'media_user')->withTimestamps()->withPivot(['is_liked', 'status_id']);
     }
 
     /**
@@ -54,7 +49,7 @@ class Media extends Model
      */
     public function categories()
     {
-        return $this->belongsToMany(Category::class);
+        return $this->belongsToMany(Category::class, 'category_media');
     }
 
     /**

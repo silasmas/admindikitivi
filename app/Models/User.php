@@ -2,23 +2,22 @@
 
 namespace App\Models;
 
+use Filament\Panel;
 use Laravel\Sanctum\HasApiTokens;
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
-use Filament\Models\Contracts\FilamentUser;
-use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
+use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Filament\Models\Contracts\FilamentUser;
+use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 
 /**
  * @author Xanders
  * @see https://www.linkedin.com/in/xanders-samoth-b2770737/
  */
-class User extends Authenticatable
-
+class User extends Authenticatable implements FilamentUser
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, HasPanelShield;
 
     /**
      * The attributes that are mass assignable.
@@ -40,11 +39,9 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'last_connection' => 'datetime:Y-m-d H:i:s',
         'created_at' => 'datetime:Y-m-d H:i:s',
         'updated_at' => 'datetime:Y-m-d H:i:s',
-        "avatar_url" => 'array',
-        "status_name" => 'json'
+        'birth_date' => 'date',
     ];
     public function setPasswordAttribute($value)
     {
@@ -56,8 +53,7 @@ class User extends Authenticatable
     }
     public function getStatus_name($lang = 'fr')
     {
-        return $this->status_name[$lang] ?? null;
-        // return $this->status_name[$lang] ?? null; // Retourne la description dans la langue demandée
+        return $this->status?->getStatus_name($lang);
     }
 
     /**
@@ -148,5 +144,24 @@ class User extends Authenticatable
     public function sessions()
     {
         return $this->hasMany(Session::class);
+    }
+
+    /**
+     * Étend canAccessPanel : super_admin, panel_user, ou tout rôle autre que Membre.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if ($this->hasRole(config('filament-shield.super_admin.name'))) {
+            return true;
+        }
+        if ($this->hasRole(config('filament-shield.panel_user.name'))) {
+            return true;
+        }
+        return $this->roles()->where(function ($q) {
+            $q->where('name', '!=', 'membre')
+                ->where(function ($q2) {
+                    $q2->whereNull('role_name')->orWhere('role_name', '!=', 'Membre');
+                });
+        })->exists();
     }
 }

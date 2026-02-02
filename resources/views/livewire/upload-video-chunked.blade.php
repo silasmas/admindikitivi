@@ -1,46 +1,55 @@
-<!-- ✅ ZONE UPLOAD + PREVIEW STYLÉE -->
-<div>
-    <label for="video-upload">Uploader une vidéo (.mp4, .mov) :</label>
-    <input type="file" id="video-upload" accept="video/mp4,video/quicktime" class="form-control" />
+<!-- ✅ ZONE UPLOAD + PREVIEW AMÉLIORÉE -->
+<div class="video-upload-wrapper" style="padding: 1.5rem; border-radius: 0.75rem; background: linear-gradient(to bottom, #f9fafb, #ffffff); border: 2px dashed #d1d5db;">
+    <label for="video-upload" style="display: block; font-weight: 600; font-size: 1rem; color: #374151; margin-bottom: 0.75rem;">
+        📹 Uploader une vidéo (.mp4, .mov)
+    </label>
+    <input type="file" id="video-upload" accept="video/mp4,video/quicktime" 
+           style="display: block; width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; background: white; cursor: pointer;" />
 
-    <!-- 🎟️ Barre de progression chunks -->
-    <div id="progress-container" style="margin-top: 10px; border: 1px solid #ccc;">
-        <div id="progress-bar" style="height: 20px; background: green; width: 0%; color: #fff; text-align: center;">0%
+    <!-- 🎟️ Barre de progression upload (chunks) -->
+    <div id="progress-container" style="margin-top: 1rem; border-radius: 0.5rem; overflow: hidden; background: #e5e7eb; height: 32px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+        <div id="progress-bar" style="height: 100%; background: linear-gradient(90deg, #10b981, #059669); width: 0%; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; transition: width 0.3s ease;">
+            0%
         </div>
     </div>
 
-    <!-- ✅ Rendu final (preview) -->
-    <div id="video-wrapper" style="margin-top: 10px; display: none;">
-        <video id="video-preview" width="100%" controls style="display: none;"></video>
+    <!-- ✅ Preview vidéo améliorée -->
+    <div id="video-wrapper" style="margin-top: 1.5rem; display: none; padding: 1rem; border-radius: 0.75rem; background: #f9fafb; border: 1px solid #e5e7eb;">
+        <p style="font-weight: 600; margin-bottom: 0.75rem; color: #374151;">📺 Prévisualisation :</p>
+        <video id="video-preview" width="100%" controls style="display: none; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></video>
 
-        <div class="d-flex gap-2 mt-2">
-            <button id="remove-video" type="button" class="btn btn-danger">❌ Supprimer</button>
-            <a id="open-video-link" href="#" target="_blank" class="btn btn-outline-primary"
-                style="display: none;">🔗 Ouvrir</a>
+        <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+            <button id="remove-video" type="button" style="padding: 0.5rem 1rem; border-radius: 0.5rem; background: #ef4444; color: white; border: none; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+                ❌ Supprimer
+            </button>
+            <a id="open-video-link" href="#" target="_blank" rel="noopener" 
+               style="display: none; padding: 0.5rem 1rem; border-radius: 0.5rem; background: #3b82f6; color: white; text-decoration: none; font-weight: 600; transition: background 0.2s;">
+                🔗 Ouvrir dans un nouvel onglet
+            </a>
         </div>
-        <!-- ✅ Message "prête à lire" -->
-        <div id="ready-indicator" style="display: none; margin-top: 10px; color: green; font-weight: bold;">
-            ✅ Vidéo prête à être visionnée.
+        <div id="ready-indicator" style="display: none; margin-top: 1rem; padding: 0.75rem; background: #d1fae5; color: #065f46; border-radius: 0.5rem; font-weight: 600;">
+            ✅ Vidéo prête à être visionnée et enregistrée.
         </div>
     </div>
 
-    <!-- ⏳ Animation de reconstruction -->
-    <div id="video-finalizing" style="display:none; text-align:center; margin-top:20px;">
+    <!-- ⏳ Traitement en cours -->
+    <div id="video-finalizing" style="display:none; text-align:center; margin-top: 1.5rem; padding: 1.5rem; border-radius: 0.75rem; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
         <svg xmlns="http://www.w3.org/2000/svg" style="margin:auto; background:none;" width="60" height="60"
             viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
-            <circle cx="50" cy="50" fill="none" stroke="#3b82f6" stroke-width="10" r="35"
+            <circle cx="50" cy="50" fill="none" stroke="#3b82f6" stroke-width="8" r="35"
                 stroke-dasharray="164.93361431346415 56.97787143782138">
                 <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s"
                     values="0 50 50;360 50 50" keyTimes="0;1" />
             </circle>
         </svg>
-        <p style="margin-top: 10px;">🛠️ Reconstruction de la vidéo...<br><small>Merci de patienter.</small></p>
-        <div id="rebuild-bar" style="width: 100%; height: 30px; background: #e5e7eb; margin-top: 10px;">
-            <div id="rebuild-bar-fill" style="width: 0%; height: 100%; background: #3b82f6; transition: width 0.3s;">
+        <p style="margin-top: 1rem; font-size: 1.125rem; font-weight: 600; color: #1e40af;">
+            🎬 Traitement de la vidéo en cours...
+        </p>
+        <div id="rebuild-bar" style="width: 100%; height: 36px; background: #e5e7eb; margin-top: 1rem; border-radius: 0.5rem; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+            <div id="rebuild-bar-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #3b82f6, #2563eb); transition: width 0.4s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
             </div>
         </div>
-        <p id="estimated-time" style="text-align: center; font-style: italic; margin-top: 8px;"></p>
-
+        <p id="estimated-time" style="text-align: center; font-style: italic; margin-top: 0.75rem; color: #6b7280; font-size: 0.875rem;"></p>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -142,10 +151,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const percent = Math.round(((i + 1) / totalChunks) * 100);
             progressBar.style.width = percent + '%';
-            progressBar.textContent = percent + '%';
-            progressBar.style.background =
-                percent < 40 ? '#dc3545' :
-                percent < 80 ? '#ffc107' : '#28a745';
+            progressBar.textContent = `${percent}% (${i + 1}/${totalChunks} morceaux)`;
+            progressBar.style.background = percent < 50 
+                ? 'linear-gradient(90deg, #ef4444, #dc2626)' 
+                : percent < 80 
+                ? 'linear-gradient(90deg, #f59e0b, #d97706)' 
+                : 'linear-gradient(90deg, #10b981, #059669)';
         }
 
         finalizingBox.style.display = 'block';
@@ -237,15 +248,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     <iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}"
                     frameborder="0" allowfullscreen></iframe>
                 `);
-            } else {
-                videoPreview.setAttribute('src', url);
-                videoPreview.load();
-                videoPreview.style.display = 'block';
-            }
+        } else {
+            videoPreview.setAttribute('src', url);
+            videoPreview.load();
+            videoPreview.style.display = 'block';
+            document.getElementById('ready-indicator').style.display = 'block';
+        }
 
-            videoWrapper.style.display = 'block';
-            openBtn.href = url;
-            openBtn.style.display = 'inline-block';
+        videoWrapper.style.display = 'block';
+        openBtn.href = url;
+        openBtn.style.display = 'inline-block';
         };
 
         const clearPreview = () => {
@@ -260,10 +272,19 @@ document.addEventListener('DOMContentLoaded', function () {
         removeBtn.onclick = () => {
             if (confirm("Supprimer cette vidéo ?")) {
                 clearPreview();
-                mediaUrlField.value = '';
-                mediaUrlField.dispatchEvent(new Event('input', {
-                    bubbles: true
-                }));
+                if (mediaUrlField) {
+                    mediaUrlField.value = '';
+                    mediaUrlField.dispatchEvent(new Event('input', { bubbles: true }));
+                    mediaUrlField.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                const form = document.querySelector('form[wire\\:submit]') || document.querySelector('form');
+                if (form) {
+                    const wireEl = form.closest('[wire\\:id]');
+                    if (wireEl && typeof Livewire !== 'undefined') {
+                        const id = wireEl.getAttribute('wire:id');
+                        if (id && Livewire.find(id)) Livewire.find(id).set('data.media_url', null);
+                    }
+                }
             }
         };
 
@@ -309,86 +330,82 @@ document.addEventListener('DOMContentLoaded', function () {
                     percent < 80 ? '#ffc107' : '#28a745';
             }
 
-            // 🔄 Simulation de la reconstitution
+            // 🔄 Finalisation et assemblage sur le serveur
             finalizingBox.style.display = 'block';
-            rebuildProgress.style.width = '0%';
-            rebuildProgress.textContent = '0%';
-            rebuildProgress.style.transition = 'width 0.4s ease';
-            rebuildProgress.style.textAlign = 'center';
-            rebuildProgress.style.fontWeight = 'bold';
+            rebuildProgress.style.width = '5%';
+            rebuildProgress.textContent = '5%';
+            estimatedText.innerText = '⏳ Assemblage et envoi vers S3...';
 
-            let percent = 0;
-            const simulationInterval = setInterval(async () => {
-                percent += Math.random() * 4 + 1;
-                if (percent >= 100) {
-                    percent = 100;
-                    clearInterval(simulationInterval);
-                    rebuildProgress.style.width = '100%';
-                    rebuildProgress.textContent = '100%';
-                    estimatedText.innerText = '';
+            // 🟢 Appel immédiat au serveur pour assemblage et upload S3
+            const finalizeData = new FormData();
+            finalizeData.append('uploadId', uploadId);
+            finalizeData.append('filename', file.name);
+            finalizeData.append('total', totalChunks);
 
-                    // 🟢 On appelle le serveur pour obtenir le vrai lien après simulation
-                    const finalizeData = new FormData();
-                    finalizeData.append('uploadId', uploadId);
-                    finalizeData.append('filename', file.name);
-                    finalizeData.append('total', totalChunks);
+            rebuildProgress.style.width = '25%';
+            rebuildProgress.textContent = '25%';
+            estimatedText.innerText = '⏳ Assemblage des morceaux...';
 
-                    const finalizeResponse = await fetch(
-                        "{{ route('video.chunk.finalize') }}", {
-                            method: "POST",
-                            headers: {
-                                'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                            },
-                            body: finalizeData,
-                        });
+            const finalizeResponse = await fetch("{{ route('video.chunk.finalize') }}", {
+                method: "POST",
+                headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" },
+                body: finalizeData,
+            });
 
-                    const rawText = await finalizeResponse.text();
-                    try {
-                        const result = JSON.parse(rawText);
-                        if (result.path) {
-                            mediaUrlField.value = result.path;
-                            mediaUrlField.dispatchEvent(new Event('input', {
-                                bubbles: true
-                            }));
-                            displayVideoPreview(result.path);
+            rebuildProgress.style.width = '75%';
+            rebuildProgress.textContent = '75%';
+            estimatedText.innerText = '☁️ Envoi vers le serveur S3...';
 
-                            Swal.fire({
-                                title: '🎉 Vidéo prête',
-                                text: 'Lien récupéré et champ mis à jour !',
-                                icon: 'success',
-                                timer: 2500,
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false
-                            });
-                        } else {
-                            throw new Error('Aucun lien reçu');
-                        }
-                    } catch (e) {
-                        console.error('Erreur JSON :', rawText);
-                        Swal.fire('Erreur', 'Échec de la récupération du lien.',
-                            'error');
+            const rawText = await finalizeResponse.text();
+            
+            rebuildProgress.style.width = '100%';
+            rebuildProgress.textContent = '100%';
+            estimatedText.innerText = '';
+
+            try {
+                const result = JSON.parse(rawText);
+                if (result.path) {
+                    if (mediaUrlField) {
+                        mediaUrlField.value = result.path;
+                        mediaUrlField.dispatchEvent(new Event('input', { bubbles: true }));
+                        mediaUrlField.dispatchEvent(new Event('change', { bubbles: true }));
                     }
-
+                    // Sync avec Livewire/Filament
+                    const form = document.querySelector('form[wire\\:submit]') || document.querySelector('form');
+                    if (form) {
+                        const wireEl = form.closest('[wire\\:id]');
+                        if (wireEl && typeof Livewire !== 'undefined') {
+                            const id = wireEl.getAttribute('wire:id');
+                            if (id && Livewire.find(id)) {
+                                Livewire.find(id).set('data.media_url', result.path);
+                            }
+                        }
+                    }
+                    
+                    displayVideoPreview(result.path);
                     finalizingBox.style.display = 'none';
-                }
 
-                rebuildProgress.style.width = percent + '%';
-                rebuildProgress.textContent = Math.round(percent) + '%';
-                estimatedText.innerText =
-                    `⏳ Simulation : ${Math.ceil(100 - percent)}% restantes...`;
-
-                if (percent < 40) {
-                    rebuildProgress.style.backgroundColor = '#dc3545';
-                    rebuildProgress.style.color = 'white';
-                } else if (percent < 80) {
-                    rebuildProgress.style.backgroundColor = '#ffc107';
-                    rebuildProgress.style.color = '#000';
+                    Swal.fire({
+                        title: '🎉 Vidéo prête',
+                        html: '<p>La vidéo a été uploadée avec succès.</p><p style="font-size: 0.875rem; color: #6b7280;">Vous pouvez la prévisualiser ci-dessous avant de valider le formulaire.</p>',
+                        icon: 'success',
+                        timer: 3000,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false
+                    });
                 } else {
-                    rebuildProgress.style.backgroundColor = '#28a745';
-                    rebuildProgress.style.color = 'white';
+                    throw new Error('Aucun lien reçu du serveur');
                 }
-            }, 250);
+            } catch (e) {
+                console.error('Erreur JSON :', rawText);
+                finalizingBox.style.display = 'none';
+                Swal.fire({
+                    title: 'Erreur',
+                    text: 'Échec de la récupération du lien vidéo.',
+                    icon: 'error'
+                });
+            }
         });
     });
 </script>
