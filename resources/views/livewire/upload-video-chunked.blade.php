@@ -6,12 +6,13 @@
     <input type="file" id="video-upload" accept="video/mp4,video/quicktime" 
            style="display: block; width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; background: white; cursor: pointer;" />
 
-    <!-- 🎟️ Barre de progression upload (chunks) -->
+    <!-- 🎟️ Barre de progression upload (chunks) + taille uploadée -->
     <div id="progress-container" style="margin-top: 1rem; border-radius: 0.5rem; overflow: hidden; background: #e5e7eb; height: 32px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
         <div id="progress-bar" style="height: 100%; background: linear-gradient(90deg, #10b981, #059669); width: 0%; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; transition: width 0.3s ease;">
             0%
         </div>
     </div>
+    <p id="progress-size" style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280; display: none;"></p>
 
     <!-- ✅ Preview vidéo améliorée -->
     <div id="video-wrapper" style="margin-top: 1.5rem; display: none; padding: 1rem; border-radius: 0.75rem; background: #f9fafb; border: 1px solid #e5e7eb;">
@@ -220,6 +221,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('DOMContentLoaded', function() {
         const input = document.getElementById('video-upload');
         const progressBar = document.getElementById('progress-bar');
+        const progressSizeEl = document.getElementById('progress-size');
         const mediaUrlField = document.querySelector('[id^="media_url_filament"]');
         const videoPreview = document.getElementById('video-preview');
         const videoWrapper = document.getElementById('video-wrapper');
@@ -229,6 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const estimatedText = document.getElementById('estimated-time');
         const rebuildProgress = document.getElementById('rebuild-bar-fill');
         const chunkSize = 5 * 1024 * 1024;
+        const storageBaseUrl = @json(asset('storage'));
 
         const displayVideoPreview = (url) => {
             const oldIframe = videoPreview.parentNode.querySelector("iframe");
@@ -240,14 +243,20 @@ document.addEventListener('DOMContentLoaded', function () {
             videoPreview.load();
 
             if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                const videoId = url.includes('youtu.be') ?
-                    url.split('/').pop() :
-                    new URL(url).searchParams.get('v');
-
-                videoPreview.insertAdjacentHTML('afterend', `
-                    <iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}"
-                    frameborder="0" allowfullscreen></iframe>
-                `);
+                let videoId = null;
+                try {
+                    videoId = url.includes('youtu.be') ?
+                        url.split('/').pop()?.split('?')[0] :
+                        (new URL(url).searchParams.get('v') || null);
+                } catch (_) {}
+                if (videoId && videoId !== 'null' && videoId !== 'undefined') {
+                    videoPreview.insertAdjacentHTML('afterend', `
+                        <iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}"
+                        frameborder="0" allowfullscreen></iframe>
+                    `);
+                } else {
+                    videoPreview.insertAdjacentHTML('afterend', '<p class="text-gray-500 text-sm mt-2">Lien YouTube invalide (ID manquant).</p>');
+                }
         } else {
             videoPreview.setAttribute('src', url);
             videoPreview.load();
@@ -265,33 +274,104 @@ document.addEventListener('DOMContentLoaded', function () {
             videoPreview.style.display = 'none';
             openBtn.style.display = 'none';
             videoWrapper.style.display = 'none';
+            setMediaUrlStorage('');
+            const ri = document.getElementById('ready-indicator');
+            if (ri) ri.style.display = 'none';
             const iframe = videoPreview.parentNode.querySelector("iframe");
             if (iframe) iframe.remove();
+            const invalidMsg = videoPreview.parentNode.querySelector('p.text-gray-500');
+            if (invalidMsg) invalidMsg.remove();
         };
 
-        removeBtn.onclick = () => {
-            if (confirm("Supprimer cette vidéo ?")) {
-                clearPreview();
-                if (mediaUrlField) {
-                    mediaUrlField.value = '';
-                    mediaUrlField.dispatchEvent(new Event('input', { bubbles: true }));
-                    mediaUrlField.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-                const form = document.querySelector('form[wire\\:submit]') || document.querySelector('form');
-                if (form) {
-                    const wireEl = form.closest('[wire\\:id]');
-                    if (wireEl && typeof Livewire !== 'undefined') {
-                        const id = wireEl.getAttribute('wire:id');
-                        if (id && Livewire.find(id)) Livewire.find(id).set('data.media_url', null);
+        removeBtn.onclick = async () => {
+            if (!confirm("Supprimer cette vidéo ? Elle sera supprimée du dépôt AWS et de la base de données.")) return;
+            const currentMediaUrl = getMediaUrlValue();
+            if (currentMediaUrl) {
+                removeBtn.disabled = true;
+                removeBtn.textContent = '⏳ Suppression...';
+                try {
+                    const fd = new FormData();
+                    fd.append('media_url', currentMediaUrl);
+                    fd.append('_token', '{{ csrf_token() }}');
+                    const resp = await fetch("{{ route('video.chunk.delete') }}", {
+                        method: 'POST',
+                        body: fd,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        }
+                    });
+                    const data = await resp.json().catch(() => ({}));
+                    if (!resp.ok) {
+                        throw new Error(data.message || data.error || 'Erreur lors de la suppression');
                     }
+                } catch (e) {
+                    removeBtn.disabled = false;
+                    removeBtn.textContent = '❌ Supprimer';
+                    alert('Erreur : ' + (e.message || 'impossible de supprimer la vidéo.'));
+                    return;
+                }
+                removeBtn.textContent = '❌ Supprimer';
+                removeBtn.disabled = false;
+            }
+            clearPreview();
+            setMediaUrlStorage('');
+            const inputField = document.querySelector('[id^="media_url_filament"]') || document.querySelector('input[name*="media_url"]');
+            if (inputField) {
+                inputField.value = '';
+                inputField.dispatchEvent(new Event('input', { bubbles: true }));
+                inputField.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            const form = document.querySelector('form[wire\\:submit]') || document.querySelector('form');
+            if (form) {
+                const wireEl = form.closest('[wire\\:id]');
+                if (wireEl && typeof Livewire !== 'undefined') {
+                    const id = wireEl.getAttribute('wire:id');
+                    if (id && Livewire.find(id)) Livewire.find(id).set('data.media_url', null);
                 }
             }
         };
 
-        const initialMediaUrl = mediaUrlField?.value;
-        if (initialMediaUrl && initialMediaUrl.startsWith('http')) {
-            displayVideoPreview(initialMediaUrl);
+        const toFullVideoUrl = (value) => {
+            if (!value || typeof value !== 'string') return null;
+            const v = value.trim();
+            if (v.startsWith('http://') || v.startsWith('https://')) return v;
+            const base = (storageBaseUrl || '').replace(/\/$/, '');
+            return base ? (base + '/' + v.replace(/^\//, '')) : v;
+        };
+
+        const getMediaUrlValue = () => {
+            const byId = document.querySelector('[id^="media_url_filament"]');
+            if (byId && byId.value) return byId.value.trim();
+            const byName = document.querySelector('input[name*="media_url"]');
+            if (byName && byName.value) return byName.value.trim();
+            const wrapper = document.getElementById('video-wrapper');
+            if (wrapper && wrapper.dataset.mediaUrl) return wrapper.dataset.mediaUrl.trim();
+            return (mediaUrlField && mediaUrlField.value) ? mediaUrlField.value.trim() : '';
+        };
+
+        const setMediaUrlStorage = (url) => {
+            const w = document.getElementById('video-wrapper');
+            if (w) w.dataset.mediaUrl = url || '';
+        };
+
+        const initialMediaUrl = getMediaUrlValue();
+        const initialFullUrl = toFullVideoUrl(initialMediaUrl);
+        if (initialFullUrl) {
+            setMediaUrlStorage(initialMediaUrl);
+            displayVideoPreview(initialFullUrl);
         }
+
+        if (typeof Livewire !== 'undefined') {
+            Livewire.hook('morph.updated', () => {
+                const url = mediaUrlField?.value?.trim();
+                const full = toFullVideoUrl(url);
+                if (full && full !== initialFullUrl) displayVideoPreview(full);
+            });
+        }
+
+        const formatBytes = (bytes) => (bytes / (1024 * 1024)).toFixed(2) + ' Mo';
 
         input.addEventListener('change', async function() {
             const file = input.files[0];
@@ -304,6 +384,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const uploadId = Date.now() + '-' + file.name.replace(/\s+/g, '-');
             const totalChunks = Math.ceil(file.size / chunkSize);
+            const totalBytes = file.size;
+            progressSizeEl.style.display = 'block';
+            progressSizeEl.textContent = '0 Mo / ' + formatBytes(totalBytes);
 
             for (let i = 0; i < totalChunks; i++) {
                 const chunk = file.slice(i * chunkSize, (i + 1) * chunkSize);
@@ -322,55 +405,74 @@ document.addEventListener('DOMContentLoaded', function () {
                     body: formData,
                 });
 
+                const uploadedBytes = Math.min((i + 1) * chunkSize, totalBytes);
                 const percent = Math.round(((i + 1) / totalChunks) * 100);
                 progressBar.style.width = percent + '%';
                 progressBar.textContent = percent + '%';
+                progressSizeEl.textContent = formatBytes(uploadedBytes) + ' / ' + formatBytes(totalBytes);
                 progressBar.style.background =
                     percent < 40 ? '#dc3545' :
                     percent < 80 ? '#ffc107' : '#28a745';
             }
 
-            // 🔄 Finalisation et assemblage sur le serveur
-            finalizingBox.style.display = 'block';
-            rebuildProgress.style.width = '5%';
-            rebuildProgress.textContent = '5%';
-            estimatedText.innerText = '⏳ Assemblage et envoi vers S3...';
+            progressSizeEl.style.display = 'none';
 
-            // 🟢 Appel immédiat au serveur pour assemblage et upload S3
-            const finalizeData = new FormData();
-            finalizeData.append('uploadId', uploadId);
-            finalizeData.append('filename', file.name);
-            finalizeData.append('total', totalChunks);
+            const runFinalize = async (isRetry) => {
+                finalizingBox.style.display = 'block';
+                rebuildProgress.style.width = isRetry ? '50%' : '5%';
+                rebuildProgress.textContent = (isRetry ? '50' : '5') + '%';
+                estimatedText.innerText = isRetry ? '🔄 Nouvelle tentative d’envoi vers S3...' : '⏳ Assemblage et envoi vers S3...';
 
-            rebuildProgress.style.width = '25%';
-            rebuildProgress.textContent = '25%';
-            estimatedText.innerText = '⏳ Assemblage des morceaux...';
+                const finalizeData = new FormData();
+                finalizeData.append('uploadId', uploadId);
+                finalizeData.append('filename', file.name);
+                finalizeData.append('total', totalChunks);
 
-            const finalizeResponse = await fetch("{{ route('video.chunk.finalize') }}", {
-                method: "POST",
-                headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" },
-                body: finalizeData,
-            });
+                if (!isRetry) {
+                    rebuildProgress.style.width = '25%';
+                    rebuildProgress.textContent = '25%';
+                    estimatedText.innerText = '⏳ Assemblage des morceaux...';
+                }
 
-            rebuildProgress.style.width = '75%';
-            rebuildProgress.textContent = '75%';
-            estimatedText.innerText = '☁️ Envoi vers le serveur S3...';
+                const finalizeResponse = await fetch("{{ route('video.chunk.finalize') }}", {
+                    method: "POST",
+                    headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" },
+                    body: finalizeData,
+                });
 
-            const rawText = await finalizeResponse.text();
-            
-            rebuildProgress.style.width = '100%';
-            rebuildProgress.textContent = '100%';
-            estimatedText.innerText = '';
+                rebuildProgress.style.width = '75%';
+                rebuildProgress.textContent = '75%';
+                estimatedText.innerText = '☁️ Envoi vers le serveur S3...';
 
-            try {
-                const result = JSON.parse(rawText);
+                const rawText = await finalizeResponse.text();
+                rebuildProgress.style.width = '100%';
+                rebuildProgress.textContent = '100%';
+                estimatedText.innerText = '';
+
+                let result;
+                try {
+                    result = JSON.parse(rawText);
+                } catch (_) {
+                    finalizingBox.style.display = 'none';
+                    const msg = finalizeResponse.ok ? 'Réponse serveur invalide.' : (rawText.length > 200 ? rawText.slice(0, 200) + '…' : rawText);
+                    Swal.fire({
+                        title: 'Erreur',
+                        html: '<p>' + (msg || 'Échec de la récupération du lien vidéo.') + '</p><p style="font-size:0.875rem;color:#6b7280;margin-top:0.5rem;">Vous pouvez réessayer la finalisation sans reposter la vidéo.</p>',
+                        icon: 'error',
+                        showDenyButton: true,
+                        confirmButtonText: 'Fermer',
+                        denyButtonText: 'Réessayer la finalisation',
+                        denyButtonColor: '#3b82f6'
+                    }).then((r) => { if (r.isDenied) runFinalize(true); });
+                    return;
+                }
+
                 if (result.path) {
                     if (mediaUrlField) {
                         mediaUrlField.value = result.path;
                         mediaUrlField.dispatchEvent(new Event('input', { bubbles: true }));
                         mediaUrlField.dispatchEvent(new Event('change', { bubbles: true }));
                     }
-                    // Sync avec Livewire/Filament
                     const form = document.querySelector('form[wire\\:submit]') || document.querySelector('form');
                     if (form) {
                         const wireEl = form.closest('[wire\\:id]');
@@ -381,10 +483,9 @@ document.addEventListener('DOMContentLoaded', function () {
                             }
                         }
                     }
-                    
+                    setMediaUrlStorage(result.path);
                     displayVideoPreview(result.path);
                     finalizingBox.style.display = 'none';
-
                     Swal.fire({
                         title: '🎉 Vidéo prête',
                         html: '<p>La vidéo a été uploadée avec succès.</p><p style="font-size: 0.875rem; color: #6b7280;">Vous pouvez la prévisualiser ci-dessous avant de valider le formulaire.</p>',
@@ -394,18 +495,24 @@ document.addEventListener('DOMContentLoaded', function () {
                         position: 'top-end',
                         showConfirmButton: false
                     });
-                } else {
-                    throw new Error('Aucun lien reçu du serveur');
+                    return;
                 }
-            } catch (e) {
-                console.error('Erreur JSON :', rawText);
+
                 finalizingBox.style.display = 'none';
+                const errorMsg = (result.error || 'Erreur lors de la finalisation.') + (result.details ? '<br><small style="color:#6b7280;">' + result.details + '</small>' : '');
+                const canRetry = !!result.retry_finalize;
                 Swal.fire({
-                    title: 'Erreur',
-                    text: 'Échec de la récupération du lien vidéo.',
-                    icon: 'error'
-                });
-            }
+                    title: 'Erreur lors de la finalisation',
+                    html: '<p>' + errorMsg + '</p><p style="font-size:0.875rem;color:#059669;margin-top:0.75rem;">Les morceaux ont bien été reçus. Vous n’avez pas besoin de renvoyer la vidéo : cliquez sur « Réessayer la finalisation » pour réessayer l’envoi vers S3.</p>',
+                    icon: 'error',
+                    showDenyButton: canRetry,
+                    confirmButtonText: 'Fermer',
+                    denyButtonText: 'Réessayer la finalisation',
+                    denyButtonColor: '#059669'
+                }).then((r) => { if (r.isDenied && canRetry) runFinalize(true); });
+            };
+
+            await runFinalize(false);
         });
     });
 </script>

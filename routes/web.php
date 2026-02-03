@@ -14,6 +14,7 @@ use App\Http\Controllers\CountryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\Test;
+use App\Models\Media;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,26 +55,36 @@ Route::middleware('auth')->group(function () {
     Route::get('/upload/progress', [Test::class, 'progress'])->name('video.chunk.progress');
 });
 
-// Route::post('/delete-uploaded-video', function (Request $request) {
-//     $path = $request->input('path');
-
-//     // Retirer le /storage/ du chemin public pour récupérer le vrai chemin
-//     $realPath = str_replace('/storage/', 'public/', $path);
-
-//     if (\Storage::exists($realPath)) {
-//         \Storage::delete($realPath);
-//         return response()->json(['deleted' => true]);
-//     }
-
-//     return response()->json(['deleted' => false, 'message' => 'Fichier non trouvé']);
-// })->name('video.chunk.delete');
-Route::post('/delete-uploaded-video', function (Request $request) {
-    $s3Key = $request->input('s3_key');
-    if (Storage::disk('s3')->exists($s3Key)) {
-        Storage::disk('s3')->delete($s3Key);
-        return response()->json(['deleted' => true]);
+Route::middleware('auth')->post('/delete-uploaded-video', function (Request $request) {
+    $mediaUrl = $request->input('media_url');
+    if (! $mediaUrl || ! is_string($mediaUrl)) {
+        return response()->json(['deleted' => false, 'message' => 'media_url manquant'], 422);
     }
-    return response()->json(['deleted' => false, 'message' => 'Fichier non trouvé']);
+    $mediaUrl = trim($mediaUrl);
+
+    // Dériver la clé S3 : soit URL complète (path après le host), soit chemin relatif déjà stocké
+    $s3Key = null;
+    if (str_starts_with($mediaUrl, 'http://') || str_starts_with($mediaUrl, 'https://')) {
+        $path = parse_url($mediaUrl, PHP_URL_PATH);
+        // Clé S3 = path sans le slash initial (ex. /videos/xxx.mp4 → videos/xxx.mp4)
+        $s3Key = $path ? ltrim($path, '/') : null;
+    } else {
+        $s3Key = $mediaUrl;
+    }
+
+    $deletedFromS3 = false;
+    if ($s3Key && Storage::disk('s3')->exists($s3Key)) {
+        Storage::disk('s3')->delete($s3Key);
+        $deletedFromS3 = true;
+    }
+
+    $updated = Media::where('media_url', $mediaUrl)->update(['media_url' => null]);
+
+    return response()->json([
+        'deleted' => true,
+        'deleted_from_s3' => $deletedFromS3,
+        'updated_in_db' => $updated > 0,
+    ]);
 })->name('video.chunk.delete');
 
 Route::middleware('auth')->group(function () {

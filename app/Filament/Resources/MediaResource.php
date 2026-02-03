@@ -423,7 +423,7 @@ class MediaResource extends Resource
             ->searchable() // ✅ active la recherche globale
             ->actions([
                 ActionGroup::make([
-                    ViewAction::make(),
+                    //ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),
