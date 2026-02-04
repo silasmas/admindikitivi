@@ -275,72 +275,72 @@ class Test extends BaseController
         set_time_limit(0);
         ignore_user_abort(true);
 
-        $uploadId = $request->input('uploadId');
-        $filename = $request->input('filename');
-        $total    = (int) $request->input('total');
+        try {
+            $uploadId = $request->input('uploadId');
+            $filename = $request->input('filename');
+            $total    = (int) $request->input('total');
 
-        if (! $uploadId || ! $filename || ! $total) {
-            return response()->json(['error' => 'Paramètres manquants.'], 422);
-        }
-
-        $originalExtension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        $baseName = pathinfo($filename, PATHINFO_FILENAME);
-        $safeBaseName = Str::slug($baseName);
-
-        $baseFinalFilename = $uploadId . '-' . $safeBaseName;
-        $finalFilename = $baseFinalFilename . '.' . $originalExtension;
-        $s3Path = "videos/{$finalFilename}";
-
-        $suffix = 1;
-        while (Storage::disk('s3')->exists($s3Path)) {
-            $finalFilename = $baseFinalFilename . '-' . $suffix . '.' . $originalExtension;
-            $s3Path = "videos/{$finalFilename}";
-            $suffix++;
-        }
-
-        $destinationPath = storage_path("app/tmp");
-        $finalPath = "{$destinationPath}/{$finalFilename}";
-
-        if (! is_dir($destinationPath)) {
-            mkdir($destinationPath, 0755, true);
-        }
-
-        $isRetry = file_exists($finalPath);
-        $tempPath = storage_path("app/chunks/{$uploadId}");
-
-        if (! $isRetry) {
-            if (! is_dir($tempPath)) {
-                return response()->json(['error' => 'Dossier des chunks introuvable. Relancez l’upload des morceaux.'], 404);
+            if (! $uploadId || ! $filename || ! $total) {
+                return response()->json(['error' => 'Paramètres manquants.'], 422);
             }
 
-            $output = fopen($finalPath, 'wb');
-            for ($i = 0; $i < $total; $i++) {
-                $chunkPath = "{$tempPath}/chunk_{$i}";
-                if (! file_exists($chunkPath)) {
-                    fclose($output);
-                    @unlink($finalPath);
+            $originalExtension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            $baseName = pathinfo($filename, PATHINFO_FILENAME);
+            $safeBaseName = Str::slug($baseName);
 
-                    return response()->json(['error' => "Chunk #{$i} manquant.", 'details' => 'Un ou plusieurs morceaux ont été perdus. Relancez l’upload depuis le début.'], 400);
+            $baseFinalFilename = $uploadId . '-' . $safeBaseName;
+            $finalFilename = $baseFinalFilename . '.' . $originalExtension;
+            $s3Path = "videos/{$finalFilename}";
+
+            $suffix = 1;
+            while (Storage::disk('s3')->exists($s3Path)) {
+                $finalFilename = $baseFinalFilename . '-' . $suffix . '.' . $originalExtension;
+                $s3Path = "videos/{$finalFilename}";
+                $suffix++;
+            }
+
+            $destinationPath = storage_path("app/tmp");
+            $finalPath = "{$destinationPath}/{$finalFilename}";
+
+            if (! is_dir($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+
+            $isRetry = file_exists($finalPath);
+            $tempPath = storage_path("app/chunks/{$uploadId}");
+
+            if (! $isRetry) {
+                if (! is_dir($tempPath)) {
+                    return response()->json(['error' => 'Dossier des chunks introuvable. Relancez l’upload des morceaux.'], 404);
                 }
 
-                $in = fopen($chunkPath, 'rb');
-                stream_copy_to_stream($in, $output);
-                fclose($in);
-                unlink($chunkPath);
+                $output = fopen($finalPath, 'wb');
+                for ($i = 0; $i < $total; $i++) {
+                    $chunkPath = "{$tempPath}/chunk_{$i}";
+                    if (! file_exists($chunkPath)) {
+                        fclose($output);
+                        @unlink($finalPath);
 
-                Cache::put("video_progress_{$uploadId}", (($i + 1) / $total) * 100, now()->addMinutes(10));
+                        return response()->json(['error' => "Chunk #{$i} manquant.", 'details' => 'Un ou plusieurs morceaux ont été perdus. Relancez l’upload depuis le début.'], 400);
+                    }
+
+                    $in = fopen($chunkPath, 'rb');
+                    stream_copy_to_stream($in, $output);
+                    fclose($in);
+                    unlink($chunkPath);
+
+                    Cache::put("video_progress_{$uploadId}", (($i + 1) / $total) * 100, now()->addMinutes(10));
+                }
+                fclose($output);
+                @rmdir($tempPath);
             }
-            fclose($output);
-            @rmdir($tempPath);
-        }
 
-        $contentType = match ($originalExtension) {
-            'mp4'  => 'video/mp4',
-            'mov'  => 'video/quicktime',
-            default => 'application/octet-stream',
-        };
+            $contentType = match ($originalExtension) {
+                'mp4'  => 'video/mp4',
+                'mov'  => 'video/quicktime',
+                default => 'application/octet-stream',
+            };
 
-        try {
             $stream = fopen($finalPath, 'rb');
             if ($stream === false) {
                 return response()->json(['error' => 'Impossible d’ouvrir le fichier assemblé.', 'retry_finalize' => true], 500);
@@ -352,29 +352,44 @@ class Test extends BaseController
             if (is_resource($stream)) {
                 fclose($stream);
             }
-        } catch (\Throwable $e) {
-            if (isset($stream) && is_resource($stream)) {
-                fclose($stream);
-            }
-            Log::warning('Finalize S3 upload failed', ['uploadId' => $uploadId, 'message' => $e->getMessage()]);
+
+            @unlink($finalPath);
+            Cache::forget("video_progress_{$uploadId}");
+
+            $url = Storage::disk('s3')->url($s3Path);
 
             return response()->json([
-                'error'            => 'Erreur lors de l’envoi vers S3.',
-                'details'          => $e->getMessage(),
-                'retry_finalize'   => true,
-                'uploadId'         => $uploadId,
-                'filename'         => $filename,
-                'total'            => $total,
+                'path'   => $url,
+                's3_key' => $s3Path,
+            ]);
+        } catch (\Throwable $e) {
+            if (isset($stream) && is_resource($stream ?? null)) {
+                fclose($stream);
+            }
+            Log::error('Finalize video upload failed', [
+                'uploadId' => $uploadId ?? null,
+                'message'  => $e->getMessage(),
+                'file'     => $e->getFile(),
+                'line'     => $e->getLine(),
+            ]);
+
+            $details = $e->getMessage();
+            $hint = '';
+            if (str_contains($e->getMessage(), 'credentials') || str_contains($e->getMessage(), 'AWS') || str_contains($e->getMessage(), 'access')) {
+                $hint = ' Vérifiez le fichier .env : AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, AWS_BUCKET (et optionnellement AWS_URL, AWS_ENDPOINT).';
+            } elseif (str_contains($e->getMessage(), 'Permission') || str_contains($e->getMessage(), 'denied')) {
+                $hint = ' Vérifiez les permissions du bucket S3 et la politique IAM (PutObject, GetObject).';
+            }
+
+            return response()->json([
+                'error'          => 'Erreur lors de la finalisation.',
+                'details'        => $details . $hint,
+                'retry_finalize' => true,
+                'uploadId'       => $uploadId ?? null,
+                'filename'       => $filename ?? null,
+                'total'         => $total ?? null,
             ], 500);
         }
-
-        @unlink($finalPath);
-        Cache::forget("video_progress_{$uploadId}");
-
-        return response()->json([
-            'path'   => Storage::disk('s3')->url($s3Path),
-            's3_key' => $s3Path,
-        ]);
     }
 
     public function progressoldd(Request $request)
