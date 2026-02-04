@@ -52,6 +52,14 @@
         </div>
         <p id="estimated-time" style="text-align: center; font-style: italic; margin-top: 0.75rem; color: #6b7280; font-size: 0.875rem;"></p>
     </div>
+
+    <!-- 🔄 Bouton de relance de l’assemblage (affiché après échec) -->
+    <div id="retry-assembly-box" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 0.5rem; background: #fef3c7; border: 1px solid #f59e0b;">
+        <p style="margin-bottom: 0.75rem; font-weight: 600; color: #92400e;">L’assemblage ou l’envoi vers S3 a échoué. Les morceaux sont prêts sur le serveur.</p>
+        <button id="retry-assembly-btn" type="button" style="padding: 0.5rem 1rem; border-radius: 0.5rem; background: #f59e0b; color: white; border: none; font-weight: 600; cursor: pointer;">
+            🔄 Relancer l’assemblage
+        </button>
+    </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {{-- <script>
@@ -230,6 +238,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const finalizingBox = document.getElementById('video-finalizing');
         const estimatedText = document.getElementById('estimated-time');
         const rebuildProgress = document.getElementById('rebuild-bar-fill');
+        const retryAssemblyBox = document.getElementById('retry-assembly-box');
+        const retryAssemblyBtn = document.getElementById('retry-assembly-btn');
+        if (retryAssemblyBtn) {
+            retryAssemblyBtn.addEventListener('click', function () {
+                if (typeof window.__retryFinalize === 'function') window.__retryFinalize();
+            });
+        }
         const chunkSize = 5 * 1024 * 1024;
         const storageBaseUrl = @json(asset('storage'));
 
@@ -420,6 +435,7 @@ document.addEventListener('DOMContentLoaded', function () {
             progressSizeEl.style.display = 'none';
 
             const runFinalize = async (isRetry) => {
+                if (retryAssemblyBox) retryAssemblyBox.style.display = 'none';
                 finalizingBox.style.display = 'block';
                 rebuildProgress.style.width = isRetry ? '50%' : '5%';
                 rebuildProgress.textContent = (isRetry ? '50' : '5') + '%';
@@ -456,11 +472,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     result = JSON.parse(rawText);
                 } catch (_) {
                     finalizingBox.style.display = 'none';
+                    if (retryAssemblyBox) {
+                        retryAssemblyBox.style.display = 'block';
+                        window.__retryFinalize = () => runFinalize(true);
+                    }
                     const statusInfo = '<br><small style="color:#6b7280;">Code HTTP : ' + finalizeResponse.status + (finalizeResponse.statusText ? ' — ' + finalizeResponse.statusText : '') + '</small>';
                     const msg = finalizeResponse.ok ? 'Réponse serveur invalide (réponse non JSON).' : ('Le serveur a renvoyé une erreur.' + statusInfo + '<br><small style="word-break:break-all;margin-top:0.5rem;display:block;">' + (rawText.length > 300 ? rawText.slice(0, 300) + '…' : rawText) + '</small>');
                     Swal.fire({
                         title: 'Erreur lors de la finalisation',
-                        html: '<p>' + (msg || 'Échec de la récupération du lien vidéo.') + '</p><p style="font-size:0.875rem;color:#059669;margin-top:0.75rem;">Les morceaux ont bien été envoyés. Cliquez sur « Réessayer la finalisation » pour relancer sans reposter la vidéo.</p>',
+                        html: '<p>' + (msg || 'Échec de la récupération du lien vidéo.') + '</p><p style="font-size:0.875rem;color:#059669;margin-top:0.75rem;">Les morceaux ont bien été envoyés. Vous pouvez aussi cliquer sur « Relancer l’assemblage » ci-dessous.</p>',
                         icon: 'error',
                         showConfirmButton: true,
                         confirmButtonText: 'Fermer',
@@ -490,6 +510,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     setMediaUrlStorage(result.path);
                     displayVideoPreview(result.path);
                     finalizingBox.style.display = 'none';
+                    if (retryAssemblyBox) retryAssemblyBox.style.display = 'none';
+                    if (typeof window.__retryFinalize !== 'undefined') delete window.__retryFinalize;
                     Swal.fire({
                         title: '🎉 Vidéo prête',
                         html: '<p>La vidéo a été uploadée avec succès.</p><p style="font-size: 0.875rem; color: #6b7280;">Vous pouvez la prévisualiser ci-dessous avant de valider le formulaire.</p>',
@@ -503,13 +525,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 finalizingBox.style.display = 'none';
+                if (retryAssemblyBox && result.retry_finalize) {
+                    retryAssemblyBox.style.display = 'block';
+                    window.__retryFinalize = () => runFinalize(true);
+                }
                 const errorTitle = result.error || 'Erreur lors de la finalisation';
                 const errorDetail = result.details ? '<br><small style="color:#6b7280;margin-top:0.25rem;display:block;">Détail : ' + result.details + '</small>' : '';
                 const statusInfo = '<br><small style="color:#6b7280;">Code HTTP : ' + (finalizeResponse ? finalizeResponse.status : '—') + '</small>';
                 const canRetry = !!result.retry_finalize;
                 Swal.fire({
                     title: errorTitle,
-                    html: '<p>' + errorTitle + errorDetail + statusInfo + '</p><p style="font-size:0.875rem;color:#059669;margin-top:0.75rem;">Les morceaux ont bien été reçus. Cliquez sur « Réessayer la finalisation » pour relancer l’envoi vers S3 sans reposter la vidéo.</p>',
+                    html: '<p>' + errorTitle + errorDetail + statusInfo + '</p><p style="font-size:0.875rem;color:#059669;margin-top:0.75rem;">Les morceaux ont bien été reçus. Cliquez sur « Réessayer la finalisation » ou sur le bouton « Relancer l’assemblage » ci-dessous.</p>',
                     icon: 'error',
                     showConfirmButton: true,
                     confirmButtonText: 'Fermer',
