@@ -16,7 +16,9 @@ class ClientTotalOverview extends StatsOverviewWidget
         $base = DB::table('users')
             ->join('role_user', 'users.id', '=', 'role_user.user_id')
             ->join('roles', 'roles.id', '=', 'role_user.role_id')
-            ->where('roles.role_name', 'Membre');
+            ->where(function ($query) {
+                $query->where('roles.role_name', 'Membre')->orWhere('roles.name', 'Membre');
+            });
 
         return [
             Stat::make('Total Clients', (clone $base)->count())

@@ -249,13 +249,15 @@ document.addEventListener('DOMContentLoaded', function () {
                         url.split('/').pop()?.split('?')[0] :
                         (new URL(url).searchParams.get('v') || null);
                 } catch (_) {}
+                const prevInvalid = videoPreview.parentNode.querySelector('p.video-invalid-msg');
+                if (prevInvalid) prevInvalid.remove();
                 if (videoId && videoId !== 'null' && videoId !== 'undefined') {
                     videoPreview.insertAdjacentHTML('afterend', `
                         <iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}"
                         frameborder="0" allowfullscreen></iframe>
                     `);
                 } else {
-                    videoPreview.insertAdjacentHTML('afterend', '<p class="text-gray-500 text-sm mt-2">Lien YouTube invalide (ID manquant).</p>');
+                    videoPreview.insertAdjacentHTML('afterend', '<p class="video-invalid-msg text-amber-600 text-sm mt-2">Ce lien ressemble à un lien YouTube mais l’identifiant vidéo est manquant ou invalide. Vérifiez l’URL ou utilisez un lien de vidéo direct (mp4).</p>');
                 }
         } else {
             videoPreview.setAttribute('src', url);
@@ -279,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (ri) ri.style.display = 'none';
             const iframe = videoPreview.parentNode.querySelector("iframe");
             if (iframe) iframe.remove();
-            const invalidMsg = videoPreview.parentNode.querySelector('p.text-gray-500');
+            const invalidMsg = videoPreview.parentNode.querySelector('p.video-invalid-msg');
             if (invalidMsg) invalidMsg.remove();
         };
 
@@ -454,15 +456,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     result = JSON.parse(rawText);
                 } catch (_) {
                     finalizingBox.style.display = 'none';
-                    const msg = finalizeResponse.ok ? 'Réponse serveur invalide.' : (rawText.length > 200 ? rawText.slice(0, 200) + '…' : rawText);
+                    const statusInfo = '<br><small style="color:#6b7280;">Code HTTP : ' + finalizeResponse.status + (finalizeResponse.statusText ? ' — ' + finalizeResponse.statusText : '') + '</small>';
+                    const msg = finalizeResponse.ok ? 'Réponse serveur invalide (réponse non JSON).' : ('Le serveur a renvoyé une erreur.' + statusInfo + '<br><small style="word-break:break-all;margin-top:0.5rem;display:block;">' + (rawText.length > 300 ? rawText.slice(0, 300) + '…' : rawText) + '</small>');
                     Swal.fire({
-                        title: 'Erreur',
-                        html: '<p>' + (msg || 'Échec de la récupération du lien vidéo.') + '</p><p style="font-size:0.875rem;color:#6b7280;margin-top:0.5rem;">Vous pouvez réessayer la finalisation sans reposter la vidéo.</p>',
+                        title: 'Erreur lors de la finalisation',
+                        html: '<p>' + (msg || 'Échec de la récupération du lien vidéo.') + '</p><p style="font-size:0.875rem;color:#059669;margin-top:0.75rem;">Les morceaux ont bien été envoyés. Cliquez sur « Réessayer la finalisation » pour relancer sans reposter la vidéo.</p>',
                         icon: 'error',
-                        showDenyButton: true,
+                        showConfirmButton: true,
                         confirmButtonText: 'Fermer',
+                        showDenyButton: true,
                         denyButtonText: 'Réessayer la finalisation',
-                        denyButtonColor: '#3b82f6'
+                        denyButtonColor: '#059669'
                     }).then((r) => { if (r.isDenied) runFinalize(true); });
                     return;
                 }
@@ -499,14 +503,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 finalizingBox.style.display = 'none';
-                const errorMsg = (result.error || 'Erreur lors de la finalisation.') + (result.details ? '<br><small style="color:#6b7280;">' + result.details + '</small>' : '');
+                const errorTitle = result.error || 'Erreur lors de la finalisation';
+                const errorDetail = result.details ? '<br><small style="color:#6b7280;margin-top:0.25rem;display:block;">Détail : ' + result.details + '</small>' : '';
+                const statusInfo = '<br><small style="color:#6b7280;">Code HTTP : ' + (finalizeResponse ? finalizeResponse.status : '—') + '</small>';
                 const canRetry = !!result.retry_finalize;
                 Swal.fire({
-                    title: 'Erreur lors de la finalisation',
-                    html: '<p>' + errorMsg + '</p><p style="font-size:0.875rem;color:#059669;margin-top:0.75rem;">Les morceaux ont bien été reçus. Vous n’avez pas besoin de renvoyer la vidéo : cliquez sur « Réessayer la finalisation » pour réessayer l’envoi vers S3.</p>',
+                    title: errorTitle,
+                    html: '<p>' + errorTitle + errorDetail + statusInfo + '</p><p style="font-size:0.875rem;color:#059669;margin-top:0.75rem;">Les morceaux ont bien été reçus. Cliquez sur « Réessayer la finalisation » pour relancer l’envoi vers S3 sans reposter la vidéo.</p>',
                     icon: 'error',
-                    showDenyButton: canRetry,
+                    showConfirmButton: true,
                     confirmButtonText: 'Fermer',
+                    showDenyButton: canRetry,
                     denyButtonText: 'Réessayer la finalisation',
                     denyButtonColor: '#059669'
                 }).then((r) => { if (r.isDenied && canRetry) runFinalize(true); });

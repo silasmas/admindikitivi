@@ -30,6 +30,7 @@ class AwsResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Aws Test';
+    protected static bool $shouldRegisterNavigation = false;
     public static function form(Form $form): Form
     {
         $id = '1';
