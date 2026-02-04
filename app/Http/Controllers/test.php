@@ -380,6 +380,9 @@ class Test extends BaseController
             } elseif (str_contains($e->getMessage(), 'Permission') || str_contains($e->getMessage(), 'denied')) {
                 $hint = ' Vérifiez les permissions du bucket S3 et la politique IAM (PutObject, GetObject).';
             }
+            if (! app()->environment('local')) {
+                $hint .= ' En production : consultez storage/logs/laravel.log sur le serveur pour l’exception complète. Vérifiez aussi les permissions (storage/app/chunks, storage/app/tmp), les limites PHP (memory_limit, max_execution_time) et l’accès réseau vers AWS.';
+            }
 
             return response()->json([
                 'error'          => 'Erreur lors de la finalisation.',

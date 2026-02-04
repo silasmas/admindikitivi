@@ -1,3 +1,11 @@
+<style>
+    /* Boutons de relance bien visibles dans la modale d’erreur de finalisation vidéo */
+    .upload-finalize-error-swal .swal2-actions .swal2-confirm,
+    .upload-finalize-error-swal .swal2-actions .swal2-deny {
+        min-height: 44px; padding: 0.6rem 1.25rem; font-size: 1rem; font-weight: 700;
+    }
+    .upload-finalize-error-swal .swal2-actions .swal2-deny { background: #059669 !important; }
+</style>
 <!-- ✅ ZONE UPLOAD + PREVIEW AMÉLIORÉE -->
 <div class="video-upload-wrapper" style="padding: 1.5rem; border-radius: 0.75rem; background: linear-gradient(to bottom, #f9fafb, #ffffff); border: 2px dashed #d1d5db;">
     <label for="video-upload" style="display: block; font-weight: 600; font-size: 1rem; color: #374151; margin-bottom: 0.75rem;">
@@ -53,10 +61,11 @@
         <p id="estimated-time" style="text-align: center; font-style: italic; margin-top: 0.75rem; color: #6b7280; font-size: 0.875rem;"></p>
     </div>
 
-    <!-- 🔄 Bouton de relance de l’assemblage (affiché après échec) -->
-    <div id="retry-assembly-box" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 0.5rem; background: #fef3c7; border: 1px solid #f59e0b;">
-        <p style="margin-bottom: 0.75rem; font-weight: 600; color: #92400e;">L’assemblage ou l’envoi vers S3 a échoué. Les morceaux sont prêts sur le serveur.</p>
-        <button id="retry-assembly-btn" type="button" style="padding: 0.5rem 1rem; border-radius: 0.5rem; background: #f59e0b; color: white; border: none; font-weight: 600; cursor: pointer;">
+    <!-- 🔄 Zone de relance bien visible (affichée après échec) -->
+    <div id="retry-assembly-box" style="display: none; margin-top: 1.25rem; padding: 1.25rem; border-radius: 0.75rem; background: linear-gradient(135deg, #fef9c3 0%, #fde68a 100%); border: 2px solid #ca8a04; box-shadow: 0 4px 12px rgba(202,138,4,0.25);">
+        <p style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 700; color: #854d0e;">⚠️ L’assemblage ou l’envoi vers S3 a échoué</p>
+        <p style="margin: 0 0 1rem 0; font-size: 0.9rem; color: #a16207;">Les morceaux sont prêts sur le serveur. Cliquez ci-dessous pour réessayer sans reposter la vidéo.</p>
+        <button id="retry-assembly-btn" type="button" style="padding: 0.75rem 1.5rem; font-size: 1rem; border-radius: 0.5rem; background: #059669; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(5,150,105,0.4);">
             🔄 Relancer l’assemblage
         </button>
     </div>
@@ -480,8 +489,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     const msg = finalizeResponse.ok ? 'Réponse serveur invalide (réponse non JSON).' : ('Le serveur a renvoyé une erreur.' + statusInfo + '<br><small style="word-break:break-all;margin-top:0.5rem;display:block;">' + (rawText.length > 300 ? rawText.slice(0, 300) + '…' : rawText) + '</small>');
                     Swal.fire({
                         title: 'Erreur lors de la finalisation',
-                        html: '<p>' + (msg || 'Échec de la récupération du lien vidéo.') + '</p><p style="font-size:0.875rem;color:#059669;margin-top:0.75rem;">Les morceaux ont bien été envoyés. Vous pouvez aussi cliquer sur « Relancer l’assemblage » ci-dessous.</p>',
+                        html: '<p>' + (msg || 'Échec de la récupération du lien vidéo.') + '</p><p style="font-size:0.875rem;color:#059669;margin-top:0.75rem;">Les morceaux ont bien été envoyés. Cliquez sur <strong>« Réessayer la finalisation »</strong> ci-dessous ou sur le bouton vert <strong>« Relancer l’assemblage »</strong> sur la page.</p>',
                         icon: 'error',
+                        customClass: { popup: 'upload-finalize-error-swal' },
                         showConfirmButton: true,
                         confirmButtonText: 'Fermer',
                         showDenyButton: true,
@@ -535,8 +545,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 const canRetry = !!result.retry_finalize;
                 Swal.fire({
                     title: errorTitle,
-                    html: '<p>' + errorTitle + errorDetail + statusInfo + '</p><p style="font-size:0.875rem;color:#059669;margin-top:0.75rem;">Les morceaux ont bien été reçus. Cliquez sur « Réessayer la finalisation » ou sur le bouton « Relancer l’assemblage » ci-dessous.</p>',
+                    html: '<p>' + errorTitle + errorDetail + statusInfo + '</p><p style="font-size:0.875rem;color:#059669;margin-top:0.75rem;">Cliquez sur <strong>« Réessayer la finalisation »</strong> ci-dessous ou sur le bouton vert <strong>« Relancer l’assemblage »</strong> sur la page.</p>',
                     icon: 'error',
+                    customClass: { popup: 'upload-finalize-error-swal' },
                     showConfirmButton: true,
                     confirmButtonText: 'Fermer',
                     showDenyButton: canRetry,
