@@ -367,10 +367,12 @@ class Test extends BaseController
                 fclose($stream);
             }
             Log::error('Finalize video upload failed', [
-                'uploadId' => $uploadId ?? null,
-                'message'  => $e->getMessage(),
-                'file'     => $e->getFile(),
-                'line'     => $e->getLine(),
+                'uploadId'       => $uploadId ?? null,
+                'message'        => $e->getMessage(),
+                'file'           => $e->getFile(),
+                'line'           => $e->getLine(),
+                'exceptionClass' => get_class($e),
+                'trace'          => $e->getTraceAsString(),
             ]);
 
             $details = $e->getMessage();
@@ -381,16 +383,25 @@ class Test extends BaseController
                 $hint = ' Vérifiez les permissions du bucket S3 et la politique IAM (PutObject, GetObject).';
             }
             if (! app()->environment('local')) {
-                $hint .= ' En production : consultez storage/logs/laravel.log sur le serveur pour l’exception complète. Vérifiez aussi les permissions (storage/app/chunks, storage/app/tmp), les limites PHP (memory_limit, max_execution_time) et l’accès réseau vers AWS.';
+                $hint .= ' Vérifiez aussi : permissions (storage/app/chunks, storage/app/tmp), limites PHP (memory_limit, max_execution_time), accès réseau vers AWS.';
+            }
+
+            $stackTrace = config('app.debug') ? $e->getTraceAsString() : null;
+            if ($stackTrace && strlen($stackTrace) > 1500) {
+                $stackTrace = substr($stackTrace, 0, 1500) . "\n...";
             }
 
             return response()->json([
-                'error'          => 'Erreur lors de la finalisation.',
-                'details'        => $details . $hint,
-                'retry_finalize' => true,
-                'uploadId'       => $uploadId ?? null,
-                'filename'       => $filename ?? null,
-                'total'         => $total ?? null,
+                'error'           => 'Erreur lors de la finalisation.',
+                'details'         => $details . $hint,
+                'exception_class' => get_class($e),
+                'file'            => $e->getFile(),
+                'line'            => $e->getLine(),
+                'stack_trace'     => $stackTrace,
+                'retry_finalize'  => true,
+                'uploadId'        => $uploadId ?? null,
+                'filename'        => $filename ?? null,
+                'total'           => $total ?? null,
             ], 500);
         }
     }

@@ -540,7 +540,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.__retryFinalize = () => runFinalize(true);
                 }
                 const errorTitle = result.error || 'Erreur lors de la finalisation';
-                const errorDetail = result.details ? '<br><small style="color:#6b7280;margin-top:0.25rem;display:block;">Détail : ' + result.details + '</small>' : '';
+                let errorDetail = result.details ? '<br><small style="color:#6b7280;margin-top:0.25rem;display:block;">Message : ' + result.details + '</small>' : '';
+                if (result.file) {
+                    errorDetail += '<br><small style="color:#dc2626;font-family:monospace;margin-top:0.25rem;display:block;"><strong>Fichier :</strong> ' + result.file + (result.line ? ' <strong>ligne ' + result.line + '</strong>' : '') + '</small>';
+                }
+                if (result.exception_class) {
+                    errorDetail += '<br><small style="color:#6b7280;">Classe : ' + result.exception_class + '</small>';
+                }
+                if (result.stack_trace) {
+                    errorDetail += '<br><pre style="margin-top:0.5rem;padding:0.5rem;background:#1f2937;color:#e5e7eb;font-size:0.7rem;max-height:120px;overflow:auto;text-align:left;border-radius:0.25rem;">' + result.stack_trace.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+                }
                 const statusInfo = '<br><small style="color:#6b7280;">Code HTTP : ' + (finalizeResponse ? finalizeResponse.status : '—') + '</small>';
                 const canRetry = !!result.retry_finalize;
                 Swal.fire({
