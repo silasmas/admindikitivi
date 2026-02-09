@@ -353,14 +353,16 @@ class Test extends BaseController
                 fclose($stream);
             }
 
+            $fileSize = file_exists($finalPath) ? filesize($finalPath) : null;
             @unlink($finalPath);
             Cache::forget("video_progress_{$uploadId}");
 
             $url = Storage::disk('s3')->url($s3Path);
 
             return response()->json([
-                'path'   => $url,
-                's3_key' => $s3Path,
+                'path'       => $url,
+                's3_key'     => $s3Path,
+                'file_size'  => $fileSize,
             ]);
         } catch (\Throwable $e) {
             if (isset($stream) && is_resource($stream ?? null)) {

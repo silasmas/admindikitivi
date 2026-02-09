@@ -17,6 +17,8 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Form;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action as tab;
@@ -146,8 +148,7 @@ class MediaResource extends Resource
                                     ->filter(fn ($m) => $m->type && filled($m->media_title))
                                     ->mapWithKeys(fn ($m) => [$m->id => (string) $m->media_title])
                                     ->toArray();
-                            })
-                            ->required(),
+                            }),
 
                             Select::make('type_id')
                                 ->label('Type :')
@@ -254,6 +255,12 @@ class MediaResource extends Resource
                                 ->label('Lien de la vidéo')
                                 ->disabled()       // Lecture seule
                                 ->dehydrated(true) // Important pour l'enregistrement
+                                ->columnSpan(12),
+                            TextInput::make('media_file_size')
+                                ->label('Taille vidéo (octets)')
+                                ->hidden()
+                                ->dehydrated(true)
+                                ->numeric()
                                 ->afterStateHydrated(fn($component, $state) => $component->state($state))
                                 ->helperText('Ce lien est généré automatiquement après upload. Cliquez sur 🔗 pour l’ouvrir dans un nouvel onglet.')
                                 ->columnSpan(12)
@@ -271,6 +278,128 @@ class MediaResource extends Resource
 
                 ])->columnSpanFull(),
             ]));
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Section::make('Informations générales')
+                    ->schema([
+                        Infolists\Components\Grid::make(3)->schema([
+                            Infolists\Components\TextEntry::make('media_title')
+                                ->label('Titre du media'),
+                            Infolists\Components\TextEntry::make('belonging_count')
+                                ->label('Nombre des contenants'),
+                            Infolists\Components\TextEntry::make('source')
+                                ->label('Source'),
+                            Infolists\Components\TextEntry::make('time_length')
+                                ->label('Temps du media')
+                                ->time('H:i'),
+                            Infolists\Components\TextEntry::make('author_names')
+                                ->label('Auteur'),
+                            Infolists\Components\TextEntry::make('director')
+                                ->label('Réalisateur'),
+                            Infolists\Components\TextEntry::make('writer')
+                                ->label('Écrit par'),
+                            Infolists\Components\TextEntry::make('artist_names')
+                                ->label("Nom de l'artiste"),
+                            Infolists\Components\TextEntry::make('teaser_url')
+                                ->label('Teaser URL')
+                                ->url(fn ($state) => filled($state) && str_starts_with((string) $state, 'http') ? $state : 'https://' . $state)
+                                ->openUrlInNewTab(),
+                        ]),
+                        Infolists\Components\TextEntry::make('media_description')
+                            ->label('Description')
+                            ->columnSpanFull(),
+                        Infolists\Components\IconEntry::make('is_public')
+                            ->label('Actif')
+                            ->boolean(),
+                    ])->columns(3),
+                Infolists\Components\Section::make('Classification')
+                    ->schema([
+                        Infolists\Components\Grid::make(3)->schema([
+                            Infolists\Components\IconEntry::make('for_youth')
+                                ->label('Pour enfant')
+                                ->boolean(),
+                            Infolists\Components\IconEntry::make('is_live')
+                                ->label('Est un live')
+                                ->boolean(),
+                            Infolists\Components\TextEntry::make('type.display_name')
+                                ->label('Type'),
+                            Infolists\Components\TextEntry::make('user_owner')
+                                ->label('Appartient à')
+                                ->formatStateUsing(fn ($state) => $state ? trim(($state->firstname ?? '') . ' ' . ($state->lastname ?? '')) ?: $state->email ?? '—' : '—'),
+                            Infolists\Components\TextEntry::make('belongs_to')
+                                ->label('Media parent')
+                                ->formatStateUsing(fn ($state) => $state ? Media::find($state)?->media_title ?? $state : '—'),
+                            Infolists\Components\TextEntry::make('categories')
+                                ->label('Catégories')
+                                ->formatStateUsing(function ($state) {
+                                    if (!$state) return '—';
+                                    return collect($state)->map(function ($c) {
+                                        if (is_object($c)) {
+                                            return $c->display_name ?? null;
+                                        }
+                                        if (is_numeric($c)) {
+                                            return Category::find($c)?->display_name ?? (string) $c;
+                                        }
+                                        return null;
+                                    })->filter()->join(', ');
+                                })
+                                ->badge(),
+                        ]),
+                    ])->columns(3),
+                Infolists\Components\Section::make('Couvertures')
+                    ->schema([
+                        Infolists\Components\Grid::make(2)->schema([
+                            Infolists\Components\ViewEntry::make('cover_url')
+                                ->label('Couverture')
+                                ->view('filament.infolists.media-image-with-fallback'),
+                            Infolists\Components\ViewEntry::make('thumbnail_url')
+                                ->label('Miniature')
+                                ->view('filament.infolists.media-image-with-fallback'),
+                        ]),
+                    ]),
+                Infolists\Components\Section::make('Vidéo')
+                    ->schema([
+                        Infolists\Components\ViewEntry::make('media_url')
+                            ->label('Aperçu et lecture')
+                            ->view('filament.infolists.media-video-preview'),
+                        Infolists\Components\TextEntry::make('media_file_size')
+                            ->label('Taille vidéo')
+                            ->formatStateUsing(function (?string $state): string {
+                                if ($state === null || $state === '') {
+                                    return '—';
+                                }
+                                $bytes = (int) $state;
+                                if ($bytes >= 1073741824) {
+                                    return number_format($bytes / 1073741824, 2, ',', ' ') . ' Go';
+                                }
+                                if ($bytes >= 1048576) {
+                                    return number_format($bytes / 1048576, 2, ',', ' ') . ' Mo';
+                                }
+                                if ($bytes >= 1024) {
+                                    return number_format($bytes / 1024, 2, ',', ' ') . ' Ko';
+                                }
+                                return $bytes . ' o';
+                            }),
+                    ]),
+                Infolists\Components\Section::make('Métadonnées')
+                    ->schema([
+                        Infolists\Components\Grid::make(3)->schema([
+                            Infolists\Components\TextEntry::make('published_date')
+                                ->label('Date de publication')
+                                ->date(),
+                            Infolists\Components\TextEntry::make('created_at')
+                                ->label('Date de création')
+                                ->dateTime(),
+                            Infolists\Components\TextEntry::make('updated_at')
+                                ->label('Date de mise à jour')
+                                ->dateTime(),
+                        ]),
+                    ])->columns(3)->collapsed(),
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -346,12 +475,31 @@ class MediaResource extends Resource
                 //     return view('components.video-preview', compact('thumbnail', 'videoUrl', 'source'))->render();
                 // })
                 // ->html()->disableClick(), // 🔥 empêche le redirect sur clic,
-                TextColumn::make('media_url')
-                    ->label('Action')
-                    ->formatStateUsing(fn ($state) => $state ? '<a href="' . e($state) . '" target="_blank" rel="noopener" class="text-primary-600 underline">🎬 Lire</a>' : '—')
-                    ->html(),
+                                TextColumn::make('media_file_size')
+                                    ->label('Taille vidéo')
+                                    ->formatStateUsing(function (?string $state): string {
+                                        if ($state === null || $state === '') {
+                                            return '—';
+                                        }
+                                        $bytes = (int) $state;
+                                        if ($bytes >= 1073741824) {
+                                            return number_format($bytes / 1073741824, 2, ',', ' ') . ' Go';
+                                        }
+                                        if ($bytes >= 1048576) {
+                                            return number_format($bytes / 1048576, 2, ',', ' ') . ' Mo';
+                                        }
+                                        if ($bytes >= 1024) {
+                                            return number_format($bytes / 1024, 2, ',', ' ') . ' Ko';
+                                        }
+                                        return $bytes . ' o';
+                                    })
+                                    ->sortable(),
+                                TextColumn::make('media_url')
+                                    ->label('Action')
+                                    ->formatStateUsing(fn ($state) => $state ? '<a href="' . e($state) . '" target="_blank" rel="noopener" class="text-primary-600 underline">🎬 Lire</a>' : '—')
+                                    ->html(),
 
-                // TextColumn::make('media_url')
+                                // TextColumn::make('media_url')
                 //     ->label('Télécharger')
                 //     ->formatStateUsing(fn($state) => '<a href="' . $state . '" download class="text-success underline">📥 Télécharger</a>')
                 //     ->html(),
@@ -423,7 +571,7 @@ class MediaResource extends Resource
             ->searchable() // ✅ active la recherche globale
             ->actions([
                 ActionGroup::make([
-                    //ViewAction::make(),
+                    ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),
@@ -483,6 +631,7 @@ class MediaResource extends Resource
         return [
             'index'  => Pages\ListMedia::route('/'),
             'create' => Pages\CreateMedia::route('/create'),
+            'view'   => Pages\ViewMedia::route('/{record}'),
             'edit'   => Pages\EditMedia::route('/{record}/edit'),
         ];
     }
