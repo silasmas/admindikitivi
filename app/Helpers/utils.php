@@ -10,6 +10,49 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+/**
+ * Résout l'URL de lecture d'une vidéo selon la source (YouTube, Vimeo, AWS S3, etc.)
+ * @param string|null $mediaUrl L'URL ou le chemin stocké (YouTube, Vimeo, S3 full URL, ou path S3)
+ * @param string|null $source La source déclarée : 'youtube', 'vimeo', 'aws', 's3', etc.
+ * @return array{url: string|null, type: string} ['url' => url complète, 'type' => 'youtube'|'vimeo'|'direct']
+ */
+if (!function_exists('resolve_media_video')) {
+    function resolve_media_video(?string $mediaUrl, ?string $source = null): array
+    {
+        if (empty($mediaUrl) || !is_string($mediaUrl)) {
+            return ['url' => null, 'type' => 'direct'];
+        }
+        $mediaUrl = trim($mediaUrl);
+        $source = strtolower(trim((string) $source));
+
+        // Déjà une URL complète http(s)
+        if (str_starts_with($mediaUrl, 'http://') || str_starts_with($mediaUrl, 'https://')) {
+            if (str_contains($mediaUrl, 'youtube.com') || str_contains($mediaUrl, 'youtu.be')) {
+                return ['url' => $mediaUrl, 'type' => 'youtube'];
+            }
+            if (str_contains($mediaUrl, 'vimeo.com')) {
+                return ['url' => $mediaUrl, 'type' => 'vimeo'];
+            }
+            // S3 ou autre URL directe
+            return ['url' => $mediaUrl, 'type' => 'direct'];
+        }
+
+        // Path relatif : probablement S3 (AWS)
+        if ($source === 'aws' || $source === 's3' || $source === 'amazon' || empty($source)) {
+            try {
+                $fullUrl = Storage::disk('s3')->url($mediaUrl);
+                return ['url' => $fullUrl, 'type' => 'direct'];
+            } catch (\Throwable $e) {
+                // Fallback : essayer comme storage public local
+                $fullUrl = asset('storage/' . ltrim($mediaUrl, '/'));
+                return ['url' => $fullUrl, 'type' => 'direct'];
+            }
+        }
+
+        return ['url' => $mediaUrl, 'type' => 'direct'];
+    }
+}
+
 // Get web URL
 if (!function_exists('getWebURL')) {
     function getWebURL()

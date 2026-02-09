@@ -27,6 +27,9 @@ use App\Models\Media;
 |
  */
 
+ // Generate symbolic link
+Route::get('/symlink', function () { return view('symlink'); })->name('generate_symlink');
+
 Route::get('/', [BaseController::class, 'dashbord'])->middleware(['auth', 'verified']);
 
 Route::get('/dashboard', [BaseController::class, 'dashbord'])->middleware(['auth', 'verified'])->name('dashboard');
@@ -53,6 +56,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/upload-video-chunk', [Test::class, 'uploadChunk'])->name('video.chunk.upload');
     Route::post('/finalize-video-upload', [Test::class, 'finalizeUpload'])->name('video.chunk.finalize');
     Route::get('/upload/progress', [Test::class, 'progress'])->name('video.chunk.progress');
+    Route::get('/resolve-media-video-url', function (Request $request) {
+        $mediaUrl = $request->query('media_url');
+        $source = $request->query('source');
+        $resolved = resolve_media_video($mediaUrl, $source);
+        return response()->json(['url' => $resolved['url'], 'type' => $resolved['type']]);
+    })->name('video.resolve-url');
 });
 
 Route::middleware('auth')->post('/delete-uploaded-video', function (Request $request) {

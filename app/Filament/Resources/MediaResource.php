@@ -249,6 +249,10 @@ class MediaResource extends Resource
                     Step::make('Étape 4')->schema([
                         Section::make('Vidéo')->schema([
                             \Filament\Forms\Components\View::make('livewire.upload-video-chunked')
+                                ->viewData([
+                                    'initialResolvedUrl' => fn ($record) => $record ? resolve_media_video($record->media_url ?? null, $record->source ?? null)['url'] : null,
+                                    'initialSource' => fn ($record) => $record?->source ?? 'aws',
+                                ])
                                 ->columnSpan(12),
                             TextInput::make('media_url')
                                 ->id('media_url_filament')

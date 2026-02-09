@@ -255,7 +255,16 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
         const chunkSize = 5 * 1024 * 1024;
-        const storageBaseUrl = @json(asset('storage'));
+        const resolveUrlRoute = @json(route('video.resolve-url'));
+        const initialResolvedUrl = @json($initialResolvedUrl ?? null);
+        const initialSource = @json($initialSource ?? 'aws');
+
+        const getVideoType = (url) => {
+            if (!url) return 'direct';
+            if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+            if (url.includes('vimeo.com')) return 'vimeo';
+            return 'direct';
+        };
 
         const displayVideoPreview = (url) => {
             const oldIframe = videoPreview.parentNode.querySelector("iframe");
@@ -266,7 +275,8 @@ document.addEventListener('DOMContentLoaded', function () {
             videoPreview.removeAttribute('src');
             videoPreview.load();
 
-            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            const videoType = getVideoType(url);
+            if (videoType === 'youtube') {
                 let videoId = null;
                 try {
                     videoId = url.includes('youtu.be') ?
@@ -283,16 +293,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     videoPreview.insertAdjacentHTML('afterend', '<p class="video-invalid-msg text-amber-600 text-sm mt-2">Ce lien ressemble à un lien YouTube mais l’identifiant vidéo est manquant ou invalide. Vérifiez l’URL ou utilisez un lien de vidéo direct (mp4).</p>');
                 }
-        } else {
-            videoPreview.setAttribute('src', url);
-            videoPreview.load();
-            videoPreview.style.display = 'block';
-            document.getElementById('ready-indicator').style.display = 'block';
-        }
+            } else if (videoType === 'vimeo') {
+                const m2 = url.match(/vimeo\.com\/(\d+)/);
+                if (m2) {
+                    videoPreview.insertAdjacentHTML('afterend', `<iframe width="100%" height="315" src="https://player.vimeo.com/video/${m2[1]}" frameborder="0" allowfullscreen></iframe>`);
+                } else {
+                    videoPreview.setAttribute('src', url);
+                    videoPreview.load();
+                    videoPreview.style.display = 'block';
+                    document.getElementById('ready-indicator').style.display = 'block';
+                }
+            } else {
+                videoPreview.setAttribute('src', url);
+                videoPreview.load();
+                videoPreview.style.display = 'block';
+                document.getElementById('ready-indicator').style.display = 'block';
+            }
 
-        videoWrapper.style.display = 'block';
-        openBtn.href = url;
-        openBtn.style.display = 'inline-block';
+            videoWrapper.style.display = 'block';
+            openBtn.href = url;
+            openBtn.style.display = 'inline-block';
         };
 
         const clearPreview = () => {
@@ -359,12 +379,18 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
 
-        const toFullVideoUrl = (value) => {
+        const toFullVideoUrl = async (value, source) => {
             if (!value || typeof value !== 'string') return null;
             const v = value.trim();
             if (v.startsWith('http://') || v.startsWith('https://')) return v;
-            const base = (storageBaseUrl || '').replace(/\/$/, '');
-            return base ? (base + '/' + v.replace(/^\//, '')) : v;
+            try {
+                const params = new URLSearchParams({ media_url: v, source: source || 'aws' });
+                const resp = await fetch(resolveUrlRoute + '?' + params.toString());
+                const data = await resp.json();
+                return data.url || v;
+            } catch (_) {
+                return v;
+            }
         };
 
         const getMediaUrlValue = () => {
@@ -383,17 +409,23 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         const initialMediaUrl = getMediaUrlValue();
-        const initialFullUrl = toFullVideoUrl(initialMediaUrl);
-        if (initialFullUrl) {
-            setMediaUrlStorage(initialMediaUrl);
-            displayVideoPreview(initialFullUrl);
-        }
+        (async () => {
+            const fullUrl = initialResolvedUrl || await toFullVideoUrl(initialMediaUrl, initialSource);
+            if (fullUrl) {
+                setMediaUrlStorage(initialMediaUrl);
+                displayVideoPreview(fullUrl);
+            }
+        })();
 
+        const getSourceFromForm = () => {
+            const sourceInput = document.querySelector('select[name*="source"], input[name*="source"]');
+            return sourceInput?.value?.trim() || initialSource;
+        };
         if (typeof Livewire !== 'undefined') {
-            Livewire.hook('morph.updated', () => {
+            Livewire.hook('morph.updated', async () => {
                 const url = mediaUrlField?.value?.trim();
-                const full = toFullVideoUrl(url);
-                if (full && full !== initialFullUrl) displayVideoPreview(full);
+                const full = await toFullVideoUrl(url, getSourceFromForm());
+                if (full) displayVideoPreview(full);
             });
         }
 
