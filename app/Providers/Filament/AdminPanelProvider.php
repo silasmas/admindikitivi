@@ -26,19 +26,16 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->id('admin')
             ->path('admin')
+            // filament-edit-env retiré : le hook Livewire change-env-file provoquait un 500
             ->plugin(FilamentShieldPlugin::make())
             ->default()
             ->login()
-            ->colors([
-                'primary' => Color::Amber,
-            ])
             ->brandName('Dashboard DIKITIVI')
-            // ->viteTheme('resources/css/filament/admin/theme.css')
             ->brandLogo(asset('assets/images/logo.png'))
-            ->brandLogoHeight(fn() => auth()->check() ? '3rem' : '5rem')
+            ->brandLogoHeight(fn () => auth()->check() ? '3rem' : '5rem')
             ->favicon(asset('assets/images/logo/favicon/android-chrome-192x192.png'))
             ->colors([
-              'primary' => Color::Amber,
+                'primary' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -46,10 +43,7 @@ class AdminPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([
-                // Widgets\AccountWidget::class,
-                // Widgets\FilamentInfoWidget::class,
-            ])
+            ->widgets([])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

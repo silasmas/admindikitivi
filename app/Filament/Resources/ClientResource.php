@@ -12,7 +12,6 @@ use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
-use Illuminate\Support\Facades\Hash;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Section;
@@ -278,16 +277,6 @@ class ClientResource extends Resource
             'create' => Pages\CreateClient::route('/create'),
             'edit' => Pages\EditClient::route('/{record}/edit'),
         ];
-    }
-    public static function beforeSave($record, array $data): void
-    {
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']); // Ne pas mettre à jour le mot de passe s'il est vide
-        }
-
-        $record->fill($data);
     }
     public static function getNavigationBadge(): ?string
     {

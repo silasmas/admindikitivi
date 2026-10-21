@@ -21,14 +21,46 @@ if (! function_exists("getRandomNumber")) {
         return $randomString;
     }
 }
-if (! function_exists("countUsersByRole")) {
+if (! function_exists('usersByRoleQuery')) {
+    /**
+     * Query users ayant un rôle (pivot Spatie model_has_roles).
+     *
+     * @param  string|null  $roleName  Filtre sur roles.role_name et/ou roles.name
+     * @return \Illuminate\Database\Query\Builder
+     */
+    function usersByRoleQuery(?string $roleName = null)
+    {
+        $userModel = config('auth.providers.users.model', \App\Models\User::class);
+
+        $query = DB::table('users')
+            ->join('model_has_roles', function ($join) use ($userModel) {
+                $join->on('users.id', '=', 'model_has_roles.model_id')
+                    ->where('model_has_roles.model_type', '=', $userModel);
+            })
+            ->join('roles', 'roles.id', '=', 'model_has_roles.role_id');
+
+        if ($roleName !== null) {
+            $query->where(function ($q) use ($roleName) {
+                $q->where('roles.role_name', $roleName)
+                    ->orWhere('roles.name', $roleName)
+                    ->orWhere('roles.name', strtolower(str_replace(' ', '_', $roleName)));
+            });
+        }
+
+        return $query;
+    }
+}
+
+if (! function_exists('countUsersByRole')) {
+    /**
+     * Compte les utilisateurs pour un libellé de rôle donné.
+     *
+     * @param  string  $roleName  Nom métier (ex. Membre)
+     * @return int
+     */
     function countUsersByRole(string $roleName): int
     {
-        return DB::table('users')
-            ->join('role_user', 'users.id', '=', 'role_user.user_id')
-            ->join('roles', 'roles.id', '=', 'role_user.role_id')
-            ->where('roles.role_name', $roleName)
-            ->count();
+        return usersByRoleQuery($roleName)->count();
     }
 }
 

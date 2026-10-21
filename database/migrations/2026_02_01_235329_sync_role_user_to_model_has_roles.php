@@ -6,17 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Synchronise role_user → model_has_roles et normalise roles.name (portable SQLite/MySQL).
+     *
+     * @return void
+     */
     public function up(): void
     {
-        if (! Schema::hasTable('role_user')) {
+        if (! Schema::hasTable('role_user') || ! Schema::hasTable('model_has_roles')) {
             return;
         }
 
         $userModel = config('filament-shield.auth_provider_model.fqcn', 'App\Models\User');
 
-        $roleUserRows = DB::table('role_user')->get();
-
-        foreach ($roleUserRows as $row) {
+        foreach (DB::table('role_user')->get() as $row) {
             $exists = DB::table('model_has_roles')
                 ->where('role_id', $row->role_id)
                 ->where('model_id', $row->user_id)
@@ -32,12 +35,31 @@ return new class extends Migration
             }
         }
 
-        DB::table('roles')->whereNull('name')->orWhere('name', '')->update([
-            'name' => DB::raw('COALESCE(LOWER(REPLACE(role_name, " ", "_")), CONCAT("role_", id))'),
-            'guard_name' => 'web',
-        ]);
+        if (! Schema::hasTable('roles')) {
+            return;
+        }
+
+        $roles = DB::table('roles')
+            ->where(function ($q) {
+                $q->whereNull('name')->orWhere('name', '');
+            })
+            ->get();
+
+        foreach ($roles as $role) {
+            $name = ! empty($role->role_name)
+                ? strtolower(str_replace(' ', '_', $role->role_name))
+                : 'role_' . $role->id;
+
+            DB::table('roles')->where('id', $role->id)->update([
+                'name' => $name,
+                'guard_name' => 'web',
+            ]);
+        }
     }
 
+    /**
+     * @return void
+     */
     public function down(): void
     {
         //

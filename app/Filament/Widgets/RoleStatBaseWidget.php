@@ -2,27 +2,37 @@
 
 namespace App\Filament\Widgets;
 
-use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Filament\Widgets\TableWidget;
-// use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;// use Filament\Tables\Widgets\TableWidget;
-
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Filament\Tables\Columns\TextColumn;
 
+/**
+ * Widget tabulaire de stats filtré par rôle (via model_has_roles).
+ */
 abstract class RoleStatBaseWidget extends TableWidget
 {
+    /**
+     * Libellé métier du rôle (ex. Membre).
+     *
+     * @return string
+     */
     abstract protected function getRoleName(): string;
 
+    /**
+     * Query de base des utilisateurs du rôle.
+     *
+     * @return \Illuminate\Database\Query\Builder
+     */
     protected function baseQuery()
     {
-        return DB::table('users')
-            ->join('role_user', 'users.id', '=', 'role_user.user_id')
-            ->join('roles', 'roles.id', '=', 'role_user.role_id')
-            ->where('roles.role_name', $this->getRoleName());
+        return usersByRoleQuery($this->getRoleName());
     }
 
+    /**
+     * Colonnes du tableau.
+     *
+     * @return array
+     */
     protected function getTableColumns(): array
     {
         return [
@@ -30,13 +40,16 @@ abstract class RoleStatBaseWidget extends TableWidget
             TextColumn::make('total')->label('Total'),
         ];
     }
+
+    /**
+     * Répartition par genre pour le rôle Membre.
+     *
+     * @return EloquentCollection
+     */
     public function query(): EloquentCollection
     {
-        $rows = DB::table('users')
-            ->join('role_user', 'users.id', '=', 'role_user.user_id')
-            ->join('roles', 'roles.id', '=', 'role_user.role_id')
-            ->where('roles.name', 'Membre')
-            ->select('users.gender as label', DB::raw('COUNT(*) as total'))
+        $rows = usersByRoleQuery('Membre')
+            ->select('users.gender as label', \Illuminate\Support\Facades\DB::raw('COUNT(*) as total'))
             ->groupBy('users.gender')
             ->get()
             ->map(fn ($item) => [

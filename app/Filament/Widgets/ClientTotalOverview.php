@@ -1,7 +1,6 @@
 <?php
 namespace App\Filament\Widgets;
 
-use Illuminate\Support\Facades\DB;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -13,12 +12,7 @@ class ClientTotalOverview extends StatsOverviewWidget
     protected static ?int $sort = -1;
     protected function getStats(): array
     {
-        $base = DB::table('users')
-            ->join('role_user', 'users.id', '=', 'role_user.user_id')
-            ->join('roles', 'roles.id', '=', 'role_user.role_id')
-            ->where(function ($query) {
-                $query->where('roles.role_name', 'Membre')->orWhere('roles.name', 'Membre');
-            });
+        $base = usersByRoleQuery('Membre');
 
         return [
             Stat::make('Total Clients', (clone $base)->count())

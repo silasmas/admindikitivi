@@ -66,7 +66,7 @@ php artisan migrate:fresh
 php artisan db:seed --class=SuperAdminSeeder
 ```
 
-Identifiants : `contact@silasmas.com` / `silasmas`
+Identifiants : définis via `.env` (`SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD`).
 
 **Import des données Dikitisivi** – Pour importer le dump SQL :
 
@@ -80,9 +80,22 @@ Ou lancez tout : `php artisan db:seed`
 
 ### 4. Accès au panel Filament
 
-L'accès est réservé aux utilisateurs ayant **au moins un rôle différent de "Membre"**.
+L'accès est réservé aux utilisateurs ayant **au moins un rôle différent de "Membre"** (ou `super_admin` / `panel_user`).
 
-**Super admin déjà créé** : `contact@silasmas.com` / `silasmas` (via `php artisan db:seed --class=SuperAdminSeeder`).
+**Super admin** : `php artisan db:seed --class=SuperAdminSeeder` avec `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` dans `.env`.
+
+---
+
+### 4bis. Architecture duale (important)
+
+| Surface | Source de vérité | Auth |
+|---------|------------------|------|
+| Filament `/admin` | DB locale Eloquent | Session + Shield + `canAccessPanel` |
+| UI Blade legacy (`/film`, `/users`, …) | API `DIKITIVI_API_URL` (défaut `https://api.dikitivi.com/api`) | Session locale + token API en session (`tokenUserActive`) |
+
+Les rôles admin passent par Spatie **`model_has_roles`** (plus `User::roles()` custom). Exécuter la migration `sync_role_user_to_model_has_roles` si des données restent dans `role_user`.
+
+Objectif long terme : déprécier le proxy Blade+API au profit de Filament / Eloquent uniquement.
 
 ---
 
@@ -91,8 +104,10 @@ L'accès est réservé aux utilisateurs ayant **au moins un rôle différent de 
 À configurer selon votre environnement :
 
 - `DB_*` – Base de données.
-- `AWS_*` – S3 (AwsResource).
+- `AWS_*` – S3 (`AWS_VISIBILITY=private`, `AWS_SIGNED_URLS=true`, `AWS_SIGNED_URL_TTL`).
 - `FILAMENT_FILESYSTEM_DISK` – Disque par défaut pour Filament.
+- `DIKITIVI_API_URL` – Base de l’API legacy.
+- `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` – seeder super admin.
 
 ---
 

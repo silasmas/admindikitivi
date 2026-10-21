@@ -149,7 +149,9 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const uploadId = Date.now() + '-' + file.name.replace(/\s+/g, '-');
+        const uploadId = (window.crypto && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : (Date.now() + '-' + Math.random().toString(16).slice(2));
         const totalChunks = Math.ceil(file.size / chunkSize);
 
         for (let i = 0; i < totalChunks; i++) {
@@ -161,11 +163,16 @@ document.addEventListener('DOMContentLoaded', function () {
             formData.append('uploadId', uploadId);
             formData.append('filename', file.name);
 
-            await fetch("{{ route('video.chunk.upload') }}", {
+            const chunkResp = await fetch("{{ route('video.chunk.upload') }}", {
                 method: "POST",
                 headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" },
                 body: formData,
             });
+            if (!chunkResp.ok) {
+                const errBody = await chunkResp.json().catch(() => ({}));
+                throw new Error(errBody.error || 'Échec upload chunk #' + i);
+            }
+
 
             const percent = Math.round(((i + 1) / totalChunks) * 100);
             progressBar.style.width = percent + '%';
@@ -208,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (result.path) {
                 mediaUrlField.value = result.path;
                 mediaUrlField.dispatchEvent(new Event('input', { bubbles: true }));
-                displayVideoPreview(result.path);
+                displayVideoPreview(result.preview_url || result.path);
 
                 Swal.fire({
                     title: '🎉 Vidéo prête',
@@ -440,7 +447,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            const uploadId = Date.now() + '-' + file.name.replace(/\s+/g, '-');
+            const uploadId = (window.crypto && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : (Date.now() + '-' + Math.random().toString(16).slice(2));
             const totalChunks = Math.ceil(file.size / chunkSize);
             const totalBytes = file.size;
             progressSizeEl.style.display = 'block';
@@ -455,13 +464,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 formData.append('uploadId', uploadId);
                 formData.append('filename', file.name);
 
-                await fetch("{{ route('video.chunk.upload') }}", {
+                const chunkResp = await fetch("{{ route('video.chunk.upload') }}", {
                     method: "POST",
                     headers: {
                         'X-CSRF-TOKEN': "{{ csrf_token() }}"
                     },
                     body: formData,
                 });
+                if (!chunkResp.ok) {
+                    const errBody = await chunkResp.json().catch(() => ({}));
+                    alert(errBody.error || ('Échec upload chunk #' + i));
+                    return;
+                }
 
                 const uploadedBytes = Math.min((i + 1) * chunkSize, totalBytes);
                 const percent = Math.round(((i + 1) / totalChunks) * 100);
@@ -550,7 +564,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     }
                     setMediaUrlStorage(result.path);
-                    displayVideoPreview(result.path);
+                    displayVideoPreview(result.preview_url || result.path);
                     finalizingBox.style.display = 'none';
                     if (retryAssemblyBox) retryAssemblyBox.style.display = 'none';
                     if (typeof window.__retryFinalize !== 'undefined') delete window.__retryFinalize;

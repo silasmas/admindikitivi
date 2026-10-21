@@ -140,7 +140,7 @@
                                             </a>
                                         </li>
                                         <li class="float-right list-inline-item">
-                                            <a href="{{ route('deleteMedia',['id'=>$m->id]) }}"
+                                            <a href="#"
                                                 onclick="event.preventDefault();deletemedia({{$m->id}})">
                                                 <span class="oi oi-trash"></span>
                                             </a>
@@ -196,7 +196,7 @@
                                             </a>
                                         </li>
                                         <li class="float-right list-inline-item">
-                                            <a href="{{ route('deleteMedia',['id'=>$m->id]) }}"
+                                            <a href="#"
                                                 onclick="event.preventDefault();deletemedia({{$m->id}})">
                                                 <span class="oi oi-trash"></span>
                                             </a>
@@ -341,7 +341,8 @@
         })
         $.ajax({
             url: url + '/' + form,
-            method: "GET",
+            method: "DELETE",
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') || $('[name="csrf"]').attr('content') },
             // data: {
             //     'id': form
             // },

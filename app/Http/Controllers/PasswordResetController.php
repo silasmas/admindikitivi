@@ -6,7 +6,6 @@ use App\Models\PasswordReset;
 use Illuminate\Http\Request;
 use App\Http\Resources\PasswordReset as ResourcesPasswordReset;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use Nette\Utils\Random;
 
 /**
@@ -188,13 +187,19 @@ class PasswordResetController extends BaseController
                 'updated_at' => now()
             ]);
 
+            // Mutator User hashe déjà : passer le clair uniquement
             $user->update([
-                'password' => Hash::make($password_reset->former_password),
-                'updated_at' => now()
+                'password' => $password_reset->former_password,
+                'updated_at' => now(),
             ]);
         }
 
-        return $this->handleResponse(new ResourcesPasswordReset($password_reset), __('notifications.find_password_reset_success'));
+        $password_reset->refresh();
+
+        return $this->handleResponse([
+            ...(new ResourcesPasswordReset($password_reset))->resolve(),
+            'temporary_password' => $password_reset->former_password,
+        ], __('notifications.find_password_reset_success'));
     }
 
     /**
@@ -205,8 +210,6 @@ class PasswordResetController extends BaseController
      */
     public function searchByPhone($data)
     {
-        // $basic  = new \Vonage\Client\Credentials\Basic('5a4c014d', 'dhOq17USeZadLgIw');
-        // $client = new \Vonage\Client($basic);
         $password_reset = PasswordReset::where('phone', $data)->first();
         $user = User::where('phone', $data)->first();
 
@@ -223,24 +226,20 @@ class PasswordResetController extends BaseController
 
             $password_reset->update([
                 'token' => $random_string,
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
 
             $user->update([
-                'password' => Hash::make($password_reset->former_password),
-                'updated_at' => now()
+                'password' => $password_reset->former_password,
+                'updated_at' => now(),
             ]);
-
-            // try {
-            //     $client->sms()->send(new \Vonage\SMS\Message\SMS($password_reset->phone, 'DikiTivi', (string) $password_reset->token));
-
-            // } catch (\Throwable $th) {
-            //     $response_error = json_decode($th->getMessage(), false);
-
-            //     return $this->handleError($response_error, __('notifications.create_user_SMS_failed'), 500);
-            // }
         }
 
-        return $this->handleResponse(new ResourcesPasswordReset($password_reset), __('notifications.find_password_reset_success'));
+        $password_reset->refresh();
+
+        return $this->handleResponse([
+            ...(new ResourcesPasswordReset($password_reset))->resolve(),
+            'temporary_password' => $password_reset->former_password,
+        ], __('notifications.find_password_reset_success'));
     }
 }

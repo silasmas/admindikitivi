@@ -21,9 +21,16 @@ class GenderStatsWidget extends TableWidget
         return $table
             ->query(
                 User::query()
-                    ->join('role_user', 'users.id', '=', 'role_user.user_id')
-                    ->join('roles', 'roles.id', '=', 'role_user.role_id')
-                    ->where('roles.name', 'Membre')
+                    ->join('model_has_roles', function ($join) {
+                        $join->on('users.id', '=', 'model_has_roles.model_id')
+                            ->where('model_has_roles.model_type', '=', User::class);
+                    })
+                    ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+                    ->where(function ($q) {
+                        $q->where('roles.name', 'Membre')
+                            ->orWhere('roles.role_name', 'Membre')
+                            ->orWhere('roles.name', 'membre');
+                    })
                     ->select('users.gender as label', DB::raw('COUNT(*) as total'))
                     ->groupBy('users.gender')
             )

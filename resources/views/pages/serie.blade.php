@@ -306,7 +306,8 @@
         })
         $.ajax({
             url: url + '/' + form,
-            method: "GET",
+            method: "DELETE",
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') || $('[name="csrf"]').attr('content') },
             // data: {
             //     'id': form
             // },

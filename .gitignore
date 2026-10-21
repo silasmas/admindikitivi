@@ -17,3 +17,6 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Dumps SQL avec données sensibles — ne jamais versionner
+/database/seeders/dumps/*.sql

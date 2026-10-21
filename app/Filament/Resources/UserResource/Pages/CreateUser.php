@@ -5,20 +5,26 @@ namespace App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource;
 use Filament\Resources\Pages\CreateRecord;
 
+/**
+ * Création d’un agent : utilise le formulaire UserResource (pas un schéma réduit).
+ */
 class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
 
-    protected function getFormSchema(): array
+    /**
+     * Prépare les données avant création.
+     * Le mutator User hashe le mot de passe : ne pas re-hasher ici.
+     *
+     * @param  array<string, mixed>  $data  Données du formulaire
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeCreate(array $data): array
     {
-        return [
-            \Filament\Forms\Components\TextInput::make('password')
-                ->password()
-                ->required()
-                ->minLength(8) // Règle pour un mot de passe d'au moins 8 caractères
-                ->label('Mot de Passe')
-                ->confirmed() // Exige un champ de confirmation
-                ->maxLength(255), // Limite de longueur
-        ];
+        if (empty($data['password'])) {
+            unset($data['password']);
+        }
+
+        return $data;
     }
 }

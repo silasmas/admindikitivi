@@ -11,7 +11,6 @@ use Filament\Pages\Page;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Group;
-use Illuminate\Support\Facades\Hash;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Section;
@@ -234,16 +233,6 @@ class UserResource extends Resource
             'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
-    }
-    public static function beforeSave($record, array $data): void
-    {
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']); // Ne pas mettre à jour le mot de passe s'il est vide
-        }
-
-        $record->fill($data);
     }
     public static function getGloballySearchableAttributes(): array
     {

@@ -4,16 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
-use Filament\Resources\Concerns\Translatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
+ * Notification utilisateur (contenu traduit via Spatie).
+ *
  * @author Xanders
  * @see https://www.linkedin.com/in/xanders-samoth-b2770737/
  */
 class Notification extends Model
 {
-    use HasFactory, HasTranslations,Translatable;
+    use HasFactory, HasTranslations;
 
     /**
      * The attributes that are mass assignable.

@@ -22,10 +22,9 @@ class PasswordReset extends JsonResource
             'id' => $this->id,
             'email' => $this->email,
             'phone' => $this->phone,
-            'token' => $this->token,
-            'former_password' => $this->former_password,
+            // token et former_password volontairement exclus (secrets)
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at->format('Y-m-d H:i:s')
+            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
         ];
     }
 }

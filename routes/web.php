@@ -2,7 +2,6 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Filament\Resources\AwsResource;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\BaseController;
 use App\Http\Controllers\RoleController;
@@ -13,22 +12,15 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DonationController;
-use App\Http\Controllers\Test;
+use App\Http\Controllers\VideoUploadController;
 use App\Models\Media;
+use Filament\Facades\Filament;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
- */
-
- // Generate symbolic link
-Route::get('/symlink', function () { return view('symlink'); })->name('generate_symlink');
+*/
 
 Route::get('/', [BaseController::class, 'dashbord'])->middleware(['auth', 'verified']);
 
@@ -39,64 +31,91 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-Route::get('/symlink', function () {
-    return view('symlink');
-})->name('generate_symlink');
-Route::post('/upload-video', function (Request $request) {
-    if ($request->hasFile('video')) {
-        $file = $request->file('video');
-        $path = $file->store('videos', 'public'); // ou sur S3 selon ta config
+
+Route::middleware(['auth', 'verified', 'panel.access'])->group(function () {
+    /**
+     * Symlink storage : réservé au panel. Préférer `php artisan storage:link`.
+     */
+    Route::get('/symlink', function () {
+        return view('symlink');
+    })->name('generate_symlink');
+
+    Route::post('/upload-video', function (Request $request) {
+        $validated = $request->validate([
+            'video' => ['required', 'file', 'mimetypes:video/mp4,video/quicktime,video/x-msvideo,video/webm', 'max:512000'],
+        ]);
+
+        $path = $validated['video']->store('videos', 'public');
+
         return response()->json(['path' => $path]);
-    }
-    return response()->json(['error' => 'Fichier manquant'], 400);
-});
+    })->middleware('throttle:10,1')->name('video.upload');
 
+    Route::post('/upload-video-chunk', [VideoUploadController::class, 'uploadChunk'])
+        ->middleware('throttle:120,1')
+        ->name('video.chunk.upload');
+    Route::post('/finalize-video-upload', [VideoUploadController::class, 'finalizeUpload'])
+        ->middleware('throttle:20,1')
+        ->name('video.chunk.finalize');
+    Route::get('/upload/progress', [VideoUploadController::class, 'progress'])
+        ->middleware('throttle:60,1')
+        ->name('video.chunk.progress');
 
-Route::middleware('auth')->group(function () {
-    Route::post('/upload-video-chunk', [Test::class, 'uploadChunk'])->name('video.chunk.upload');
-    Route::post('/finalize-video-upload', [Test::class, 'finalizeUpload'])->name('video.chunk.finalize');
-    Route::get('/upload/progress', [Test::class, 'progress'])->name('video.chunk.progress');
     Route::get('/resolve-media-video-url', function (Request $request) {
         $mediaUrl = $request->query('media_url');
         $source = $request->query('source');
         $resolved = resolve_media_video($mediaUrl, $source);
+
         return response()->json(['url' => $resolved['url'], 'type' => $resolved['type']]);
     })->name('video.resolve-url');
+
+    /**
+     * Supprime une vidéo : préfixe videos/ uniquement + enregistrement Media lié.
+     */
+    Route::post('/delete-uploaded-video', function (Request $request) {
+        $mediaUrl = $request->input('media_url');
+        if (! $mediaUrl || ! is_string($mediaUrl)) {
+            return response()->json(['deleted' => false, 'message' => 'media_url manquant'], 422);
+        }
+        $mediaUrl = trim($mediaUrl);
+
+        $s3Key = null;
+        if (str_starts_with($mediaUrl, 'http://') || str_starts_with($mediaUrl, 'https://')) {
+            $path = parse_url($mediaUrl, PHP_URL_PATH);
+            $s3Key = $path ? ltrim($path, '/') : null;
+        } else {
+            $s3Key = $mediaUrl;
+        }
+
+        if ($s3Key && (str_contains($s3Key, '..') || ! str_starts_with($s3Key, 'videos/'))) {
+            return response()->json(['deleted' => false, 'message' => 'Clé S3 non autorisée'], 403);
+        }
+
+        $media = Media::where('media_url', $mediaUrl)->first();
+        $user = $request->user();
+        if ($media && $media->user_id && (int) $media->user_id !== (int) $user->id) {
+            $panel = Filament::getPanel('admin');
+            if (! $user->canAccessPanel($panel)) {
+                return response()->json(['deleted' => false, 'message' => 'Non autorisé'], 403);
+            }
+        }
+
+        $deletedFromS3 = false;
+        if ($s3Key && Storage::disk('s3')->exists($s3Key)) {
+            Storage::disk('s3')->delete($s3Key);
+            $deletedFromS3 = true;
+        }
+
+        $updated = Media::where('media_url', $mediaUrl)->update(['media_url' => null]);
+
+        return response()->json([
+            'deleted' => true,
+            'deleted_from_s3' => $deletedFromS3,
+            'updated_in_db' => $updated > 0,
+        ]);
+    })->middleware('throttle:30,1')->name('video.chunk.delete');
 });
 
-Route::middleware('auth')->post('/delete-uploaded-video', function (Request $request) {
-    $mediaUrl = $request->input('media_url');
-    if (! $mediaUrl || ! is_string($mediaUrl)) {
-        return response()->json(['deleted' => false, 'message' => 'media_url manquant'], 422);
-    }
-    $mediaUrl = trim($mediaUrl);
-
-    // Dériver la clé S3 : soit URL complète (path après le host), soit chemin relatif déjà stocké
-    $s3Key = null;
-    if (str_starts_with($mediaUrl, 'http://') || str_starts_with($mediaUrl, 'https://')) {
-        $path = parse_url($mediaUrl, PHP_URL_PATH);
-        // Clé S3 = path sans le slash initial (ex. /videos/xxx.mp4 → videos/xxx.mp4)
-        $s3Key = $path ? ltrim($path, '/') : null;
-    } else {
-        $s3Key = $mediaUrl;
-    }
-
-    $deletedFromS3 = false;
-    if ($s3Key && Storage::disk('s3')->exists($s3Key)) {
-        Storage::disk('s3')->delete($s3Key);
-        $deletedFromS3 = true;
-    }
-
-    $updated = Media::where('media_url', $mediaUrl)->update(['media_url' => null]);
-
-    return response()->json([
-        'deleted' => true,
-        'deleted_from_s3' => $deletedFromS3,
-        'updated_in_db' => $updated > 0,
-    ]);
-})->name('video.chunk.delete');
-
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'panel.access'])->group(function () {
     Route::get('media', [BaseController::class, 'index'])->name('media');
     Route::get('film', [BaseController::class, 'index'])->name('film');
     Route::get('client', [BaseController::class, 'client'])->name('client');
@@ -109,25 +128,31 @@ Route::middleware('auth')->group(function () {
     Route::get('users', [UserController::class, 'indexAgent'])->name('users');
 
     Route::get('createMedia', [MediaController::class, 'create'])->name('createMedia');
+    // Alias corrects + anciens noms (typos) pour ne pas casser les vues legacy
     Route::get('creatGroup', [GroupController::class, 'create'])->name('creatGroup');
+    Route::get('createGroup', [GroupController::class, 'create'])->name('createGroup');
     Route::get('creatPays', [CountryController::class, 'create'])->name('creatPays');
+    Route::get('createPays', [CountryController::class, 'create'])->name('createPays');
     Route::get('creatRole', [RoleController::class, 'create'])->name('creatRole');
+    Route::get('createRole', [RoleController::class, 'create'])->name('createRole');
 
     Route::get('editeMedia/{id}', [MediaController::class, 'show'])->name('editeMedia');
+    Route::get('editMedia/{id}', [MediaController::class, 'show'])->name('editMedia');
     Route::get('editType/{id}', [TypeController::class, 'show_type'])->name('editType');
     Route::get('editGroupe/{id}', [GroupController::class, 'show_Groupe'])->name('editGroupe');
     Route::get('editPays/{id}', [CountryController::class, 'show'])->name('editPays');
     Route::get('editRole/{id}', [RoleController::class, 'show'])->name('editRole');
     Route::get('editCat/{id}', [MediaController::class, 'show_cat'])->name('editCat');
     Route::get('editeUser/{id}', [UserController::class, 'show_Agent'])->name('editeUser');
+    Route::get('editUser/{id}', [UserController::class, 'show_Agent'])->name('editUser');
 
-    Route::get('deleteMedia/{id}', [MediaController::class, 'destroy'])->name('deleteMedia');
-    Route::get('deleteCategorie/{id}', [MediaController::class, 'destroyCat'])->name('deleteCategorie');
-    Route::get('deleteType/{id}', [TypeController::class, 'destroyType'])->name('deleteType');
-    Route::get('deleteGroupe/{id}', [GroupController::class, 'destroy'])->name('deleteGroupe');
-    Route::get('deletePays/{id}', [CountryController::class, 'destroy'])->name('deletePays');
-    Route::get('deleteRole/{id}', [RoleController::class, 'destroy'])->name('deleteRole');
-    Route::get('deleteUser/{id}', [UserController::class, 'destroyAgent'])->name('deleteUser');
+    Route::delete('deleteMedia/{id}', [MediaController::class, 'destroy'])->name('deleteMedia');
+    Route::delete('deleteCategorie/{id}', [MediaController::class, 'destroyCat'])->name('deleteCategorie');
+    Route::delete('deleteType/{id}', [TypeController::class, 'destroyType'])->name('deleteType');
+    Route::delete('deleteGroupe/{id}', [GroupController::class, 'destroy'])->name('deleteGroupe');
+    Route::delete('deletePays/{id}', [CountryController::class, 'destroy'])->name('deletePays');
+    Route::delete('deleteRole/{id}', [RoleController::class, 'destroy'])->name('deleteRole');
+    Route::delete('deleteUser/{id}', [UserController::class, 'destroyAgent'])->name('deleteUser');
 
     Route::post('registerMedia', [MediaController::class, 'store'])->name('registerMedia');
     Route::post('addCat', [MediaController::class, 'store_cat'])->name('addCat');
@@ -136,6 +161,7 @@ Route::middleware('auth')->group(function () {
     Route::post('addPays', [CountryController::class, 'store'])->name('addPays');
     Route::post('addRole', [RoleController::class, 'store'])->name('addRole');
     Route::post('creatUsers', [UserController::class, 'createAgent'])->name('creatUsers');
+    Route::post('createUsers', [UserController::class, 'createAgent'])->name('createUsers');
 
     Route::post('updateMedia', [MediaController::class, 'update'])->name('updateMedia');
     Route::post('updateCat', [TypeController::class, 'update_categorie'])->name('updateCat');

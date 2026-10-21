@@ -17,16 +17,29 @@ class BaseController extends Controller
         $this::$api_client_manager = new ApiClientManager();
     }
 
+    /**
+     * Dashboard legacy (faute historique conservée pour les routes existantes).
+     *
+     * @return \Illuminate\Contracts\View\View
+     */
     public function dashbord()
     {
-        $membres = $this::$api_client_manager::call('GET', getApiURL() . '/user/find_by_role/fr/Membre', session()->get("tokenUserActive"));
+        return $this->dashboard();
+    }
+
+    /**
+     * Tableau de bord Blade legacy (données via API distante).
+     *
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function dashboard()
+    {
+        $membres = $this::$api_client_manager::call('GET', getApiURL() . '/user/find_by_role/fr/Membre', session()->get('tokenUserActive'));
         $medias = $this::$api_client_manager::call('GET', getApiURL() . '/media');
-        $dons = $this::$api_client_manager::call('GET', getApiURL() . '/donation', session()->get("tokenUserActive"));
-        $online = $this::$api_client_manager::call('GET', getApiURL() . '/userOnline', session()->get("tokenUserActive"));
+        $dons = $this::$api_client_manager::call('GET', getApiURL() . '/donation', session()->get('tokenUserActive'));
+        $online = $this::$api_client_manager::call('GET', getApiURL() . '/userOnline', session()->get('tokenUserActive'));
 
-        // dd($online->count);
-
-        return view('pages.home', compact('membres', "medias", "dons", 'online'));
+        return view('pages.home', compact('membres', 'medias', 'dons', 'online'));
     }
     public function index()
     {

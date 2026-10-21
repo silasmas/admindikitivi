@@ -33,23 +33,60 @@ if (!function_exists('resolve_media_video')) {
             if (str_contains($mediaUrl, 'vimeo.com')) {
                 return ['url' => $mediaUrl, 'type' => 'vimeo'];
             }
-            // S3 ou autre URL directe
+            // URL S3 complète → re-signer si AWS_SIGNED_URLS actif
+            if (str_contains($mediaUrl, '.amazonaws.com') || str_contains($mediaUrl, '/videos/')) {
+                try {
+                    return ['url' => s3_media_url($mediaUrl), 'type' => 'direct'];
+                } catch (\Throwable $e) {
+                    return ['url' => $mediaUrl, 'type' => 'direct'];
+                }
+            }
+
             return ['url' => $mediaUrl, 'type' => 'direct'];
         }
 
-        // Path relatif : probablement S3 (AWS)
+        // Path relatif : S3 (clé) ou storage local
         if ($source === 'aws' || $source === 's3' || $source === 'amazon' || empty($source)) {
             try {
-                $fullUrl = Storage::disk('s3')->url($mediaUrl);
+                $fullUrl = s3_media_url($mediaUrl);
+
                 return ['url' => $fullUrl, 'type' => 'direct'];
             } catch (\Throwable $e) {
-                // Fallback : essayer comme storage public local
                 $fullUrl = asset('storage/' . ltrim($mediaUrl, '/'));
+
                 return ['url' => $fullUrl, 'type' => 'direct'];
             }
         }
 
         return ['url' => $mediaUrl, 'type' => 'direct'];
+    }
+}
+
+if (! function_exists('s3_media_url')) {
+    /**
+     * URL S3 : signée temporaire si AWS_SIGNED_URLS=true, sinon URL disque.
+     *
+     * @param  string  $key  Clé objet (ex. videos/xxx.mp4) ou URL complète S3
+     * @param  int|null  $ttlMinutes  Durée de validité de l’URL signée
+     * @return string
+     */
+    function s3_media_url(string $key, ?int $ttlMinutes = null): string
+    {
+        $key = trim($key);
+        $disk = Storage::disk('s3');
+
+        if (str_starts_with($key, 'http://') || str_starts_with($key, 'https://')) {
+            $path = parse_url($key, PHP_URL_PATH);
+            $key = $path ? ltrim($path, '/') : $key;
+        }
+
+        if (filter_var(env('AWS_SIGNED_URLS', false), FILTER_VALIDATE_BOOLEAN)) {
+            $ttl = $ttlMinutes ?? (int) env('AWS_SIGNED_URL_TTL', 60);
+
+            return $disk->temporaryUrl($key, now()->addMinutes(max(1, $ttl)));
+        }
+
+        return $disk->url($key);
     }
 }
 
@@ -103,10 +140,15 @@ if (!function_exists('uploadFile')) {
 }
 // Get APIs URL
 if (!function_exists('getApiURL')) {
+    /**
+     * Base URL de l’API distante (UI Blade legacy).
+     * Filament /admin lit la DB locale ; cette URL sert uniquement au proxy legacy.
+     *
+     * @return string
+     */
     function getApiURL()
     {
-        return 'https://api.dikitivi.com/api';
-        // return 'https://apidikitivi.jptshienda.com/api';
+        return rtrim((string) env('DIKITIVI_API_URL', 'https://api.dikitivi.com/api'), '/');
     }
 }
 

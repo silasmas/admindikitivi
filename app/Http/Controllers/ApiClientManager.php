@@ -8,113 +8,52 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
 
 /**
+ * Client HTTP pour appeler l’API distante Dikitivi.
+ *
  * @author Xanders
  * @see https://www.xsam-tech.com
  */
 class ApiClientManager
 {
     /**
-     * Manage API calling
+     * Exécute un appel API et retourne le corps JSON décodé.
      *
-     * @param  $method
-     * @return \Illuminate\Http\RedirectResponse
+     * @param  string  $method  Méthode HTTP (GET, POST, …)
+     * @param  string  $url  URL complète de l’endpoint
+     * @param  string|null  $api_token  Bearer token optionnel
+     * @param  array  $data_to_send  Données form_params
+     * @param  string|null  $current_ip_address  IP à transmettre en header
+     * @param  int|string|null  $current_user_id  ID utilisateur à transmettre en header
+     * @return object|null
      */
     public static function call($method, $url, $api_token = null, $data_to_send = [], $current_ip_address = null, $current_user_id = null)
     {
-        // Client used for accessing API
         $client = new Client();
 
-        if ($current_ip_address != null AND $current_user_id != null) {
-            try {
-                $response = $client->request($method, $url, [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . $api_token,
-                        'Accept' => 'application/json',
-                        'X-localization' => !empty(Session::get('locale')) ? Session::get('locale') : App::getLocale(),
-                        'X-ip-address' => $current_ip_address,
-                        'X-user-id' => $current_user_id,
-                    ],
-                    'form_params' => $data_to_send,
-                    'verify' => false,
-                ]);
-                $result = json_decode($response->getBody(), false);
+        $headers = [
+            'Authorization' => 'Bearer ' . $api_token,
+            'Accept' => 'application/json',
+            'X-localization' => ! empty(Session::get('locale')) ? Session::get('locale') : App::getLocale(),
+        ];
 
-                return $result;
+        if ($current_ip_address !== null) {
+            $headers['X-ip-address'] = $current_ip_address;
+        }
 
-            } catch (ClientException $e) {
-                $result = json_decode($e->getResponse()->getBody()->getContents(), false);
+        if ($current_user_id !== null) {
+            $headers['X-user-id'] = $current_user_id;
+        }
 
-                return $result;
-            }
+        try {
+            $response = $client->request($method, $url, [
+                'headers' => $headers,
+                'form_params' => $data_to_send,
+                'verify' => true,
+            ]);
 
-        } else {
-            if ($current_ip_address != null AND $current_user_id == null) {
-                try {
-                    $response = $client->request($method, $url, [
-                        'headers' => [
-                            'Authorization' => 'Bearer ' . $api_token,
-                            'Accept' => 'application/json',
-                            'X-localization' => !empty(Session::get('locale')) ? Session::get('locale') : App::getLocale(),
-                            'X-ip-address' => $current_ip_address,
-                        ],
-                        'form_params' => $data_to_send,
-                        'verify' => false,
-                    ]);
-                    $result = json_decode($response->getBody(), false);
-
-                    return $result;
-
-                } catch (ClientException $e) {
-                    $result = json_decode($e->getResponse()->getBody()->getContents(), false);
-
-                    return $result;
-                }
-            }
-
-            if ($current_ip_address == null AND $current_user_id != null) {
-                try {
-                    $response = $client->request($method, $url, [
-                        'headers' => [
-                            'Authorization' => 'Bearer ' . $api_token,
-                            'Accept' => 'application/json',
-                            'X-localization' => !empty(Session::get('locale')) ? Session::get('locale') : App::getLocale(),
-                            'X-user-id' => $current_user_id,
-                        ],
-                        'form_params' => $data_to_send,
-                        'verify' => false,
-                    ]);
-                    $result = json_decode($response->getBody(), false);
-
-                    return $result;
-
-                } catch (ClientException $e) {
-                    $result = json_decode($e->getResponse()->getBody()->getContents(), false);
-
-                    return $result;
-                }
-            }
-
-            if ($current_ip_address == null AND $current_user_id == null) {
-                try {
-                    $response = $client->request($method, $url, [
-                        'headers' => [
-                            'Authorization' => 'Bearer ' . $api_token,
-                            'Accept' => 'application/json',
-                            'X-localization' => !empty(Session::get('locale')) ? Session::get('locale') : App::getLocale(),
-                        ],
-                        'form_params' => $data_to_send,
-                        'verify' => false,
-                    ]);
-                    $result = json_decode($response->getBody(), false);
-
-                    return $result;
-
-                } catch (ClientException $e) {
-                    $result = json_decode($e->getResponse()->getBody()->getContents(), false);
-
-                    return $result;
-                }
-            }
+            return json_decode($response->getBody(), false);
+        } catch (ClientException $e) {
+            return json_decode($e->getResponse()->getBody()->getContents(), false);
         }
     }
 }

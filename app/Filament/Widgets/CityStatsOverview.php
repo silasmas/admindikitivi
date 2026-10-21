@@ -11,10 +11,7 @@ class CityStatsOverview extends StatsOverviewWidget
     protected static ?int $sort = 0;
     protected function getStats(): array
     {
-        $rows = DB::table('users')
-            ->join('role_user', 'users.id', '=', 'role_user.user_id')
-            ->join('roles', 'roles.id', '=', 'role_user.role_id')
-            ->where('roles.role_name', 'Membre')
+        $rows = usersByRoleQuery('Membre')
             ->whereNotNull('users.city')
             ->select('users.city', DB::raw('COUNT(*) as total'))
             ->groupBy('users.city')

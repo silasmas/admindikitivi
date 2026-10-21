@@ -40,13 +40,22 @@ class AuthenticatedSessionController extends Controller
             'username' => $request->email,
             'password' => $request->password,
         ];
-        // Login API
-        $user = $this::$api_client_manager::call('POST', getApiURL() . '/user/login', null, $inputs);
-        //dd($user->data->api_token);
+
+        // Token API legacy (optionnel) — l’auth locale reste la source de vérité session
+        $apiUser = null;
+        try {
+            $apiUser = $this::$api_client_manager::call('POST', getApiURL() . '/user/login', null, $inputs);
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         $request->authenticate();
         $request->session()->regenerate();
-        $request->session()->put('tokenUserActive', $user->data->api_token);
+
+        $apiToken = data_get($apiUser, 'data.api_token');
+        if (is_string($apiToken) && $apiToken !== '') {
+            $request->session()->put('tokenUserActive', $apiToken);
+        }
 
         return redirect()->intended(RouteServiceProvider::HOME);
     }
