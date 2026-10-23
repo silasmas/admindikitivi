@@ -10,6 +10,9 @@ use Filament\Widgets\PieChartWidget;
  */
 class MediaByCategoryChart extends PieChartWidget
 {
+    /** Non affiché sur le dashboard (évite doublons / surcharge MySQL). */
+    protected static bool $isDiscovered = false;
+
     protected static ?string $heading = 'Médias par catégorie';
 
     protected static ?int $sort = 5;

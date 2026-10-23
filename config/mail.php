@@ -29,7 +29,8 @@ return [
     | mailers below. You are free to add additional mailers as required.
     |
     | Supported: "smtp", "sendmail", "mailgun", "ses", "ses-v2",
-    |            "postmark", "log", "array", "failover", "roundrobin"
+    |            "postmark", "log", "array", "failover", "roundrobin",
+    |            "phpmail" (fonction PHP mail(), sans SMTP)
     |
     */
 
@@ -68,6 +69,13 @@ return [
         'sendmail' => [
             'transport' => 'sendmail',
             'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
+        ],
+
+        /*
+         * Transport custom : PHP mail() (Hostinger / hébergement sans SMTP ni proc_open).
+         */
+        'phpmail' => [
+            'transport' => 'phpmail',
         ],
 
         'log' => [

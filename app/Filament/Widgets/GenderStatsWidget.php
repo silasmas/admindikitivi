@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\DB;
 
 class GenderStatsWidget extends TableWidget
 {
+    /** Non affiché sur le dashboard (évite surcharge MySQL). */
+    protected static bool $isDiscovered = false;
+
     protected static ?string $heading = 'Répartition par sexe (clients)';
 
     protected static ?string $maxWidth = 'full';

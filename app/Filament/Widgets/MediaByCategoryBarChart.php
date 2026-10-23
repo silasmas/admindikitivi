@@ -7,6 +7,9 @@ use App\Models\Category;
 
 class MediaByCategoryBarChart extends BarChartWidget
 {
+    /** Non affiché sur le dashboard (évite doublon avec le camembert). */
+    protected static bool $isDiscovered = false;
+
     // Titre affiché en haut du widget
     protected static ?string $heading = 'Top 10 des catégories avec le plus de médias';
 

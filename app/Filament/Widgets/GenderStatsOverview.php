@@ -7,6 +7,9 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class GenderStatsOverview extends StatsOverviewWidget
 {
+    /** Non affiché sur le dashboard (évite surcharge MySQL). */
+    protected static bool $isDiscovered = false;
+
     protected ?string $heading = 'Répartition des clients par sexe';
 
 

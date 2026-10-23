@@ -5,6 +5,9 @@ use Filament\Widgets\BarChartWidget;
 
 class ClientsPerMonthChart extends BarChartWidget
 {
+    /** Chargement différé : limite les connexions MySQL simultanées sur l’accueil. */
+    protected static bool $isLazy = true;
+
     protected static ?string $heading = 'Inscriptions clients par mois';
     protected static ?int $sort = 1;
     protected function getData(): array

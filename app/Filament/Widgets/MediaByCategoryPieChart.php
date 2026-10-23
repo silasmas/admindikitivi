@@ -7,6 +7,9 @@ use App\Models\Category;
 
 class MediaByCategoryPieChart  extends PieChartWidget
 {
+    /** Chargement différé : limite les connexions MySQL simultanées sur l’accueil. */
+    protected static bool $isLazy = true;
+
     // Titre affiché en haut du widget
     protected static ?string $heading = 'Top 10 des catégories avec le plus de médias';
 

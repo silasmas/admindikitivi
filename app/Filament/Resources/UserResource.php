@@ -14,6 +14,7 @@ use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Section;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -30,7 +31,10 @@ use Filament\Resources\Pages\CreateRecord;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use App\Filament\Resources\UserResource\Pages;
+use App\Services\AgentAccessResetService;
+use Filament\Notifications\Notification;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use RuntimeException;
 
 class UserResource extends Resource
 {
@@ -209,6 +213,7 @@ class UserResource extends Resource
                 ActionGroup::make([
                     ViewAction::make(),
                     EditAction::make(),
+                    static::makeResetAccessAction(),
                     DeleteAction::make(),
                 ])
             ])
@@ -248,5 +253,55 @@ class UserResource extends Resource
     public static function getNavigationBadgeColor(): string|array|null
     {
         return "warning";
+    }
+
+    /**
+     * Action Filament : réinitialiser les accès (e-mail + code unique).
+     * Utilisable en table et sur la page d’édition.
+     *
+     * @return Action|\Filament\Actions\Action
+     */
+    public static function makeResetAccessAction()
+    {
+        $configure = function ($action) {
+            return $action
+                ->label('Réinitialiser les accès')
+                ->icon('heroicon-o-key')
+                ->color('warning')
+                ->requiresConfirmation()
+                ->modalHeading('Réinitialiser les accès de cet agent')
+                ->modalDescription('L’ancien mot de passe sera invalidé. Un e-mail contenant un code unique sera envoyé pour créer un nouveau mot de passe (valable 24 h).')
+                ->modalSubmitActionLabel('Envoyer le code')
+                ->action(function (User $record) {
+                    try {
+                        app(AgentAccessResetService::class)->resetAndNotify($record);
+
+                        Notification::make()
+                            ->title('Accès réinitialisés')
+                            ->body('Un e-mail avec le code unique a été envoyé à ' . $record->email . '.')
+                            ->success()
+                            ->send();
+                    } catch (RuntimeException $e) {
+                        $isPartial = str_contains($e->getMessage(), 'Code à transmettre');
+                        Notification::make()
+                            ->title($isPartial ? 'Code généré (e-mail non envoyé)' : 'Échec de la réinitialisation')
+                            ->body($e->getMessage())
+                            ->{$isPartial ? 'warning' : 'danger'}()
+                            ->persistent()
+                            ->send();
+                    } catch (\Throwable $e) {
+                        report($e);
+
+                        Notification::make()
+                            ->title('Échec de l’envoi')
+                            ->body('Impossible d’envoyer l’e-mail. Vérifiez la configuration mail du serveur.')
+                            ->danger()
+                            ->send();
+                    }
+                });
+        };
+
+        // Table action (namespace Tables\Actions)
+        return $configure(Action::make('resetAccess'));
     }
 }

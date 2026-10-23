@@ -9,6 +9,9 @@ use Carbon\Carbon;
 
 class MediasByMonthChart extends BarChartWidget
 {
+    /** Chargement différé : limite les connexions MySQL simultanées sur l’accueil. */
+    protected static bool $isLazy = true;
+
     protected static ?string $heading = 'Médias publiés par mois';
     protected static ?int $sort = 1; // Pour l'afficher après les stats globales
     protected function getData(): array

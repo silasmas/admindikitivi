@@ -7,6 +7,9 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class MediaStats extends BaseWidget
 {
+    /** Non affiché sur le dashboard (doublon de MediasStats). */
+    protected static bool $isDiscovered = false;
+
     protected ?string $heading = 'Cérémonies';
 
     protected ?string $description = 'Liste des cérémonies à venir';

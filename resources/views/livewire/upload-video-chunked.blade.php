@@ -39,6 +39,9 @@
         <div id="ready-indicator" style="display: none; margin-top: 1rem; padding: 0.75rem; background: #d1fae5; color: #065f46; border-radius: 0.5rem; font-weight: 600;">
             ✅ Vidéo prête à être visionnée et enregistrée.
         </div>
+        <div id="preview-error" style="display: none; margin-top: 1rem; padding: 0.75rem; background: #fee2e2; color: #991b1b; border-radius: 0.5rem; font-weight: 600;">
+            ⚠️ Impossible de prévisualiser : URL de lecture invalide. Enregistrez tout de même le média (clé S3 conservée).
+        </div>
     </div>
 
     <!-- ⏳ Traitement en cours -->
@@ -265,6 +268,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const resolveUrlRoute = @json(route('video.resolve-url'));
         const initialResolvedUrl = @json($initialResolvedUrl ?? null);
         const initialSource = @json($initialSource ?? 'aws');
+        const readyIndicator = document.getElementById('ready-indicator');
+        const previewError = document.getElementById('preview-error');
+
+        /** True si l’URL est http(s) absolue (lisible par <video> / nouvel onglet). */
+        const isAbsoluteHttpUrl = (url) => typeof url === 'string' && /^https?:\/\//i.test(url.trim());
 
         const getVideoType = (url) => {
             if (!url) return 'direct';
@@ -273,16 +281,43 @@ document.addEventListener('DOMContentLoaded', function () {
             return 'direct';
         };
 
+        const showPreviewError = (show) => {
+            if (previewError) previewError.style.display = show ? 'block' : 'none';
+            if (readyIndicator && show) readyIndicator.style.display = 'none';
+        };
+
+        /**
+         * Affiche la prévisualisation uniquement avec une URL de lecture absolue.
+         * Un chemin S3 relatif (videos/…) ne doit jamais être mis dans <video src>.
+         */
         const displayVideoPreview = (url) => {
             const oldIframe = videoPreview.parentNode.querySelector("iframe");
             if (oldIframe) oldIframe.remove();
+            const prevInvalid = videoPreview.parentNode.querySelector('p.video-invalid-msg');
+            if (prevInvalid) prevInvalid.remove();
 
             videoPreview.style.display = 'none';
             videoPreview.pause();
             videoPreview.removeAttribute('src');
             videoPreview.load();
+            showPreviewError(false);
+
+            if (!url || typeof url !== 'string') {
+                showPreviewError(true);
+                videoWrapper.style.display = 'block';
+                openBtn.style.display = 'none';
+                return;
+            }
 
             const videoType = getVideoType(url);
+
+            if (videoType === 'direct' && !isAbsoluteHttpUrl(url)) {
+                showPreviewError(true);
+                videoWrapper.style.display = 'block';
+                openBtn.style.display = 'none';
+                return;
+            }
+
             if (videoType === 'youtube') {
                 let videoId = null;
                 try {
@@ -290,13 +325,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         url.split('/').pop()?.split('?')[0] :
                         (new URL(url).searchParams.get('v') || null);
                 } catch (_) {}
-                const prevInvalid = videoPreview.parentNode.querySelector('p.video-invalid-msg');
-                if (prevInvalid) prevInvalid.remove();
                 if (videoId && videoId !== 'null' && videoId !== 'undefined') {
                     videoPreview.insertAdjacentHTML('afterend', `
                         <iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}"
                         frameborder="0" allowfullscreen></iframe>
                     `);
+                    if (readyIndicator) readyIndicator.style.display = 'block';
                 } else {
                     videoPreview.insertAdjacentHTML('afterend', '<p class="video-invalid-msg text-amber-600 text-sm mt-2">Ce lien ressemble à un lien YouTube mais l’identifiant vidéo est manquant ou invalide. Vérifiez l’URL ou utilisez un lien de vidéo direct (mp4).</p>');
                 }
@@ -304,22 +338,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 const m2 = url.match(/vimeo\.com\/(\d+)/);
                 if (m2) {
                     videoPreview.insertAdjacentHTML('afterend', `<iframe width="100%" height="315" src="https://player.vimeo.com/video/${m2[1]}" frameborder="0" allowfullscreen></iframe>`);
-                } else {
+                    if (readyIndicator) readyIndicator.style.display = 'block';
+                } else if (isAbsoluteHttpUrl(url)) {
                     videoPreview.setAttribute('src', url);
                     videoPreview.load();
                     videoPreview.style.display = 'block';
-                    document.getElementById('ready-indicator').style.display = 'block';
+                    if (readyIndicator) readyIndicator.style.display = 'block';
                 }
             } else {
                 videoPreview.setAttribute('src', url);
                 videoPreview.load();
                 videoPreview.style.display = 'block';
-                document.getElementById('ready-indicator').style.display = 'block';
+                if (readyIndicator) readyIndicator.style.display = 'block';
             }
 
             videoWrapper.style.display = 'block';
-            openBtn.href = url;
-            openBtn.style.display = 'inline-block';
+            if (isAbsoluteHttpUrl(url)) {
+                openBtn.href = url;
+                openBtn.style.display = 'inline-block';
+            } else {
+                openBtn.style.display = 'none';
+            }
         };
 
         const clearPreview = () => {
@@ -328,8 +367,8 @@ document.addEventListener('DOMContentLoaded', function () {
             openBtn.style.display = 'none';
             videoWrapper.style.display = 'none';
             setMediaUrlStorage('');
-            const ri = document.getElementById('ready-indicator');
-            if (ri) ri.style.display = 'none';
+            if (readyIndicator) readyIndicator.style.display = 'none';
+            showPreviewError(false);
             const iframe = videoPreview.parentNode.querySelector("iframe");
             if (iframe) iframe.remove();
             const invalidMsg = videoPreview.parentNode.querySelector('p.video-invalid-msg');
@@ -386,18 +425,37 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
 
+        /**
+         * Résout une clé S3 relative en URL http(s) de lecture.
+         * Ne renvoie jamais un chemin relatif (injouable dans <video>).
+         */
         const toFullVideoUrl = async (value, source) => {
             if (!value || typeof value !== 'string') return null;
             const v = value.trim();
-            if (v.startsWith('http://') || v.startsWith('https://')) return v;
+            if (isAbsoluteHttpUrl(v)) return v;
             try {
                 const params = new URLSearchParams({ media_url: v, source: source || 'aws' });
-                const resp = await fetch(resolveUrlRoute + '?' + params.toString());
+                const resp = await fetch(resolveUrlRoute + '?' + params.toString(), {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin',
+                });
+                if (!resp.ok) return null;
                 const data = await resp.json();
-                return data.url || v;
+                return isAbsoluteHttpUrl(data.url) ? data.url : null;
             } catch (_) {
-                return v;
+                return null;
             }
+        };
+
+        /** Choisit la meilleure URL de preview après finalisation upload. */
+        const resolvePlayablePreview = async (result) => {
+            if (result?.preview_url && isAbsoluteHttpUrl(result.preview_url)) {
+                return result.preview_url;
+            }
+            if (result?.path) {
+                return await toFullVideoUrl(result.path, 'aws');
+            }
+            return null;
         };
 
         const getMediaUrlValue = () => {
@@ -417,10 +475,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const initialMediaUrl = getMediaUrlValue();
         (async () => {
-            const fullUrl = initialResolvedUrl || await toFullVideoUrl(initialMediaUrl, initialSource);
+            const fullUrl = (initialResolvedUrl && isAbsoluteHttpUrl(initialResolvedUrl))
+                ? initialResolvedUrl
+                : await toFullVideoUrl(initialMediaUrl, initialSource);
+            if (initialMediaUrl) setMediaUrlStorage(initialMediaUrl);
             if (fullUrl) {
-                setMediaUrlStorage(initialMediaUrl);
                 displayVideoPreview(fullUrl);
+            } else if (initialMediaUrl) {
+                videoWrapper.style.display = 'block';
+                showPreviewError(true);
             }
         })();
 
@@ -431,8 +494,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (typeof Livewire !== 'undefined') {
             Livewire.hook('morph.updated', async () => {
                 const url = mediaUrlField?.value?.trim();
+                if (!url) return;
                 const full = await toFullVideoUrl(url, getSourceFromForm());
-                if (full) displayVideoPreview(full);
+                // Ne pas écraser une preview valide avec un chemin relatif si la résolution échoue
+                if (full) {
+                    displayVideoPreview(full);
+                }
             });
         }
 
@@ -564,14 +631,17 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     }
                     setMediaUrlStorage(result.path);
-                    displayVideoPreview(result.preview_url || result.path);
+                    const playUrl = await resolvePlayablePreview(result);
+                    displayVideoPreview(playUrl);
                     finalizingBox.style.display = 'none';
                     if (retryAssemblyBox) retryAssemblyBox.style.display = 'none';
                     if (typeof window.__retryFinalize !== 'undefined') delete window.__retryFinalize;
                     Swal.fire({
                         title: '🎉 Vidéo prête',
-                        html: '<p>La vidéo a été uploadée avec succès.</p><p style="font-size: 0.875rem; color: #6b7280;">Vous pouvez la prévisualiser ci-dessous avant de valider le formulaire.</p>',
-                        icon: 'success',
+                        html: playUrl
+                            ? '<p>La vidéo a été uploadée avec succès.</p><p style="font-size: 0.875rem; color: #6b7280;">Vous pouvez la prévisualiser ci-dessous avant de valider le formulaire.</p>'
+                            : '<p>Upload OK (clé S3 enregistrée).</p><p style="font-size: 0.875rem; color: #b45309;">Prévisualisation indisponible pour le moment — enregistrez le média puis rouvrez-le.</p>',
+                        icon: playUrl ? 'success' : 'warning',
                         timer: 3000,
                         toast: true,
                         position: 'top-end',

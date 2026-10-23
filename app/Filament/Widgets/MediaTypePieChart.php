@@ -9,6 +9,9 @@ use App\Models\Media;
 
 class MediaTypePieChart extends PieChartWidget
 {
+    /** Chargement différé : limite les connexions MySQL simultanées sur l’accueil. */
+    protected static bool $isLazy = true;
+
     protected static ?string $heading = 'Répartition des types de médias';
     protected static ?int $sort    = 1;
     protected function getData(): array

@@ -6,6 +6,9 @@ use Filament\Widgets\PieChartWidget;
 
 class GenderDistributionChart extends PieChartWidget
 {
+    /** Non affiché sur le dashboard (évite surcharge MySQL). */
+    protected static bool $isDiscovered = false;
+
     protected static ?string $heading = 'Répartition des clients par sexe';
 
     protected function getData(): array

@@ -7,6 +7,9 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class CityStatsOverview extends StatsOverviewWidget
 {
+    /** Non affiché sur le dashboard (évite surcharge MySQL). */
+    protected static bool $isDiscovered = false;
+
     protected ?string $heading = 'Top 3 villes (clients)';
     protected static ?int $sort = 0;
     protected function getStats(): array

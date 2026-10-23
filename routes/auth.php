@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AgentAccessResetController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
@@ -33,6 +34,13 @@ Route::middleware('guest')->group(function () {
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
                 ->name('password.store');
+
+    // Réinitialisation des accès agent (code unique envoyé depuis Filament)
+    Route::get('reset-access', [AgentAccessResetController::class, 'show'])
+                ->name('access.reset.show');
+    Route::post('reset-access', [AgentAccessResetController::class, 'store'])
+                ->middleware('throttle:10,1')
+                ->name('access.reset.store');
 });
 
 Route::middleware('auth')->group(function () {
