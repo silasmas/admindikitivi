@@ -15,7 +15,8 @@ See `ACTIONS_A_FAIRE.md` for the (French) migration/seeding history and manual s
 - Build assets: `npm run build`
 - No composer `dev`/`test` scripts are defined — run Laravel commands directly: `php artisan serve`, `php artisan test`, `php artisan test --filter=TestName`
 - Migrate a fresh DB: `php artisan migrate` (or `php artisan migrate:fresh` to reset — destructive)
-- Seed super admin: `php artisan db:seed --class=SuperAdminSeeder` (default credentials `contact@silasmas.com` / `silasmas` — change in production)
+- Seed super admin: `php artisan db:seed --class=SuperAdminSeeder` (credentials from `.env`: `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` — required in production)
+- Prod admin panel: `https://admin.dikitivi.com/admin` (login Filament) ; API legacy: `https://api.dikitivi.com`
 - Post-deploy cache clear: `php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear`
 
 ## Architecture
