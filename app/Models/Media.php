@@ -23,6 +23,33 @@ class Media extends Model
     protected $guarded = [];
     protected $casts = [
         'published_date' => 'date',
+        'tags' => 'array',
+        'is_autoplay_eligible' => 'boolean',
+        'is_downloadable' => 'boolean',
+    ];
+
+    /**
+     * Tranches d'âge proposées dans le formulaire (même liste que l'API).
+     */
+    public const AGE_RANGES = [
+        '3-5' => '3-5 ans',
+        '6-8' => '6-8 ans',
+        '9-11' => '9-11 ans',
+        '12+' => '12 ans et plus',
+        'all' => 'Tous les âges / Famille',
+    ];
+
+    /**
+     * Étapes de la "Progression dans la foi" utilisées par le moteur de recommandation.
+     */
+    public const FAITH_STEPS = [
+        'jesus' => 'Découvrir Jésus',
+        'bible_stories' => 'Histoires bibliques',
+        'prayer' => 'Prière',
+        'faith_character' => 'Foi & caractère',
+        'worship_music' => 'Louange / musique',
+        'christian_life' => 'Vie chrétienne',
+        'series' => 'Série',
     ];
 
     /**

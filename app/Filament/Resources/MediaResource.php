@@ -10,6 +10,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
@@ -188,6 +189,61 @@ class MediaResource extends Resource
 
                         ])->columns(12),
                     ]),
+                    Step::make('Lecture & recommandation')->schema([
+                        Section::make('Lecture')
+                            ->description('Ces réglages pilotent directement l\'application (âge affiché, lecture automatique, bouton Télécharger).')
+                            ->schema([
+                                Select::make('age_range')
+                                    ->label('Tranche d\'âge')
+                                    ->options(Media::AGE_RANGES)
+                                    ->placeholder('Non précisée')
+                                    ->columnSpan(4),
+                                Toggle::make('is_autoplay_eligible')
+                                    ->label('Éligible à la lecture automatique')
+                                    ->helperText('Si désactivé, cette vidéo n\'est jamais lancée automatiquement après une autre.')
+                                    ->default(true)
+                                    ->inline(false)
+                                    ->onColor('success')
+                                    ->columnSpan(4),
+                                Toggle::make('is_downloadable')
+                                    ->label('Téléchargeable : Oui / Non')
+                                    ->helperText('Décide si le bouton Télécharger apparaît (jamais pour une vidéo YouTube).')
+                                    ->default(false)
+                                    ->inline(false)
+                                    ->onColor('success')
+                                    ->columnSpan(4),
+                            ])->columns(12),
+                        Section::make('Séries')
+                            ->description('Pour un épisode : renseigner "Appartient à" (étape 2) puis la saison et le numéro d\'épisode.')
+                            ->schema([
+                                TextInput::make('season_number')
+                                    ->label('Saison')
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->maxValue(99)
+                                    ->columnSpan(6),
+                                TextInput::make('episode_number')
+                                    ->label('Numéro d\'épisode')
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->maxValue(999)
+                                    ->columnSpan(6),
+                            ])->columns(12),
+                        Section::make('Recommandation')
+                            ->description('Tags utilisés par le moteur : même série, fréquent, commun, progression dans la foi, diversification.')
+                            ->schema([
+                                Select::make('faith_step')
+                                    ->label('Étape de la progression dans la foi')
+                                    ->options(Media::FAITH_STEPS)
+                                    ->placeholder('Aucune')
+                                    ->columnSpan(6),
+                                TagsInput::make('tags')
+                                    ->label('Thèmes')
+                                    ->placeholder('Ajouter un thème')
+                                    ->suggestions(['Jésus', 'Bible', 'Foi', 'Prière', 'Création', 'Caractère', 'Louange', 'Obéissance', 'Pardon', 'Partage'])
+                                    ->columnSpan(6),
+                            ])->columns(12),
+                    ]),
                     Step::make('Couvertures')->schema([
                         Section::make('Upload des couvertures')
                             ->description('Images au format JPG, PNG ou WebP. Taille max : 3 Mo.')
@@ -354,6 +410,35 @@ class MediaResource extends Resource
                                 ->badge(),
                         ]),
                     ])->columns(3),
+                Infolists\Components\Section::make('Lecture & recommandation')
+                    ->schema([
+                        Infolists\Components\Grid::make(3)->schema([
+                            Infolists\Components\TextEntry::make('age_range')
+                                ->label('Tranche d\'âge')
+                                ->formatStateUsing(fn ($state) => Media::AGE_RANGES[$state] ?? '—')
+                                ->placeholder('—'),
+                            Infolists\Components\IconEntry::make('is_autoplay_eligible')
+                                ->label('Lecture automatique')
+                                ->boolean(),
+                            Infolists\Components\IconEntry::make('is_downloadable')
+                                ->label('Téléchargeable')
+                                ->boolean(),
+                            Infolists\Components\TextEntry::make('season_number')
+                                ->label('Saison')
+                                ->placeholder('—'),
+                            Infolists\Components\TextEntry::make('episode_number')
+                                ->label('Épisode')
+                                ->placeholder('—'),
+                            Infolists\Components\TextEntry::make('faith_step')
+                                ->label('Progression dans la foi')
+                                ->formatStateUsing(fn ($state) => Media::FAITH_STEPS[$state] ?? '—')
+                                ->placeholder('—'),
+                            Infolists\Components\TextEntry::make('tags')
+                                ->label('Thèmes')
+                                ->badge()
+                                ->placeholder('—'),
+                        ]),
+                    ])->collapsible(),
                 Infolists\Components\Section::make('Couvertures')
                     ->schema([
                         Infolists\Components\Grid::make(2)->schema([
@@ -464,6 +549,15 @@ class MediaResource extends Resource
                 IconColumn::make('is_live')
                     ->label('Est un live?')
                     ->boolean(),
+                IconColumn::make('is_downloadable')
+                    ->label('Téléchargeable')
+                    ->boolean()
+                    ->toggleable(),
+                TextColumn::make('age_range')
+                    ->label('Âge')
+                    ->badge()
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('belongs_to')
                     ->label('Type')
                     ->toggleable(isToggledHiddenByDefault: true)
@@ -547,6 +641,15 @@ class MediaResource extends Resource
                         '1' => 'Oui',
                         '0' => 'Non',
                     ]),
+                SelectFilter::make('is_downloadable')
+                    ->label('Téléchargeable')
+                    ->options([
+                        '1' => 'Oui',
+                        '0' => 'Non',
+                    ]),
+                SelectFilter::make('age_range')
+                    ->label('Tranche d\'âge')
+                    ->options(Media::AGE_RANGES),
                 SelectFilter::make('artist_names')
                     ->label('Artiste')
                     ->options(Media::whereNotNull('artist_names')
